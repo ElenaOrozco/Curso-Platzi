@@ -1,0 +1,36 @@
+/* Ajustes Celular */
+
+@media only screen and (max-width: 480px) {
+
+}
+
+/* Ajustes pad */
+
+@media only screen and (min-width: 480px) and (max-width: 768px) {
+    body { padding-top: 50px; }
+    body { padding-bottom: 50px; }
+    
+}
+
+/* Ajustes Pc baja resulucion */
+
+@media only screen and (min-width: 768px) and (max-width: 959px) {
+    body { padding-top: 50px; }
+    body { padding-bottom: 50px; }
+    
+}
+
+/* Ajustes Pc Alta resolucion */
+
+@media only screen and (min-width: 959px) {
+    body { padding-top: 50px; }
+    body { padding-bottom: 50px; }
+    
+}
+
+/* Ajustes Generales */
+.navbar-nav.navbar-right:last-child {
+    margin-right: 5px;
+}
+
+

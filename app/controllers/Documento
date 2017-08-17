@@ -1,0 +1,28 @@
+<div style="border:1px solid #990000;padding-left:20px;margin:0 0 10px 0;">
+
+<h4>A PHP Error was encountered</h4>
+
+<p>Severity: Notice</p>
+<p>Message:  Undefined index: Datos</p>
+<p>Filename: controllers/documentos.php</p>
+<p>Line Number: 751</p>
+
+</div><div style="border:1px solid #990000;padding-left:20px;margin:0 0 10px 0;">
+
+<h4>A PHP Error was encountered</h4>
+
+<p>Severity: Notice</p>
+<p>Message:  Undefined index: Mime</p>
+<p>Filename: controllers/documentos.php</p>
+<p>Line Number: 752</p>
+
+</div><div style="border:1px solid #990000;padding-left:20px;margin:0 0 10px 0;">
+
+<h4>A PHP Error was encountered</h4>
+
+<p>Severity: Notice</p>
+<p>Message:  Undefined index: Extension</p>
+<p>Filename: controllers/documentos.php</p>
+<p>Line Number: 755</p>
+
+</div>
