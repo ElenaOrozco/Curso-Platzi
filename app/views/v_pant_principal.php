@@ -167,7 +167,9 @@ if (!defined('BASEPATH'))
                     <div class="col-md-12 column">									
                         <img src="<?php echo site_url(); ?>images/logo-secretaria.jpg" alt="Logo Secretaria" class="img-responsive center-block" />
                         <br>					
-                    </div>                    
+                    </div>  
+
+                    PRIMER COMMIT                  
                     <?php
                     if (isset($qAvisos) && $qAvisos !== FALSE) {
                         if ($qAvisos->num_rows() > 0) {
