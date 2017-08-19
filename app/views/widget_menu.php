@@ -112,7 +112,10 @@
                                     <a href="<?php echo site_url("modalidad/"); ?>" title="Sub Procesos">Modalidades</a>
                                 </li>
                                 <li>
-                                    <a href="<?php echo site_url("ubicacionFisica/"); ?>" title="Ubicacion Fisica">Ubicacion Fisica</a>
+                                    <a href="<?php echo site_url("ubicacionFisica/"); ?>" title="Ubicacion Bloques">Ubicacion Bloques</a>
+                                </li>
+                                <li>
+                                    <a href="<?php echo site_url("ubicacion_proyectos/"); ?>" title="Ubicacion Proyectos">Ubicacion Proyectos</a>
                                 </li>
                                 <li>
                                     <a href="<?php echo site_url("areas_ubicacion/"); ?>" title="Áreas ubicación trabajo">Áreas ubicación trabajo</a>

@@ -169,7 +169,7 @@ if (!defined('BASEPATH'))
                         <br>					
                     </div>  
 
-                    PRIMER COMMIT                  
+                    PRIMER COMMIT EJEMPLO                  
                     <?php
                     if (isset($qAvisos) && $qAvisos !== FALSE) {
                         if ($qAvisos->num_rows() > 0) {

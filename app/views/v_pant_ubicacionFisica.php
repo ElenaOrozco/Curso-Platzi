@@ -358,7 +358,7 @@ if (!defined('BASEPATH'))
  
           
           
-          <!-- Dialogo Modificar ubicacion  -->
+        <!-- Dialogo Modificar ubicacion  -->
         <div class="modal fade" id="modal-modificar-cat" role="dialog" aria-labelledby="modal-modificar-cat_myModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
