@@ -10,6 +10,8 @@ class observaciones_estimacion_model extends CI_Model {
     }
     
     public function datos_observacion_update($data, $id){
+        
+        $this->log_save(array('Tabla' => 'saaObservaciones_Archivo', 'Data' => $data, 'id' => $id));
         $this->db->where('id', $id);
         $this->db->update('saaObservaciones_Archivo', $data);
         
@@ -32,6 +34,8 @@ class observaciones_estimacion_model extends CI_Model {
     }
     
     public function datos_observacion_documento_update($data, $id){
+        
+        $this->log_save(array('Tabla' => 'saaObservaciones_Documento', 'Data' => $data, 'id' => $id));
         $this->db->where('id', $id);
         $this->db->update('saaObservaciones_Documento', $data);
         
@@ -289,7 +293,7 @@ class observaciones_estimacion_model extends CI_Model {
         return $query;
     }
 
-        public function total_listado_observaciones_archivo() {
+    public function total_listado_observaciones_archivo() {
         $sql = 'SELECT `saaObservaciones_Archivo`.*, `saaArchivo`.`OrdenTrabajo`, `saaArchivo`.`Contrato`, `saaArchivo`.obra 
                 FROM `saaObservaciones_Archivo` 
                 INNER JOIN `saaArchivo` 
@@ -304,11 +308,14 @@ class observaciones_estimacion_model extends CI_Model {
         
         $this->db->insert('saaObservaciones_Estimaciones',$data);
         
-         $e = $this->db->_error_message();
+        $e = $this->db->_error_message();
         $aff = $this->db->affected_rows();
         $last_query = $this->db->last_query();
         $registro = $this->db->insert_id();
 
+        if (!empty($registro)) {
+                $this->log_new(array('Tabla' => 'saaObservaciones_Estimaciones', 'Data' => $data, 'id' => $registro));
+        }
         if ($aff < 1) {
             if (empty($e)) {
                 $e = "No se realizaron cambios";
@@ -327,11 +334,14 @@ class observaciones_estimacion_model extends CI_Model {
         
         $this->db->insert('saaObservaciones_Documento',$data);
         
-         $e = $this->db->_error_message();
+        $e = $this->db->_error_message();
         $aff = $this->db->affected_rows();
         $last_query = $this->db->last_query();
         $registro = $this->db->insert_id();
-
+        
+        if (!empty($registro)) {
+                $this->log_new(array('Tabla' => 'saaObservaciones_Documento', 'Data' => $data, 'id' => $registro));
+        }
         if ($aff < 1) {
             if (empty($e)) {
                 $e = "No se realizaron cambios";
@@ -346,7 +356,9 @@ class observaciones_estimacion_model extends CI_Model {
     }
     
     
-     public function observaciones_estimacion_update($data, $id){
+    public function observaciones_estimacion_update($data, $id){
+        
+        $this->log_save(array('Tabla' => 'saaObservaciones_Estimaciones', 'Data' => $data, 'id' => $id));
         $this->db->update('saaObservaciones_Estimaciones', $data, array("id" => $id));
         $aff = $this->db->affected_rows();
 
@@ -357,7 +369,7 @@ class observaciones_estimacion_model extends CI_Model {
         }
     }
 
-        public function listado_observaciones_por_direccion_responsable($idDireccion_responsable){
+    public function listado_observaciones_por_direccion_responsable($idDireccion_responsable){
         $sql = 'SELECT `saaObservaciones_Documento`.*,
                                 `saaArchivo`.`OrdenTrabajo`,
                                 `saaArchivo`.`Contrato`,
@@ -411,6 +423,17 @@ class observaciones_estimacion_model extends CI_Model {
          }
          exit();*/
         return $query;
+    }
+    
+    
+    public function log_save($cambios) {
+            $this->load->model("control_usuarios_model");
+            return $this->control_usuarios_model->log_save($cambios);
+    }
+    
+    public function log_new($cambios) {
+            $this->load->model("control_usuarios_model");
+            return $this->control_usuarios_model->log_new($cambios);
     }
     
 }

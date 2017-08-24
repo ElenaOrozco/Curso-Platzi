@@ -108,14 +108,19 @@ class modalidad extends MY_Controller {
     public function eliminar_modalidad($id) {
         $this->load->model('modalidad_model');
         //$id = $this->input->post('id');
-        $this->modalidad_model->datos_modalidad_delete($id);
-        
-        if($retorno['retorno'] < 0)
-            header('Location:'.site_url('modalidad/index/' . $retorno['error']));
+        $data=array(
+            'Estatus'=> 0,
+            
+        );
+
+        $retorno =  $this->modalidad_model->datos_modalidad_update($data, $id);
+        if($retorno['retorno']<0)
+            header('Location:'.site_url('modalidad/index/'.$retorno['error']));
         else
             header('Location:'.site_url('modalidad')); 
-
     }
+
+    
     
     
     

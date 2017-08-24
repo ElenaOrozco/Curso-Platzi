@@ -17,7 +17,10 @@ class estimaciones_model extends CI_Model {
             $last_query = $this->db->last_query();
             $registro = $this->db->insert_id();
             //$this->db->db_debug = $oldv; 
- 
+            
+            if (!empty($registro)) {
+                $this->log_new(array('Tabla' => 'saaDocumentos', 'Data' => $data, 'id' => $registro));
+            }
             if ($aff < 1) {
                 if (empty($e)) {
                     $e = "No se realizaron cambios";
@@ -67,6 +70,8 @@ class estimaciones_model extends CI_Model {
     public function datos_estimaciones_update($data, $id) {
         //$this->db->where('id', $id);
         //$this->db->update('saatipoproceso', $data);
+        
+        $this->log_save(array('Tabla' => 'saaEstimaciones', 'Data' => $data, 'id' => $id));
         $this->db->update('saaEstimaciones', $data, array('id' => $id));
         $e = $this->db->_error_message();
         $aff = $this->db->affected_rows();
@@ -85,6 +90,16 @@ class estimaciones_model extends CI_Model {
             return array("retorno" => "1", "registro" => $id);
         }
     
+    }
+    
+    public function log_save($cambios) {
+            $this->load->model("control_usuarios_model");
+            return $this->control_usuarios_model->log_save($cambios);
+    }
+    
+    public function log_new($cambios) {
+            $this->load->model("control_usuarios_model");
+            return $this->control_usuarios_model->log_new($cambios);
     }
 }
 
