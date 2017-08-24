@@ -16,7 +16,7 @@ class Archivo extends MY_Controller {
 
     public function index() {
         
-        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Archivo","P")==false){
+        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Listado de Obras","P")==false ){
             header("Location:" . site_url('principal'));
         }
         
@@ -84,12 +84,11 @@ class Archivo extends MY_Controller {
         */
         //this->load->view('v_listado.php', $data);
         
-        if ($data["preregistro"]== 0){
-            $this->load->view('v_pant_principal', $data);
+        
             
-        }else {
+        
             $this->load->view('v_pant_archivo.php', $data);
-        }
+       
             
         
         
@@ -103,7 +102,7 @@ class Archivo extends MY_Controller {
     
      public function captura() {
         
-        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Archivo","P")==false){
+        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Estado de Obras","P")==false ){
             header("Location:" . site_url('principal'));
         }
         

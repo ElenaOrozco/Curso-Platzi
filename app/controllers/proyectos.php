@@ -16,7 +16,7 @@ class Proyectos extends MY_Controller {
 
     public function index() {
         
-        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Archivo","P")==false){
+        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Proyectos","P")==false ){
             header("Location:" . site_url('principal'));
         }
         

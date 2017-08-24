@@ -15,6 +15,11 @@ class Observaciones extends MY_Controller {
     }
     
     public function index(){
+        
+        $this->load->library('ferfunc');
+        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Observaciones por Dirección","P")==false){
+            header("Location:" . site_url('principal'));
+        }
          $data['meta'] = array(
             array('name' => 'robots', 'content' => 'no-cache'),
             array('name' => 'description', 'content' => $this->config->item('titulo_ext') . " - " . $this->config->item('titulo') . " Versión: " . $this->config->item('version')),
@@ -51,17 +56,20 @@ class Observaciones extends MY_Controller {
         $preregistro=$this->session->userdata('preregistro');
         
         
-        if($preregistro==1){
-            $this->load->view('v_pant_observaciones.php', $data);
-        } else{
-            $this->load->view('v_pant_principal.php', $data);
-        }
+       
+        $this->load->view('v_pant_observaciones.php', $data);
+        
          
         
     }
     
     
     public function observaciones_documentos(){
+        
+        $this->load->library('ferfunc');
+        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Observaciones de Documentos (CID)","P")==false){
+            header("Location:" . site_url('principal'));
+        }
          $data['meta'] = array(
             array('name' => 'robots', 'content' => 'no-cache'),
             array('name' => 'description', 'content' => $this->config->item('titulo_ext') . " - " . $this->config->item('titulo') . " Versión: " . $this->config->item('version')),
@@ -108,15 +116,18 @@ class Observaciones extends MY_Controller {
         $preregistro=$this->session->userdata('preregistro');
         
         
-        if($preregistro==0){
-            $this->load->view('v_pant_observaciones_documentos.php', $data);
-        } else{
-            $this->load->view('v_pant_principal.php', $data);
-        }
+        
+        $this->load->view('v_pant_observaciones_documentos.php', $data);
+        
          
     }
     
     public function observaciones_archivos(){
+        
+        $this->load->library('ferfunc');
+        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Observaciones de Archivo","P")==false){
+            header("Location:" . site_url('principal'));
+        }
          $data['meta'] = array(
             array('name' => 'robots', 'content' => 'no-cache'),
             array('name' => 'description', 'content' => $this->config->item('titulo_ext') . " - " . $this->config->item('titulo') . " Versión: " . $this->config->item('version')),
@@ -155,11 +166,9 @@ class Observaciones extends MY_Controller {
         $preregistro=$this->session->userdata('preregistro');
         
         
-        if($preregistro==0){
-            $this->load->view('v_pant_observaciones_archivos.php', $data);
-        } else{
-            $this->load->view('v_pant_principal.php', $data);
-        }
+       
+        $this->load->view('v_pant_observaciones_archivos.php', $data);
+        
          
          
     }

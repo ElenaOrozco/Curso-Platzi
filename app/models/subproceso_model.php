@@ -12,7 +12,7 @@ class subproceso_model extends CI_Model {
     public function listado_subproceso() {
 
             $sql = 'SELECT saaSubTipoProceso.*, saaTipoProceso.Nombre AS Proceso FROM saaSubTipoProceso INNER JOIN saaTipoProceso ON 
-             saaSubTipoProceso.idTipoProceso = saaTipoProceso.id';
+             saaSubTipoProceso.idTipoProceso = saaTipoProceso.id WHERE saaSubTipoProceso.Estatus=1';
             $query = $this->db->query($sql);
             return $query; 
     }
@@ -98,10 +98,14 @@ class subproceso_model extends CI_Model {
     
     }
     public function datos_subproceso_delete($id) {
-        //echo $id;
-        //$this->db->where('id', $id);
-        //$this->db->update('saaTipoProceso');
-        $this->db->delete('saaSubTipoProceso', array('id' => $id));
+        $data = array (
+            'Estatus' => 0,
+        );
+        $this->log_save(array('Tabla' => 'saaSubTipoProceso', 'Data' => $data, 'id' => $id));
+        
+        $this->db->where('id', $id);
+        $this->db->update('saaSubTipoProceso', $data);
+        //$this->db->update('saaTipoProceso', $data, array('id' => $id));
         $e = $this->db->_error_message();
         $aff = $this->db->affected_rows();
         $last_query = $this->db->last_query();
@@ -117,7 +121,7 @@ class subproceso_model extends CI_Model {
             return array("retorno" => "-1", "error" => $e);
         } else {
             return array("retorno" => "1", "registro" => $id);
-        } 
+        }
     }
     
    

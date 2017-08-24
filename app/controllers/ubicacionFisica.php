@@ -9,11 +9,11 @@ class ubicacionFisica extends MY_Controller {
 
     public function index($error='') {
         
-        /*
+        
         $this->load->library('ferfunc');
-        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"direcciones","P")==false){
+        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Ubicacion bloques","P")==false){
             header("Location:" . site_url('principal'));
-        }*/
+        }
         
         $data['meta'] = array(
             array('name' => 'robots', 'content' => 'no-cache'),
@@ -66,11 +66,11 @@ class ubicacionFisica extends MY_Controller {
     
     public function ubicaciones_archivo($error = '') {
         
-        /*
+        
         $this->load->library('ferfunc');
-        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"direcciones","P")==false){
+        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Ubicaciones de Archivos","P")==false){
             header("Location:" . site_url('principal'));
-        }*/
+        }
         
         $data['meta'] = array(
             array('name' => 'robots', 'content' => 'no-cache'),

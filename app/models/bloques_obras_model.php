@@ -125,7 +125,6 @@ class Bloques_obras_model extends CI_Model {
     }
 
 
-
     public function datos_bloque($id) {
         $sql = 'SELECT * FROM saaBloqueObras WHERE id = ?';
         $query = $this->db->query($sql, array($id));
