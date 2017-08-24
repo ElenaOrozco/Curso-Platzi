@@ -13,7 +13,8 @@ class Rel_archivo_documento_model extends CI_Model {
         //listar activos
         //$sql = 'SELECT * FROM saaModalidad WHERE Estatus=1 ORDER BY id ASC';
         //listar todos
-        $sql = 'SELECT * FROM saaRel_Archivo_Documento';
+        $sql = 'SELECT * FROM saaRel_Archivo_Documento
+                WHERE eliminacion_logica = 0';
         $query = $this->db->query($sql);
         return $query; 
     }
@@ -80,12 +81,17 @@ class Rel_archivo_documento_model extends CI_Model {
     }
     
     public function eliminar_relacion_archivo_documento_por_Archivo($idArchivo){
-        $this->db->delete('saaRel_Archivo_Documento', array('idArchivo' => $idArchivo)); 
+        $data = array(
+            'eliminacion_logica' => 1,
+        );
+        $this->log_save(array('Tabla' => 'saaRel_Archivo_Documento(eliminacion_por Archivo id = idArchivo)', 'Data' => $data, 'id' => $id));
+        
+        
+        $this->db->update('saaRel_Archivo_Documento', $data, array('idArchivo' => $idArchivo));
         $e = $this->db->_error_message();
         $aff = $this->db->affected_rows();
         $last_query = $this->db->last_query();
-        $registro = $this->db->insert_id();
-        //$this->db->db_debug = $oldv; 
+      
 
         if ($aff < 1) {
             if (empty($e)) {
@@ -93,10 +99,14 @@ class Rel_archivo_documento_model extends CI_Model {
             }
             // si hay debug
             $e .= "<pre>" . $last_query . "</pre>";
+            //echo 'Error';
             return array("retorno" => "-1", "error" => $e);
         } else {
-            return array("retorno" => "1", "registro" => $registro);
+            return array("retorno" => "1", "registro" => $id);
+            //echo 'bien';
         }
+        
+        
         
        
 
@@ -104,7 +114,7 @@ class Rel_archivo_documento_model extends CI_Model {
     
     
 
-        public function concepto_repetido($idDocumento, $idArchivo) {
+    public function concepto_repetido($idDocumento, $idArchivo) {
         $this->db->where('idDocumento', $idDocumento);
         $this->db->where('idArchivo', $idArchivo);
         $query = $this->db->get_where('saaRel_Archivo_Documento');
@@ -360,7 +370,7 @@ class Rel_archivo_documento_model extends CI_Model {
     
     public function datos_relacion_archivo_documento_update_por_archivo($data, $idArchivo) {
         
-       // $this->log_save(array('Tabla' => 'saaRel_Archivo_Documento', 'Data' => $data, 'id' => $id));
+       $this->log_save(array('Tabla' => 'saaRel_Archivo_Documento(update_por Archivo id = idArchivo)', 'Data' => $data, 'id' => $id));
         
         //$this->db->where('id', $id);
         //$this->db->update('saatipoproceso', $data);
@@ -391,7 +401,13 @@ class Rel_archivo_documento_model extends CI_Model {
     
     function update_rel_archivo_documento_aceptar_preregistro($idArchivo, $idDireccion_responsable, $data){
         
+        $data = array (
+            'idArchivo' => $idArchivo,
+             'idDireccion_responsable' => $idDireccion_responsable, 
+            'Estatus'=>10
+        );
         
+        $this->log_save(array('Tabla' => 'saaRel_Archivo_Documento', 'Data' => $data, 'id' => $id));
         $this->db->update('saaRel_Archivo_Documento', $data, array('idArchivo' => $idArchivo, 'idDireccion_responsable' => $idDireccion_responsable, 'Estatus'=>10));
     }
             
@@ -407,11 +423,7 @@ class Rel_archivo_documento_model extends CI_Model {
  
     
     public function datos_relacion_archivo_documento_update_por_proceso($data, $idArchivo,$idProceso) {
-        //$this->db->where('id', $id);
-        //$this->db->update('saatipoproceso', $data);
         
-        //echo $idArchivo . '-' .$idProceso;
-        //exit();
         
         $this->log_save(array('Tabla' => 'saaRel_Archivo_Documento', 'Data' => $data, 'id' => $idProceso));
         
@@ -437,10 +449,13 @@ class Rel_archivo_documento_model extends CI_Model {
     
     
     public function datos_relacion_archivo_documento_delete($id) {
-        //echo $id;
-        //$this->db->where('id', $id);
-        //$this->db->update('saatipoproceso');
-        $this->db->delete('saaRel_Archivo_Documento', array('id' => $id));
+        $data = array (
+            'eliminacion_logica' => 1,
+            
+        );
+        
+        $this->log_save(array('Tabla' => 'saaRel_Archivo_Documento', 'Data' => $data, 'id' => $id));
+        $this->db->update('saaRel_Archivo_Documento', array('id' => $id));
         $e = $this->db->_error_message();
         $aff = $this->db->affected_rows();
         $last_query = $this->db->last_query();
@@ -479,7 +494,7 @@ class Rel_archivo_documento_model extends CI_Model {
         
     }
 
-     public function cambiar_estatus_rechazar($idArchivo,$idTipoProceso, $estatus,$motivo) {
+    public function cambiar_estatus_rechazar($idArchivo,$idTipoProceso, $estatus,$motivo) {
             
          $this->db->update('saaRel_Archivo_Documento', array('Estatus' => $estatus), array('idArchivo' => $idArchivo,'idTipoProceso' => $idTipoProceso));
              
