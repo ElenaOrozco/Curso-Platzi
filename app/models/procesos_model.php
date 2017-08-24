@@ -112,6 +112,7 @@ class procesos_model extends CI_Model {
         }
     
     }
+    /*
     public function datos_proceso_delete($id) {
         //echo $id;
         //$this->db->where('id', $id);
@@ -133,7 +134,7 @@ class procesos_model extends CI_Model {
         } else {
             return array("retorno" => "1", "registro" => $id);
         } 
-    }
+    } */
     
     public function concepto_repetido($str) {
         $this->db->where('Nombre', $str);

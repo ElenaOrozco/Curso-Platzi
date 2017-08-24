@@ -107,12 +107,14 @@ class procesos extends MY_Controller {
     
     public function eliminar_proceso($id) {
         $this->load->model('procesos_model');
-        //$id = $this->input->post('id');
-        $this->procesos_model->datos_proceso_delete($id);
-        //$retorno = $this->procesos_model->datos_proceso_delete($id);
-        //$query = $this->procesos_model->datos_proceso_delete($id);
-        if($retorno['retorno'] < 0)
-            header('Location:'.site_url('procesos/index/' . $retorno['error']));
+        $data=array(
+            'Estatus'=> 0,
+            
+        );
+
+        $retorno =  $this->procesos_model->datos_proceso_update($data, $id);
+        if($retorno['retorno']<0)
+            header('Location:'.site_url('procesos/index/'.$retorno['error']));
         else
             header('Location:'.site_url('procesos')); 
 

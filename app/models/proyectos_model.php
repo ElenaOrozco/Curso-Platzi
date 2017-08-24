@@ -70,6 +70,9 @@ class Proyectos_model extends CI_Model {
         $last_query = $this->db->last_query();
         $registro = $this->db->insert_id();
         
+        if (!empty($registro)) {
+                $this->log_new(array('Tabla' => 'saaRel_Proyecto_Ubicacion', 'Data' => $data, 'id' => $registro));
+            }
         
        
         if ($aff < 1) {
@@ -80,7 +83,7 @@ class Proyectos_model extends CI_Model {
             $e .= "<pre>" . $last_query . "</pre>";
             return array("retorno" => "-1", "error" => $e);
         } else {
-            $this->log_new(array('Tabla' => 'saaRel_Proyecto_Ubicacion', 'Data' => $data, 'id' => $registro));
+           
             return array("retorno" => "1", "registro" => $registro);
         }
     }
@@ -120,7 +123,7 @@ class Proyectos_model extends CI_Model {
     }
 
     public function datos_ubicacion_update($id, $data){
-            //print_r($data);
+            $this->log_save(array('Tabla' => 'saaRel_Proyecto_Ubicacion', 'Data' => $data, 'id' => $id));
             $this->db->where('id', $id);
             $this->db->update('saaRel_Proyecto_Ubicacion', $data);
             $e = $this->db->_error_message();
@@ -136,7 +139,7 @@ class Proyectos_model extends CI_Model {
                 $e .= "<pre>" . $last_query . "</pre>";
                 return array("retorno" => "-1", "error" => $e);
             } else {
-                $this->log_save(array('Tabla' => 'saaRel_Proyecto_Ubicacion', 'Data' => $data, 'id' => $id));
+               
                 return array("retorno" => "1", "registro" => $id);
             }
     }

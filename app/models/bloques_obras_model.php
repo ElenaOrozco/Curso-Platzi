@@ -133,7 +133,7 @@ class Bloques_obras_model extends CI_Model {
     }
     
     
-     public function log_save($cambios) {
+    public function log_save($cambios) {
             $this->load->model("control_usuarios_model");
             return $this->control_usuarios_model->log_save($cambios);
     }
