@@ -62,13 +62,23 @@ class Datos_model extends CI_Model {
         return $query;
     }
     
+     public function listado_tx() {
+        $sql= 'SELECT * FROM `saaArchivo`
+                WHERE
+                (idBloqueObra = 3)
+                AND eliminacion_logica = 0
+                ORDER BY id DESC';
+        $query = $this->db->query($sql);
+        return $query;
+    }
+    
     
     public function listado_736_captura() {
         $sql= 'SELECT DISTINCT `saaArchivo`.id ,
-`saaArchivo`.*
-FROM `saaArchivo`
-INNER JOIN `saaRel_Archivo_Documento`
-ON `saaArchivo`.id = `saaRel_Archivo_Documento`.`idArchivo`
+                `saaArchivo`.*
+                FROM `saaArchivo`
+                INNER JOIN `saaRel_Archivo_Documento`
+                ON `saaArchivo`.id = `saaRel_Archivo_Documento`.`idArchivo`
                 WHERE
                 (idBloqueObra = 1 OR idBloqueObra = 2 OR idBloqueObra = 3)
                 AND eliminacion_logica = 0 

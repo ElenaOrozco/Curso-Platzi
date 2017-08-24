@@ -220,7 +220,7 @@ if (!defined('BASEPATH'))
                         <a href="#modal-agregar-cat" class="btn btn-primary" role="button" data-toggle="modal" ><span class="glyphicon glyphicon-plus"></span> Nueva Ubicación Fisica</a>
                 </div>
                 
-                 <div class="col-md-12 column">
+                <div class="col-md-12 column">
                         <a href="#modal-ubicacion-fisica-excel-catalogo" class="btn btn-primary" role="button" data-toggle="modal" ><span class="glyphicon glyphicon-plus"></span> Nueva Ubicación Fisica desde Excel</a>
                 </div>
                 

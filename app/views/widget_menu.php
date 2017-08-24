@@ -20,6 +20,9 @@
                                 <li>
                                     <a href="<?php echo site_url("archivo/captura"); ?>" title="Estados de Obra">Estado de Obra</a>
                                 </li>
+                                <li>
+                                    <a href="<?php echo site_url("proyectos/"); ?>" title="Proyectos">Proyectos</a>
+                                </li>
                            
                                 
                             </ul>

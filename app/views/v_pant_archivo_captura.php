@@ -616,6 +616,78 @@
             }
             
             
+            function listado_tx(){
+                $.ajax({
+                        type:"POST",
+                        url: "<?php echo site_url('archivo/listado_tx') ?>/",
+
+                        success: function(data) {
+                             
+                             $('#tabla-tx').html(data["tabla"]);
+                             $('#tabla-tx').show();
+                             //$('#tabla-mostrar-todos').show();
+                             
+                             $('#t_tx').dataTable({
+                            'bProcessing': true,
+                            //'sScrollY': '400px',                    
+
+                            'sPaginationType': 'bs_normal',
+                            'sDom': '<"top"iflp<"clear">>rt<"bottom"iflp<"clear">>',
+                            'iDisplayLength': 10,
+                            'aaSorting': [[1, 'desc']],
+                            'aLengthMenu': [[10, 50, 100, 200, -1], [10, 50, 100, 200, "Todo"]],
+                            'bDeferRender': true,
+                            'bAutoWidth': false,
+                            'bScrollCollapse': false,                    
+                            'oLanguage': {
+                                'sProcessing': '<img src=\"./images/ajax-loader.gif\"/> Procesando...',
+                                'sLengthMenu': 'Mostrar _MENU_ archivos',
+                                'sZeroRecords': 'Buscando Archivos...',
+                                'sInfo': 'Mostrando desde _START_ hasta _END_ de _TOTAL_ archivos',
+                                'sInfoEmpty': 'Mostrando desde 0 hasta 0 de 0 archivos',
+                                'sInfoFiltered': '(filtrado de _MAX_ archivos en total)',
+                                'sInfoPostFix': '',
+                                'sSearch': 'Buscar:',
+                                'sUrl': '',
+                                'oPaginate': {
+                                    'sFirst': '&nbsp;Primero&nbsp;',
+                                    'sPrevious': '&nbsp;Anterior&nbsp;',
+                                    'sNext': '&nbsp;Siguiente&nbsp;',
+                                    'sLast': '&nbsp;&Uacute;ltimo&nbsp;'
+                                }
+                            },
+                            'aoColumns': [
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+
+                                {'sClass': 'small'}
+
+                            ],
+                        });
+
+                           
+                            
+                            
+                             
+
+                        }
+                    });
+            }
+            
+            
             function cargar_archivos(){
 
             
@@ -819,6 +891,7 @@
                             
                         ?>
                         <li role="digitalizar"  <?= $activo_digitalizar ?>><a href="#digitalizar" aria-controls="profile" role="tab" data-toggle="tab" onclick="filtrar_archivos_estatus(50)">Digitalizar </a></li>
+                        <li role="G3 TX"><a href="#grupotx" aria-controls="profile" role="tab" data-toggle="tab" onclick="listado_tx()">Grupo 3 TX </a></li>
                         <?php } ?>
                         <?php if ($Editar == 1) { 
                             
@@ -1541,6 +1614,30 @@
 
 
                             </div>
+                        </div>
+                        
+                        <div role="tabpanel"   class="tab-pane" id="grupotx">
+                            <div class="col-md-12 m-b m-t">
+                    
+                    
+                                <h4>Archivos Grupo 3 - TX </h4>
+                                
+                                <div class="row clearfix">
+                                    <div class="col-md-12 column">
+                                        <br> Grupo
+                                        
+
+                                        <div id="tabla-tx" style="display:none"></div>
+                                        
+                                    </div>
+                                </div>
+                                
+
+
+
+                            </div>
+                            
+                            
                         </div>
                         
                         <div role="tabpanel" <?= $panel_activo_editar ?> id="editar">

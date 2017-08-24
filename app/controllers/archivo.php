@@ -137,6 +137,7 @@ class Archivo extends MY_Controller {
         $data["Validar"]=$this->session->userdata('Validar');
         $data["digitalizar"]=$this->session->userdata('digitalizar');
         $data["Editar"]=$this->session->userdata('Editar');
+        
 
         $data["integracion"]=$this->session->userdata('integracion');
         $data["preregistro"]=$this->session->userdata('preregistro');
@@ -150,8 +151,7 @@ class Archivo extends MY_Controller {
         $data["qGrupos"] = $this->datos_model->get_grupos(); //Grupos obra- idBloqueObra
         $data["qUbicacionesFisicas"]=$this->ubicacion_fisica_model->listado_ubicacion_ordenada_por_columna();
         $data["qDirecciones"]=$this->datos_model->get_Direcciones_SIOP();
-        
-        
+       
       
                         
                         
@@ -180,7 +180,140 @@ class Archivo extends MY_Controller {
         
     }
     
-    public function historico_archivo($idArchivo){
+    
+    public function listado_tx(){
+        $this->load->model('datos_model');
+        $tabla ="";
+        
+        //Filtro por grupos
+        $qFiltro = $this->datos_model->listado_tx();
+           
+        
+        /*if (isset($qFiltro)) {
+                                    if ($qFiltro->num_rows() > 0) {
+                                       
+                                        foreach ($qFiltro->result() as $rFiltro) {
+                                            echo $rFiltro->OrdenTrabajo;
+                                        }
+                                    }
+        }
+        exit();*/
+        
+        $tabla.='
+         
+           
+          <table class="table table-responsive table-striped table-hover table-bordered" id="t_tx">
+                            <thead>
+                            <tr>
+                                <th class="col-md-1">
+                                    Acción
+                                </th>
+                                <th>
+                                    Orden de Trabajo
+                                </th>
+                                <th>
+                                    Contrato
+                                </th>
+                                <th>
+                                    Obra
+                                </th>                               
+                                <th>
+                                    Descripcion
+                                </th>
+                               
+                                  <th >
+                                    Normatividad
+                                </th> 
+                                  <th >
+                                    Modalidad
+                                </th> 
+                                <th >
+                                    Ejercicio
+                                </th> 
+                                <th >
+                                    Estatus Obra
+                                </th>
+                                
+                                <th >
+                                    Direccion Ejecutora
+                                </th>
+                                <th >
+                                    Supervisor
+                                </th>
+                                <th >
+                                    Inicio Contrato
+                                </th>
+                                <th >
+                                    Monto Contratado
+                                </th>
+                                <th >
+                                    Monto Ejercido por SIOP
+                                </th>
+                                <th >
+                                    Finiquitada
+                                </th>
+                                <th>
+                                    Estatus FIDO
+                                </th>
+                               
+                            </tr>
+                        </thead>
+                        <tbody>
+         ';
+         
+         
+                                if (isset($qFiltro)) {
+                                    if ($qFiltro->num_rows() > 0) {
+                                        $i = 0;
+                                        foreach ($qFiltro->result() as $rFiltro) {
+                                            if ( $rFiltro->Finiquitada == 0){
+                                                $finiquitada = 'NO';
+                                            }else {
+                                                $finiquitada = 'SI';
+                                            }
+                                           $tabla.= "<tr>";
+                                                $tabla.=  "<td>" ;
+                                                
+                                                $tabla.= "<a href='". site_url('archivo/cambios/' . $rFiltro->id) ."' class='btn btn-xs btn-success'><span class='glyphicon glyphicon-pencil'></span></a></td>";
+                                                $tabla.=  "<td>" . $rFiltro->OrdenTrabajo . "</td>";
+
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Contrato . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Obra . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Descripcion . "</td>";
+                                               
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Normatividad . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->idModalidad . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->idEjercicio . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->EstatusObra . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Direccion . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Supervisor . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->FechaInicio . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->ImporteContratado . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->EjercidoSiop . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $finiquitada. "</td>";
+                                                $tabla.= "<td class='sinwarp'> <a href='#' class='btn btn-warning btn-xs' title=''  data-toggle='modal' data-target='#modal-historico-archivo' role='button' onclick='ver_historico_archivo(" . $rFiltro->id  .")'><span class='glyphicon glyphicon-search'></span></a>&nbsp;</td>";
+                                           
+                                               //$tabla.= "<td class='sinwarp'>" .$rProcesos->Estatus. "</td>";
+                                           $tabla.= "</tr>";
+                                            
+                                        }
+                                    }
+                                }
+        
+                                
+        $tabla.=' </tbody>
+                        </table> ';                        
+                                
+        $data=array();
+        $data["tabla"]=$tabla;
+                                
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Content-type: application/json');
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);  
+    }
+
+        public function historico_archivo($idArchivo){
         $this->load->model('datos_model');
         $this->load->model('rel_archivo_documento_model');
         $this->load->model('procesos_model');

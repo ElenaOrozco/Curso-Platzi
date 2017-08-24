@@ -19,7 +19,7 @@ class ubicacion_proyectos_model extends CI_Model {
     }
     
     
-     public function insert_ubicacion($data){
+    public function insert_ubicacion($data){
         $repetido =  $this->concepto_repetido($data);
 
         if(!$repetido['ret']){
@@ -53,6 +53,8 @@ class ubicacion_proyectos_model extends CI_Model {
       
     }
     
+    
+
     public function datos_ubicacion_update($data, $id) {
         
         $repetido =  $this->concepto_repetido($data);
@@ -91,6 +93,40 @@ class ubicacion_proyectos_model extends CI_Model {
         return $query;
     }
     
+    public function actualizar_cm( $id, $data){
+         $this->db->where('id', $id);
+            $this->db->update('saaUbicacion_Proyecto', $data);
+            $e = $this->db->_error_message();
+            $aff = $this->db->affected_rows();
+            $last_query = $this->db->last_query();
+   
+
+            if ($aff < 1) {
+                if (empty($e)) {
+                    $e = "No se realizaron cambios";
+                }
+                // si hay debug
+                $e .= "<pre>" . $last_query . "</pre>";
+                return array("retorno" => "-1", "error" => $e);
+            } else {
+                $this->log_save(array('Tabla' => 'saaUbicacion_Proyecto', 'Data' => $data, 'id' => $id));
+                return array("retorno" => "1", "registro" => $id);
+            }
+    }
+    
+    
+    public function  traer_cm($id){
+        $sql = 'SELECT cm_utilizados FROM saaUbicacion_Proyecto WHERE id = ?';
+        $query = $this->db->query($sql, array($id));
+        $cm = $query->row_array();
+        //echo $cm["cm_utilizados"];
+        //exit();
+        return $cm["cm_utilizados"];
+    }
+
+    
+
+
     public function concepto_repetido($data) {
        
         $this->db->where('no_isla', $data['no_isla']);

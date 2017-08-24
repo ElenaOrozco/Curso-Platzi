@@ -11,7 +11,7 @@ class Areas_ubicacion_model extends CI_Model {
 
     public function listado() {
         
-         $sql = 'SELECT * FROM `saaAreasUbicacionTrabajo`';
+         $sql = 'SELECT * FROM `saaAreasUbicacionTrabajo` WHERE eliminacion_logica = 0';
             $query = $this->db->query($sql);
             return $query; 
         
@@ -77,17 +77,23 @@ class Areas_ubicacion_model extends CI_Model {
     }
     
     public function datos_area_delete($id) {
-        /*$data = array(
-            'Estatus' => 0
+        $data = array(
+            'eliminacion_logica' => 1,
         );
-        $this->db->update('saaDocumentos',$data ,array('id'=>$id));*/
-        $this->db->delete('saaAreasUbicacionTrabajo', array('id' => $id));
+        
+         
+        $this->log_save(array('Tabla' => 'saaAreasUbicacionTrabajo', 'Data' => $data, 'id' => $id));
+        
+        $this->db->update('saaAreasUbicacionTrabajo', $data, array('id' => $id));
         $e = $this->db->_error_message();
         $aff = $this->db->affected_rows();
         $last_query = $this->db->last_query();
 //        $registro = $this->db->insert_id();
         //$this->db->db_debug = $oldv; 
- 
+
+        
+        
+        
         if ($aff < 1) {
             if (empty($e)) {
                 $e = "No se realizaron cambios";

@@ -126,6 +126,7 @@ class Documentos_model extends CI_Model {
         $data = array(
             'Estatus' => 0
         );
+        $this->log_save(array('Tabla' => 'saaDocumentos', 'Data' => $data, 'id' => $id));
         $this->db->update('saaDocumentos',$data ,array('id'=>$id));
         //$this->db->delete('saaDocumentos', array('id' => $id));
         $e = $this->db->_error_message();

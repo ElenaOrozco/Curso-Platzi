@@ -150,6 +150,48 @@
                 <div class="col-md-12 column">
                         <a href="#modal-agregar-cat" class="btn btn-primary" role="button" data-toggle="modal" ><span class="glyphicon glyphicon-plus"></span> Nueva Ubicación de Proyecto</a>
                 </div>
+                
+                <div class="col-md-12 column" style="margin-top: 20px">
+                        <a href="#modal-ubicacion-fisica-excel-catalogo" class="btn btn-primary" role="button" data-toggle="modal" ><span class="glyphicon glyphicon-plus"></span> Nueva Ubicación Fisica desde Excel</a>
+                </div>
+                
+                 <!-- Dialogo Importa Ubicaciones Físicas Catalogo-->
+                <div class="modal fade" id="modal-ubicacion-fisica-excel-catalogo" role="dialog" aria-labelledby="modal-ubicacion-fisica-excel-catalogogomyModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                    ×
+                                </button>
+                                <h4 class="modal-titlsamplee" id="modal-presupuesto-excel-catalogoModalLabel"><span id="title_comentario"></span>Importar Catálogo de Ubicaciones Físicas desde Excel</h4>
+                            </div>
+                            <form action="<?php echo site_url("proyectos/importa_ubicaciones_base_db"); ?>" method="post" accept-charset="utf-8" enctype="multipart/form-data">                        
+
+
+
+                                 <div class="modal-body">
+
+                                    <div class="form-group">
+                                        <label for="userfile" class="control-label">Seleccionar Archivo:</label>
+                                        <input type="file" name="userfile" size="20" class="form-control" required accept=".xls,.xlsx" />
+                                        <small>Solo Archivos de Excel</small>
+                                    </div>                           
+
+
+                                </div>   
+
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">
+                                        Subir Archivo</button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                                        Cancelar
+                                    </button>                       
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div> 
+                <!-- **** FIN *** -->
             </div>
             <!-- Fin Encabezado -->
             

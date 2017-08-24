@@ -26,6 +26,10 @@ class Bloques_obras_model extends CI_Model {
             $last_query = $this->db->last_query();
             $registro = $this->db->insert_id();
             
+            if (!empty($registro)) {
+                $this->log_new(array('Tabla' => 'saaAreasUbicacionTrabajo', 'Data' => $data, 'id' => $registro));
+            }
+        
         
             
 
@@ -52,7 +56,7 @@ class Bloques_obras_model extends CI_Model {
 
         if( !$repetido['ret'] ){
         
-        
+            $this->log_save(array('Tabla' => 'saaBloqueObras', 'Data' => $data, 'id' => $id));
             $this->db->where('id', $id);
             $this->db->update('saaBloqueObras', $data);
 
@@ -80,12 +84,15 @@ class Bloques_obras_model extends CI_Model {
     
     
     public function datos_bloque_delete($id) {
-       
-         $data=array(
+        
+        
+        
+        $data=array(
             'Estatus'=> 0,
            
         );
         
+        $this->log_save(array('Tabla' => 'saaBloqueObras', 'Data' => $data, 'id' => $id));
         $this->db->where('id', $id);
         $this->db->update('saaBloqueObras', $data);
         $e = $this->db->_error_message();
@@ -123,6 +130,17 @@ class Bloques_obras_model extends CI_Model {
         $sql = 'SELECT * FROM saaBloqueObras WHERE id = ?';
         $query = $this->db->query($sql, array($id));
         return $query;
+    }
+    
+    
+     public function log_save($cambios) {
+            $this->load->model("control_usuarios_model");
+            return $this->control_usuarios_model->log_save($cambios);
+    }
+    
+    public function log_new($cambios) {
+            $this->load->model("control_usuarios_model");
+            return $this->control_usuarios_model->log_new($cambios);
     }
     
   
