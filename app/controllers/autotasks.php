@@ -27,8 +27,10 @@ class Autotasks extends CI_Controller {
     public function listado_obras(){
         $this->load->model('secip_obras_model');
         $this->load->model('datos_model');
+        $this->load->library('ferfunc');
         
         //datos_archivo_insert
+        
         
         
         $addw_supervisores=$this->secip_obras_model->addw_supervisores();
@@ -36,9 +38,10 @@ class Autotasks extends CI_Controller {
         $addw_estatus=$this->secip_obras_model->addw_estatus();
         
         
-        
+       
         $qObras=$this->secip_obras_model->listado_obras();
          
+       
         
         foreach ($qObras->result() as $row):
             
@@ -56,6 +59,16 @@ class Autotasks extends CI_Controller {
                 $proyecto=0;
             
             
+            $qContratista=$this->secip_obras_model->datos_contratista($row->idContratista);    
+            
+            $idContratista=0;
+            $Contratista="";
+            if ($qContratista->num_rows()>0){
+                $aContratista=$qContratista->row_array();
+                $idContratista=$row->idContratista;
+                $Contratista=$aContratista['RazonSocial'];
+            }
+            
             $qArchivo=$this->secip_obras_model->datos_Archivo_contrato($row->id);
             
             $qSupervisor=$this->secip_obras_model->datos_supervisor($row->idSupervisor);
@@ -65,6 +78,23 @@ class Autotasks extends CI_Controller {
                  $aSupervisor=$qSupervisor->row_array();
                  $supervisor=$aSupervisor['Supervisor'];
              }        
+            
+             
+            $xml = $row->complementoXML;
+            $data= array();
+            if (strlen($xml) > 0) {
+                $aXml = $this->ferfunc->xml2array($xml);
+                foreach ($aXml as $key => $value) {
+                    $data["aObra"][$key] = $value;
+                }
+            }
+             
+            $FechaExtincionDerechos = date('Y-m-d'); 
+            if (!empty($data["aObra"]['FechaExtincionDerechos'])) {
+                $FechaExtincionDerechos = $data["aObra"]['FechaExtincionDerechos'];
+            }
+            
+          
             
             if ($qArchivo->num_rows()==0){
         
@@ -94,9 +124,13 @@ class Autotasks extends CI_Controller {
                     'idJefeSupervisor' =>  $row->idJefeSupervisor,
                     'idDirectorGral' =>  $row->idDirectorGral,
                     'EstatusObra' => $addw_estatus[$row->Estatus],
+                    'idContratista' => $idContratista,
+                    'Contratista' => $Contratista,
+                    'FechaExtincionDerechos' => $FechaExtincionDerechos,
                 );
 
-
+ 
+                
                 $retorno=  $this->datos_model->datos_archivo_insert($data);
 
                 $id_new_archivo=$retorno['registro'];
@@ -142,9 +176,13 @@ class Autotasks extends CI_Controller {
                     'idJefeSupervisor' =>  $row->idJefeSupervisor,
                     'idDirectorGral' =>  $row->idDirectorGral,
                     'EstatusObra' => $addw_estatus[$row->Estatus],
-
+                    'idContratista' => $idContratista,
+                    'Contratista' => $Contratista,
+                    'FechaExtincionDerechos' => $FechaExtincionDerechos,
                 );
 
+               
+                
                $aArchivo=$qArchivo->row_array();
                $this->datos_model->datos_archivo_update($data,$aArchivo['id'] );
        
@@ -153,6 +191,8 @@ class Autotasks extends CI_Controller {
             
             
         endforeach;
+        
+        echo "Proceso Terminado";
         
     }
 
