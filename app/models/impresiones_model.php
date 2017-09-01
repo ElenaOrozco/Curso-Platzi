@@ -31,6 +31,15 @@ class Impresiones_model extends CI_Model {
         return $query;
     }
     
+    
+    public function listado_contratistas(){
+        $sql = 'SELECT OrdenTrabajo, Contratista, idBloqueObra
+                FROM `saaArchivo`
+                WHERE idBloqueObra= 1 || idBloqueObra= 2 || idBloqueObra= 3';
+        $query = $this->db->query($sql);
+        return $query;
+    }
+    
     public function estimaciones_de_archivo($id){
         $sql = 'SELECT * FROM `saaRel_Archivo_Documento`
                 WHERE idArchivo = ? AND idDocumento =114';

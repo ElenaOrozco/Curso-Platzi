@@ -95,7 +95,7 @@
                         {'sClass': 'small'},
                         {'sClass': 'small'},
                         {'sClass': 'small'},
-                       
+                        {'sClass': 'small'},
                         {'sClass': 'small'},
                         {'sClass': 'small'}
                       
@@ -219,7 +219,8 @@
                                         {'sClass': 'small'},
                                         {'sClass': 'small'},
                                         {'sClass': 'small'},
-
+                                        {'sClass': 'small'},
+                                            
                                         {'sClass': 'small'}
 
                                     ],
@@ -487,6 +488,9 @@
                                         Finiquitada
                                     </th>
                                     <th class="col-md-1">
+                                        Contratista
+                                    </th>
+                                    <th class="col-md-1">
                                         Estatus FIDO
                                     </th>
 
@@ -560,6 +564,9 @@
                                                         echo 'Si';
                                                     }
                                                     ?>
+                                                </td>
+                                                <td>
+                                                    <?php echo $rArchivo->Contratista; ?>
                                                 </td>
                                                 <td>
                                                     <a href="#" class="btn btn-warning btn-xs" title=""  data-toggle="modal" data-target="#modal-historico-archivo" role="button" onclick="ver_historico_archivo(<?php echo $rArchivo->id; ?>)"><span class="glyphicon glyphicon-search"></span></a>&nbsp;

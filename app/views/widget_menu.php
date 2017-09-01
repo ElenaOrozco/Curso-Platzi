@@ -23,6 +23,9 @@
                                 <li>
                                     <a href="<?php echo site_url("proyectos/"); ?>" title="Proyectos">Proyectos</a>
                                 </li>
+                                <li>
+                                    <a href="<?php echo site_url("concentracion/"); ?>" title="Concentración">Concentración</a>
+                                </li>
                            
                                 
                             </ul>
@@ -63,6 +66,10 @@
                                 
                                 <li>
                                     <a  href=""data-toggle="modal" data-target="#modal-ver-reporte-documento-bloque" role="button">Documentos por Bloque</a>
+                                    
+                                </li>
+                                 <li>
+                                    <a  href="<?php echo site_url("impresion/reporte_listado_contratistas"); ?>" target="_blank" >Contratistas (736 Obras)</a>
                                     
                                 </li>
                                 

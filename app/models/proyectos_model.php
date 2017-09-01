@@ -11,45 +11,45 @@ class Proyectos_model extends CI_Model {
     
     
     public function ot_json($term = null, $id = null){
-            $aRow = array();
-            $return_arr = array();            
-            if (!empty($term) || !empty($id)){
-                if ($id > 0){
-                    
-                    
-                    $this->db->select("id,OrdenTrabajo");
-                    $this->db->order_by("OrdenTrabajo", "ASC");
-                    $query2 = $this->db->get_where("saaArchivo",array("id" => $id),100);
-                  
-                }else{
-                    
-                    
-                    $this->db->select("id,OrdenTrabajo");
-                    $this->db->like("OrdenTrabajo",$term);
-                    $this->db->order_by("OrdenTrabajo", "ASC");
-                    $query2 = $this->db->get("saaArchivo",100);                    
-                }
-                
-                if ($query2->num_rows() > 0){
-                    
-                    
-                    foreach ($query2->result() as $row ){
-                        $aRow["id"] = $row->id;
-                        $aRow["text"] = $row->OrdenTrabajo;
-                        $return_arr["results"][] = $aRow;
-                    }
-                }else{
-                    $aRow["id"] = "newremit";
-                    $aRow["text"] = 'No se encontro OT';
+        $aRow = array();
+        $return_arr = array();            
+        if (!empty($term) || !empty($id)){
+            if ($id > 0){
+
+
+                $this->db->select("id,OrdenTrabajo");
+                $this->db->order_by("OrdenTrabajo", "ASC");
+                $query2 = $this->db->get_where("saaArchivo",array("id" => $id),100);
+
+            }else{
+
+
+                $this->db->select("id,OrdenTrabajo");
+                $this->db->like("OrdenTrabajo",$term);
+                $this->db->order_by("OrdenTrabajo", "ASC");
+                $query2 = $this->db->get("saaArchivo",100);                    
+            }
+
+            if ($query2->num_rows() > 0){
+
+
+                foreach ($query2->result() as $row ){
+                    $aRow["id"] = $row->id;
+                    $aRow["text"] = $row->OrdenTrabajo;
                     $return_arr["results"][] = $aRow;
                 }
             }else{
-                $aRow["id"] = "";
-                $aRow["text"] = "";
+                $aRow["id"] = "newremit";
+                $aRow["text"] = 'No se encontro OT';
                 $return_arr["results"][] = $aRow;
-            } 
-            return $return_arr; 
-        }
+            }
+        }else{
+            $aRow["id"] = "";
+            $aRow["text"] = "";
+            $return_arr["results"][] = $aRow;
+        } 
+        return $return_arr; 
+    }
         
     
     public function buscar_ubicacion_disponible($cm){

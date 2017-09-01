@@ -494,7 +494,7 @@ class Archivo extends MY_Controller {
             //
             $data["aUsuarios"] = $this->datos_model->get_usuarios();
             $data["qProcesos"] = $this->datos_model->get_procesos();
-            $data["NoProcesos_archivo"] = $this->datos_model->get_procesos_archivo( $id_archivo)->num_rows();
+            $data["NoProcesos_archivo"] = $this->datos_model->get_procesos_archivo($id_archivo)->num_rows();
             $data["NoProcesos_archivo_integracion"] = $this->datos_model->get_procesos_archivo_integracion( $id_archivo)->num_rows();
             $data["qBloques"] = $this->datos_model->get_bloques();
             $data["Ejercicios"] = $this->datos_model->get_Ejercicio_select();
@@ -541,9 +541,14 @@ class Archivo extends MY_Controller {
             $this->load->model("estimaciones_model");
 
             
-            
+            if( $data["preregistro"]== 1 ){
+                //$data["qCarga"] = $this->datos_model->get_procesos();
+               // $this->load->view('v_pant_preregistro', $data);
+                 $this->load->view('v_reporte_form_2.php', $data);
+            } else {
             //$this->load->view('v_reporte_form.php', $data);
             $this->load->view('v_reporte_form_2.php', $data);
+            }
             
         }else{
             
@@ -560,6 +565,18 @@ class Archivo extends MY_Controller {
         }
     }
     
+    public function cargar_plantilla ($idArchivo){
+        
+       
+        $resultado = array (
+            "procesos" =>  $this->datos_model->procesos_de_archivo($idArchivo),
+            "array_subprocesos" =>  $this->datos_model->procesos_de_archivo($idArchivo),
+            "plantilla" => $this->datos_model->procesos_de_archivo($idArchivo),
+        );
+        
+    }
+
+
     public function preregistrar($id_archivo = null, $idDireccion, $idProceso = 1, $idSubProceso = 1, $idDocumento = 1, $Numero_Estimacion = "") {
         
         if ($id_archivo != 0) {
@@ -910,6 +927,7 @@ class Archivo extends MY_Controller {
             }else {
                 $datos['eliminacion_logica']= 0;
             }
+            $datos['fecha_ingreso']=date('Y-m-d H:i:s');
             $idDireccion_responsable = $idDireccion;
             $this->rel_archivo_preregistro_model->datos_relacion_archivo_preregistro_update($datos, $idDireccion, $idRelDoc_Archivo);
         }  else {
@@ -919,6 +937,7 @@ class Archivo extends MY_Controller {
             $datos['idUsuario_preregistra']=$this->session->userdata('id');
             $datos['idUsuario_acepta']=$this->session->userdata('id');
             $datos['preregistro_aceptado']=1;
+            $datos['fecha_ingreso']=date('Y-m-d H:i:s');
             
             $datos['tipo_documento']= $this->input->post("preregistrado");
             $datos["idArchivo"] =$idArchivo;
@@ -1050,6 +1069,7 @@ class Archivo extends MY_Controller {
                 }else {
                     $datos['eliminacion_logica']= 0;
                 }
+                
                
                 $this->rel_archivo_preregistro_model->datos_preregistro_update_por_relacion($datos, $idRelDoc_Archivo);
             }  else {
@@ -5898,6 +5918,9 @@ class Archivo extends MY_Controller {
                                 <th >
                                     Finiquitada
                                 </th>
+                                <th >
+                                    Contratista
+                                </th>
                                 <th>
                                     Estatus FIDO
                                 </th>
@@ -5936,6 +5959,7 @@ class Archivo extends MY_Controller {
                                                 $tabla.= "<td class='sinwarp'>" . $rFiltro->ImporteContratado . "</td>";
                                                 $tabla.= "<td class='sinwarp'>" . $rFiltro->EjercidoSiop . "</td>";
                                                 $tabla.= "<td class='sinwarp'>" . $finiquitada. "</td>";
+                                                 $tabla.= "<td class='sinwarp'>" . $rFiltro->Contratista . "</td>";
                                                 $tabla.= "<td class='sinwarp'> <a href='#' class='btn btn-warning btn-xs' title=''  data-toggle='modal' data-target='#modal-historico-archivo' role='button' onclick='ver_historico_archivo(" . $rFiltro->id  .")'><span class='glyphicon glyphicon-search'></span></a>&nbsp;</td>";
                                            
                                                //$tabla.= "<td class='sinwarp'>" .$rProcesos->Estatus. "</td>";
@@ -6107,9 +6131,9 @@ class Archivo extends MY_Controller {
     
     
     public function ver_todo(){
-        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Archivo","P")==false){
+        /*if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Archivo","P")==false){
             header("Location:" . site_url('principal'));
-        }
+        }*/
         
         $data['meta'] = array(
             array('name' => 'robots', 'content' => 'no-cache'),
@@ -6294,6 +6318,7 @@ class Archivo extends MY_Controller {
          $this->load->model('rel_archivo_preregistro_model');
          $data = array(
                 'preregistro_aceptado' => 1,
+                'fecha_ingreso' => date('Y-m-d H:i:s'),
                 );
             
          $this->rel_archivo_documento_model->update_rel_archivo_documento_aceptar_preregistro($idArchivo, $idDireccion_responsable, $data);

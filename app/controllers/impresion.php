@@ -2365,6 +2365,48 @@ BANCO DEL BAJÍO, S.A.</span>');
                 $this->load->view('v_reporte_documentos_por_direccion', $data);
             }
     }
+    
+    public function reporte_listado_contratistas($pdf=1){
+            $this->load->model('impresiones_model');
+            $this->load->model('datos_model');
+            
+            $data = array();
+            
+            $data['qListado']= $this->impresiones_model->listado_contratistas();
+            
+            
+            
+            
+            //$pdf=0;
+            if ($pdf == 1) {
+                $this->load->library('mpdf');
+                //$mpdf = new mPDF('utf-8', 'Letter');
+                //$mpdf = new mPDF('utf-8', 'Legal');
+                $mpdf = new mPDF('utf-8');
+
+
+               /* $mpdf->keep_table_proportions = true;
+                $mpdf->tableMinSizePriority = false;
+                $mpdf->shrink_tables_to_fit = 1.4;
+                $mpdf->forcePortraitHeaders = true;
+
+
+                $mpdf->pagenumPrefix = 'Página ';
+                $mpdf->pagenumSuffix = ' de ';
+                $mpdf->autoPageBreak = true; */
+
+
+
+
+
+                $output = $this->load->view('v_reporte_listado_contratistas', $data, true);
+                $mpdf->WriteHTML($output);
+                $mpdf->Output();
+            } else {
+                $this->load->view('v_reporte_listado_contratistas', $data);
+            }
+    }
+
 
     public function reporte_memoria_nomina(){
 

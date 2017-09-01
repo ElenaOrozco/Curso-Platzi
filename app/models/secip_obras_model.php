@@ -39,6 +39,22 @@ class secip_obras_model extends CI_Model {
     }
     
     
+    public function datos_contratista($idContratista) {
+        
+        //con esta línea cargamos la base de datos secip
+        //y la asignamos a $db_secip
+        $db_secip = $this->load->database('production_secip', TRUE);
+        //$db_secip = $this->load->database('secip_dev', TRUE);
+        //y de esta forma accedemos, no con $this->db->get,
+        //sino con $db_prueba->get que contiene la conexión
+        //a la base de datos prueba
+	$sql = 'SELECT * FROM catContratistas  where  id = ?';
+        $query = $db_secip->query($sql,array($idContratista));
+        return $query; 	
+        
+    }
+    
+    
     public function datos_Archivo_contrato($idContrato){
         $query = $this->db->get_where("saaArchivo", array("idContrato" => $idContrato));
         return $query;

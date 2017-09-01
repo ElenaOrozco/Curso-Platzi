@@ -55,7 +55,8 @@ class Rel_archivo_preregistro_model extends CI_Model {
         $datos = $data;
         $datos['idDireccion_responsable'] = $idDireccion_responsable;
         $datos['idRel'] = $idRel;
-        $this->log_save(array('Tabla' => 'saaRel_Archivo_Preregistro', 'Data' => $datos, 'id' => $id));
+        $id = $this->db->get_where('SELECT id FROM saaRel_Archivo_Preregistro Where idDireccion_responsable='.$idDireccion_responsable. ' AND id_Rel_Archivo_Documento='. $idRel)->row_array();
+        $this->log_save(array('Tabla' => 'saaRel_Archivo_Preregistro', 'Data' => $datos, 'id' => $id['id']));
         $this->db->update('saaRel_Archivo_Preregistro', $data, array('idDireccion_responsable' => $idDireccion_responsable, 'id_Rel_Archivo_Documento' => $idRel));
        
     

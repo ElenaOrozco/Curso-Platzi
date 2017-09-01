@@ -2077,6 +2077,7 @@
    
         
         <style>
+            
             .p-l{
               padding-left: 15px;
             }
@@ -2442,22 +2443,25 @@
             <div  class="m-b-separacion">
             <?php 
             if (isset($qProcesos)) {
+                
                 if ($qProcesos->num_rows() > 0) {
+                    
                     foreach ($qProcesos->result() as $rRow) {
-                          
+                    //print_r($rRow);    
                         ?>
                         
                <!-- $idProceso,$idSubProceso,$idDocumento -->
               
                    <?php  
+                   //echo $rRow->id;
                         $strin="  ";
                         
                         if ($rRow->id==$idProceso){
                             $strin=" in ";
                         }
-                 
+                      
                
-                   ?>
+                ?>    
             <!-- Procesos -->  
             
             <div class="col-sm-12">
@@ -3181,6 +3185,7 @@
                             </a>
                         </div>
                         
+                        <!-- Panel Collapse Procesos -->
                         <div id="panel-element-proceso-<?php echo $rRow->id;  ?>" class="panel-collapse collapse <?php  echo $strin; ?>" >
                             <div class="panel-body" <?php echo $style_procesos_preregistro?> id="panel-body-<?php echo $rRow->id;  ?>">
                                 <div class="row clearfix">
@@ -3201,11 +3206,10 @@
                                                             ?>
                                                             
                                                         <?php  
-                                                        $strin_subproceso="  ";
-                                                       
-                                                        if ($rRowSubProcesos->id==$idSubProceso){
+                                                        
+                                                        
                                                             $strin_subproceso=" in ";
-                                                        }
+                                                        
                                                    
                                                    ?>                     
                                                                                 
@@ -3245,7 +3249,7 @@
                                                     if ($qDocumentos->num_rows() > 0) {
                                                         //echo $qDocumentos->num_rows();
                                                 ?>
-                                                <!-- Subprocesos -->
+                <!-- Subprocesos -->
                 <div class="panel-group" id="panel-sub-proceso-<?php echo $rRowSubProcesos->id;  ?>">
                     <div class="panel panel-success">
                         
@@ -3362,6 +3366,8 @@
                             </a>
                         </div>
                         
+                        
+                        <!--panel Collapse Subprocesos -->
                         <div id="panel-element-sub-proceso-<?php echo $rRowSubProcesos->id;  ?>" class="panel-collapse collapse <?php echo $strin_subproceso;  ?>">
                             <div class="panel-body">
                                 <div class="row clearfix">
@@ -4783,7 +4789,7 @@
       <?php
             }
         }
-    }
+    } //if isset Procesos
     ?>           
                 </div>
                 <br>

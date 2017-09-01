@@ -52,7 +52,7 @@ class Proyectos extends MY_Controller {
     }
     
     
-     public function ot_json() {
+    public function ot_json() {
         $term = $this->input->post("term");
         $id = $this->input->post("id");
         $this->load->model('proyectos_model');
