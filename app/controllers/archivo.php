@@ -493,7 +493,8 @@ class Archivo extends MY_Controller {
             $data["aArchivo"] = $this->datos_model->datos_Archivo($id_archivo)->row_array();
             //
             $data["aUsuarios"] = $this->datos_model->get_usuarios();
-            $data["qProcesos"] = $this->datos_model->get_procesos();
+            //$data["qProcesos"] = $this->datos_model->get_procesos();
+            $data["qProcesos"] = $this->datos_model->procesos_de_archivo($id_archivo);
             $data["NoProcesos_archivo"] = $this->datos_model->get_procesos_archivo($id_archivo)->num_rows();
             $data["NoProcesos_archivo_integracion"] = $this->datos_model->get_procesos_archivo_integracion( $id_archivo)->num_rows();
             $data["qBloques"] = $this->datos_model->get_bloques();
@@ -540,15 +541,15 @@ class Archivo extends MY_Controller {
             
             $this->load->model("estimaciones_model");
 
-            
-            if( $data["preregistro"]== 1 ){
+            $this->load->view('v_pant_preregistro', $data);
+            /* if( $data["preregistro"]== 1 ){
                 //$data["qCarga"] = $this->datos_model->get_procesos();
-               // $this->load->view('v_pant_preregistro', $data);
-                 $this->load->view('v_reporte_form_2.php', $data);
+                $this->load->view('v_pant_preregistro', $data);
+                 //$this->load->view('v_reporte_form_2.php', $data);
             } else {
             //$this->load->view('v_reporte_form.php', $data);
             $this->load->view('v_reporte_form_2.php', $data);
-            }
+            }*/
             
         }else{
             
@@ -575,7 +576,20 @@ class Archivo extends MY_Controller {
         );
         
     }
-
+    
+    public function cargar_documentos($idArchivo, $idproceso, $idsubproceso){
+        $this->load->model("datos_model");
+        $documentos = $this->datos_model->cargar_documentos($idArchivo, $idproceso, $idsubproceso);
+        if (isset($documentos)){
+            if ($documentos->num_rows() > 0){
+                foreach ($documentos->result() as $rRow){
+                   require('site_url("archivo/cargar_documentos"); ?>row_documentos.php');
+                }
+            }
+        }
+        
+        
+    }
 
     public function preregistrar($id_archivo = null, $idDireccion, $idProceso = 1, $idSubProceso = 1, $idDocumento = 1, $Numero_Estimacion = "") {
         
@@ -1004,59 +1018,20 @@ class Archivo extends MY_Controller {
 
    
     
-    
-     public function edit_preregistrados($idRelDoc_Archivo, $idArchivo) {
+    //*
+    public function edit_preregistrados($idRelDoc_Archivo, $idArchivo) {
         $this->load->model('rel_archivo_documento_model');
         $this->load->model('rel_archivo_preregistro_model');
         
-        $data=array();
-        $data["idUsuario_recibio"]=  $this->session->userdata('id');
-        $data["idDireccion_responsable"] =$this->session->userdata('idDireccion_responsable');
+        $datos=array();
+        //$datos['fecha_ingreso']=date('Y-m-d H:i:s');
         
-        //echo $this->input->post("recibido");
-        //exit();
-        
-        if ($this->input->post("preregistrado") == 1){
-            $data["copia"]= 1;
-            $data["original_recibido"]= 0;
-            $data["no_aplica"]= 0;
-            
-        }
-        
-        if ($this->input->post("preregistrado") == 2){
-            $data["original_recibido"]= 1;
-            $data["copia"]= 0;
-            $data["no_aplica"]= 0;
-            
-        }
-        if ($this->input->post("preregistrado") ==0){
-            $data["original_recibido"]= 0;
-            $data["copia"]= 0;
-            $data["idUsuario_recibio"]=  0;
-            $data["idDireccion_responsable"] =0;
-            $data["noHojas"]=0;
-            $data["no_aplica"]= 0;
-        }
-        
-        if ($this->input->post("preregistrado") ==3){
-            $data["original_recibido"]= 0;
-            $data["copia"]= 0;
-            $data["no_aplica"]= 1;
-            //$data["idDireccion_responsable"] =0;
-            $data["noHojas"]=0;
-        }
-        if ($this->input->post("preregistrado") == 4){
-            $data["copia"]= 2;
-            $data["original_recibido"]= 0;
-            $data["no_aplica"]= 0;
-            
-        }
-        
+        //Si no es de preregistro
         if ($this->session->userdata('preregistro') == 0){
             $str_existe_preregistro = $this->hay_preregistro($idRelDoc_Archivo);
 
             if($str_existe_preregistro > 0 )  {
-                $datos=array();
+                
                 $datos['tipo_documento']= $this->input->post("preregistrado");
                 $datos['idUsuario_preregistra']=$this->session->userdata('id');
                 if ($this->input->post("preregistrado") == 3){
@@ -1070,12 +1045,12 @@ class Archivo extends MY_Controller {
                     $datos['eliminacion_logica']= 0;
                 }
                 
-               
+                
                 $this->rel_archivo_preregistro_model->datos_preregistro_update_por_relacion($datos, $idRelDoc_Archivo);
             }  else {
-                $datos=array();
+                
                 $datos['id_Rel_Archivo_Documento']= $idRelDoc_Archivo;
-                $datos['idDireccion_responsable']= $data["idDireccion_responsable"];
+                $datos['idDireccion_responsable']= $this->session->userdata("idDireccion_responsable");
                 $datos['idUsuario_preregistra']=$this->session->userdata('id');
 
                 $datos['tipo_documento']= $this->input->post("preregistrado");
@@ -1088,7 +1063,8 @@ class Archivo extends MY_Controller {
             $str_existe_preregistro = $this->existe_preregistro($idRelDoc_Archivo, $this->session->userdata('idDireccion_responsable'));
 
             if($str_existe_preregistro > 0 )  {
-                $datos=array();
+                
+                
                 $datos['tipo_documento']= $this->input->post("preregistrado");
                 if ($this->input->post("preregistrado") == 3){
                     $datos['noHojas']= 0;
@@ -1103,9 +1079,9 @@ class Archivo extends MY_Controller {
                 $idDireccion_responsable = $this->session->userdata('idDireccion_responsable');
                 $this->rel_archivo_preregistro_model->datos_relacion_archivo_preregistro_update($datos, $idDireccion_responsable, $idRelDoc_Archivo);
             }  else {
-                $datos=array();
+                
                 $datos['id_Rel_Archivo_Documento']= $idRelDoc_Archivo;
-                $datos['idDireccion_responsable']= $data["idDireccion_responsable"];
+                $datos['idDireccion_responsable']= $this->session->userdata('idDireccion_responsable');
                 $datos['idUsuario_preregistra']=$this->session->userdata('id');
 
                 $datos['tipo_documento']= $this->input->post("preregistrado");
@@ -1165,7 +1141,77 @@ class Archivo extends MY_Controller {
         
     }
     
-    
+    public function modificar_tipo_documento($idRelDoc_Archivo, $idArchivo,  $idRAP){
+        $this->load->model('rel_archivo_documento_model');
+        $this->load->model('rel_archivo_preregistro_model');
+        
+        $datos=array();
+        
+        
+       
+                
+        $datos['tipo_documento']= $this->input->post("preregistrado");
+
+        if ($this->input->post("preregistrado") == 3){
+            $datos['noHojas']= 0;
+        }
+        if ($this->input->post("preregistrado") == 0){
+            $datos['noHojas']= 0;
+            $datos['eliminacion_logica']= 1;
+
+        }else {
+            $datos['eliminacion_logica']= 0;
+        }
+
+
+        $this->rel_archivo_preregistro_model->update_registro($datos, $idRAP);
+        
+            
+       
+        
+        $aRegistro=$this->rel_archivo_documento_model->datos_relacion_archivo_documento($idRelDoc_Archivo)->row_array();
+        
+        $idDireccion_responsable = $this->session->userdata('idDireccion_responsable');
+        
+        $qSubTipoProceso_preregistro=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_sub_tipo_proceso_preregistro($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"],  $idDireccion_responsable);
+        
+        $qTipoProceso_preregistro=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_tipo_proceso_preregistro($aRegistro["idArchivo"],$aRegistro["idTipoProceso"],  $idDireccion_responsable);
+        
+        
+        $qSubTipoProceso_recibido=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_sub_tipo_proceso($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"]);
+        
+        $qTipoProceso_recibido=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_tipo_proceso($aRegistro["idArchivo"],$aRegistro["idTipoProceso"]);
+        
+        
+        $qSubTipoProceso=$this->rel_archivo_documento_model->listado_registros_recibido_por_sub_tipo_proceso_total($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"]);
+        
+        $qTipoProceso=$this->rel_archivo_documento_model->listado_registros_recibido_por_tipo_proceso_total($aRegistro["idArchivo"],$aRegistro["idTipoProceso"]);
+        //$str_existe_preregistro ='OK';
+        
+        $data=array();
+        $data["NumSubTipoProceso_recibidos"]=$qSubTipoProceso_recibido->num_rows();
+        $data["NumTipoProceso_recibidos"]=$qTipoProceso_recibido->num_rows();
+        $data["NumSubTipoProceso_preregistrados"]=$qSubTipoProceso_preregistro->num_rows();
+        $data["NumTipoProceso_preregistados"]=$qTipoProceso_preregistro->num_rows();
+        $data["idTipoProceso"]=$aRegistro["idTipoProceso"];
+        $data["idSubTipoProceso"]=$aRegistro["idSubTipoProceso"];
+        
+        
+        $data["strTipoProceso_preregistrados"]="Preregistrados " . $qTipoProceso_preregistro->num_rows() . " de " . $qTipoProceso->num_rows();
+        $data["strSubTipoProceso_preregistrados"]="Preregistrados " . $qSubTipoProceso_preregistro->num_rows() . " de " . $qSubTipoProceso->num_rows();
+        
+        $data["strTipoProceso_cid"]="Entregados " . $qTipoProceso_recibido->num_rows() . " de " . $qTipoProceso->num_rows();
+        $data["strSubTipoProceso_cid"]="Entregados " . $qSubTipoProceso_recibido->num_rows() . " de " . $qSubTipoProceso->num_rows();
+        
+       
+        
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Content-type: application/json');
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+    }
+            
+            
     public function editar_documento_preregistro($id, $idRelDoc_Archivo, $idArchivo) {
         $this->load->model('rel_archivo_documento_model');
         $this->load->model('rel_archivo_preregistro_model');
@@ -1278,14 +1324,46 @@ class Archivo extends MY_Controller {
             'noHojas' => $hojas,
             
             );
-        $this->rel_archivo_documento_model-> datos_relacion_archivo_documento_update($data, $idRelacion) ;
+        //$this->rel_archivo_documento_model-> datos_relacion_archivo_documento_update($data, $idRelacion) ;
         
         if ( $this->session->userdata('preregistro') == 0){
-             $this->rel_archivo_preregistro_model->datos_preregistro_update_por_relacion($data, $idRelacion);
+            $estado = $this->rel_archivo_preregistro_model->datos_preregistro_update_por_relacion($data, $idRelacion);
         } else {
             $idDireccion_responsable = $this->session->userdata('idDireccion_responsable');
-            $this->rel_archivo_preregistro_model-> datos_relacion_archivo_preregistro_update($data, $idDireccion_responsable, $idRelacion) ;
+            $estado = $this->rel_archivo_preregistro_model->datos_relacion_archivo_preregistro_update($data, $idDireccion_responsable, $idRelacion) ;
         }
+        
+        
+        $data=array();
+        $data["estado"]=$estado;
+        
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+        
+        
+        
+        
+    }
+    
+    
+    public function modificar_noHojas($idRelacion, $idArchivo, $hojas, $idRAP){
+        $this->load->model('rel_archivo_documento_model');
+        $this->load->model('rel_archivo_preregistro_model');
+        
+        $data=array(
+            'noHojas' => $hojas,
+            
+            );
+        
+       
+        $estado = $this->rel_archivo_preregistro_model->update_registro($data, $idRAP) ;
+        
+        
+        
+        
+        $data["estado"]=$estado;
+        
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+        
         
         
         
@@ -6594,6 +6672,8 @@ class Archivo extends MY_Controller {
         
         
     }
+
+
     
     
     
