@@ -283,7 +283,7 @@ class Proyectos extends MY_Controller {
         $this->load->model("proyectos_model");
         $qProyectos = $this->proyectos_model->listado(); 
         $pregunta ="¿Desea liberar ubicación?";
-        $tabla = '<table class="table table-responsive table-striped table-hover table-bordered" id="t_listado">
+        $tabla = '<table class="table table-responsive table-striped table-hover table-bordered display" id="t_listado">
                                     <thead>
                                         <tr>
                                             <th class="col-md-1">
@@ -296,7 +296,7 @@ class Proyectos extends MY_Controller {
                                             <th class="col-md-2">
                                                 Contrato
                                             </th>
-                                            <th class="col-md-2">
+                                            <th class="col-md-4">
                                                 Obra
                                             </th>                               
                                             <th class="col-md-2">

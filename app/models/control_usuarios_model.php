@@ -216,7 +216,9 @@ class Control_usuarios_model extends CI_Model {
         $this->db->insert('sisHistorico_archivo', $data);
         return 1;
     }
-     
+    
+    
+    
     
     
     public function log_new($datos){

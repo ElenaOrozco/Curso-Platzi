@@ -48,76 +48,32 @@
 
 
         <script>
-            var ot_listado;
-            $(document).ready(function() {
-
-                ot_listado = $('#t_listado').dataTable({
-                    'bProcessing': true,
-                    //'sScrollY': '400px',                    
-
-                    'sPaginationType': 'bs_normal',
-                    'sDom': '<"top"iflp<"clear">>rt<"bottom"iflp<"clear">>',
-                    'iDisplayLength': 10,
-                    'aaSorting': [[1, 'desc']],
-                    'aLengthMenu': [[10, 50, 100, 200, -1], [10, 50, 100, 200, "Todo"]],
-                    'bDeferRender': true,
-                    'bAutoWidth': false,
-                    'bScrollCollapse': false,                    
-                    'oLanguage': {
-                        'sProcessing': '<img src=\"./images/ajax-loader.gif\"/> Procesando...',
-                        'sLengthMenu': 'Mostrar _MENU_ archivos',
-                        'sZeroRecords': 'Buscando Archivos...',
-                        'sInfo': 'Mostrando desde _START_ hasta _END_ de _TOTAL_ archivos',
-                        'sInfoEmpty': 'Mostrando desde 0 hasta 0 de 0 archivos',
-                        'sInfoFiltered': '(filtrado de _MAX_ archivos en total)',
-                        'sInfoPostFix': '',
-                        'sSearch': 'Buscar:',
-                        'sUrl': '',
-                        'oPaginate': {
-                            'sFirst': '&nbsp;Primero&nbsp;',
-                            'sPrevious': '&nbsp;Anterior&nbsp;',
-                            'sNext': '&nbsp;Siguiente&nbsp;',
-                            'sLast': '&nbsp;&Uacute;ltimo&nbsp;'
-                        }
-                    },
-                    'aoColumns': [
-                        {'sClass': 'small'},
-                        {'sClass': 'small'},
-                        {'sClass': 'small'},
-                        {'sClass': 'small'},
-                        {'sClass': 'small'},
-                        {'sClass': 'small'},
-                        {'sClass': 'small'},
-                        {'sClass': 'small'},
-                        {'sClass': 'small'},
-                        {'sClass': 'small'},
-                        {'sClass': 'small'},
-                        {'sClass': 'small'},
-                        {'sClass': 'small'},
-                        {'sClass': 'small'},
-                        {'sClass': 'small'},
-                        {'sClass': 'small'},
-                        {'sClass': 'small'}
-                      
-                    ],
-                });
-
-                $('.datatable').each(function() {
-                    var datatable = $(this);
-                    // SEARCH - Add the placeholder for Search and Turn this into in-line form control
-
-                    var search_input = datatable.closest('.dataTables_wrapper').find('div[id$=_filter] input');
-                    search_input.attr('placeholder', 'Search');
-                    search_input.addClass('form-control input-sm');
-                    // LENGTH - Inline-Form control
-                    var length_sel = datatable.closest('.dataTables_wrapper').find('div[id$=_length] select');
-                    length_sel.addClass('form-control input-sm');
-                    datatable.bind('page', function(e) {
-                        window.console && console.log('pagination event:', e); //this event must be fired whenever you paginate
-                    });
-                    // add responsive hardcode
-                });
-            });
+            
+           
+            $(document).ready(function(){  
+                var dataTable = $('#t_listado').DataTable({  
+                       "processing":true,  
+                       "serverSide":true, 
+                       "responsive":true,
+                       "scrollX": true,
+                       "order":[],  
+                       "ajax":{  
+                            url:"<?php echo base_url() . 'archivo/fetch_archivos'; ?>",  
+                            type:"POST" 
+                       }, 
+                       "language": {
+                            "url": "<?php echo base_url() . 'assets/dataTables.spanish.lang'; ?>"
+                        }, 
+ 
+                       "columnDefs":[  
+                            {  
+                                "targets":[0], 
+                                "orderable":false,  
+                            },  
+                       ]
+                  });  
+             }); 
+ 
 
 
 
@@ -172,59 +128,61 @@
                                  $('#tabla-principal').hide();
                                  //$('#filtro-tabla').html(data["tabla"]);
                                  $('#filtro-tabla').html(data["tabla"]);
+                                 
                                  $('#filtro-tabla').show();
 
-                                 $('#t_listado').dataTable({
-                                    'bProcessing': true,
-                                    //'sScrollY': '400px',                    
+                                   $('#t_listado').dataTable({
+                            'bProcessing': true,
+                            //'sScrollY': '400px',                    
 
-                                    'sPaginationType': 'bs_normal',
-                                    'sDom': '<"top"iflp<"clear">>rt<"bottom"iflp<"clear">>',
-                                    'iDisplayLength': 10,
-                                    'aaSorting': [[1, 'desc']],
-                                    'aLengthMenu': [[10, 50, 100, 200, -1], [10, 50, 100, 200, "Todo"]],
-                                    'bDeferRender': true,
-                                    'bAutoWidth': false,
-                                    'bScrollCollapse': false,                    
-                                    'oLanguage': {
-                                        'sProcessing': '<img src=\"./images/ajax-loader.gif\"/> Procesando...',
-                                        'sLengthMenu': 'Mostrar _MENU_ archivos',
-                                        'sZeroRecords': 'Buscando Archivos...',
-                                        'sInfo': 'Mostrando desde _START_ hasta _END_ de _TOTAL_ archivos',
-                                        'sInfoEmpty': 'Mostrando desde 0 hasta 0 de 0 archivos',
-                                        'sInfoFiltered': '(filtrado de _MAX_ archivos en total)',
-                                        'sInfoPostFix': '',
-                                        'sSearch': 'Buscar:',
-                                        'sUrl': '',
-                                        'oPaginate': {
-                                            'sFirst': '&nbsp;Primero&nbsp;',
-                                            'sPrevious': '&nbsp;Anterior&nbsp;',
-                                            'sNext': '&nbsp;Siguiente&nbsp;',
-                                            'sLast': '&nbsp;&Uacute;ltimo&nbsp;'
-                                        }
-                                    },
-                                    'aoColumns': [
-                                        {'sClass': 'small'},
-                                        {'sClass': 'small'},
-                                        {'sClass': 'small'},
-                                        {'sClass': 'small'},
-                                        {'sClass': 'small'},
-                                        {'sClass': 'small'},
-                                        {'sClass': 'small'},
-                                        {'sClass': 'small'},
-                                        {'sClass': 'small'},
-                                        {'sClass': 'small'},
-                                        {'sClass': 'small'},
-                                        {'sClass': 'small'},
-                                        {'sClass': 'small'},
-                                        {'sClass': 'small'},
-                                        {'sClass': 'small'},
-                                        {'sClass': 'small'},
-                                            
-                                        {'sClass': 'small'}
+                            'sPaginationType': 'bs_normal',
+                            'sDom': '<"top"iflp<"clear">>rt<"bottom"iflp<"clear">>',
+                            'iDisplayLength': 10,
+                            'aaSorting': [[1, 'desc']],
+                            'aLengthMenu': [[10, 50, 100, 200, -1], [10, 50, 100, 200, "Todo"]],
+                            'bDeferRender': true,
+                            'bAutoWidth': false,
+                            'bScrollCollapse': false,                    
+                            'oLanguage': {
+                                'sProcessing': '<img src=\"./images/ajax-loader.gif\"/> Procesando...',
+                                'sLengthMenu': 'Mostrar _MENU_ archivos',
+                                'sZeroRecords': 'Buscando Archivos...',
+                                'sInfo': 'Mostrando desde _START_ hasta _END_ de _TOTAL_ archivos',
+                                'sInfoEmpty': 'Mostrando desde 0 hasta 0 de 0 archivos',
+                                'sInfoFiltered': '(filtrado de _MAX_ archivos en total)',
+                                'sInfoPostFix': '',
+                                'sSearch': 'Buscar:',
+                                'sUrl': '',
+                                'oPaginate': {
+                                    'sFirst': '&nbsp;Primero&nbsp;',
+                                    'sPrevious': '&nbsp;Anterior&nbsp;',
+                                    'sNext': '&nbsp;Siguiente&nbsp;',
+                                    'sLast': '&nbsp;&Uacute;ltimo&nbsp;'
+                                }
+                            },
+                            'aoColumns': [
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'}
 
-                                    ],
-                                });
+                            ],
+                        });
+                                   
+                              
 
 
 
@@ -348,6 +306,9 @@
             .m-b{
                 margin-bottom: 10px;
             }
+            #t_listado{
+                font-size: 85%;
+            }
             
         </style>
     </head>
@@ -373,7 +334,7 @@
                 <div class="col-md-12 m-b">
                     <div class="col-md-11"><h3>Listado de Archivos</h3></div>
                     <div class="col-xs-12 col-md-1">
-                        <a href="<?php echo site_url("archivo/ver_todo") ?>" class="btn btn-primary end">
+                        <a href="<?php echo site_url("archivo_todos/") ?>" class="btn btn-primary end">
                                     <span class="glyphicon glyphicon-plus"></span> Ver Todos 
                         </a>
                     </div>
@@ -437,7 +398,7 @@
                     <div id="filtro-tabla" style="display:none"></div>
                     
                     <div id="tabla-principal">
-                        <table class="table table-responsive table-striped table-hover table-bordered" id="t_listado">
+                        <table class="table table-responsive table-striped table-hover table-bordered" id="t_listado" width="200%">
                             <thead>
                                 <tr>
                                     <th class="col-md-1">
@@ -496,8 +457,9 @@
 
                                 </tr>
                             </thead>
+                            <!--
                             <tbody>
-                                <?php
+                                <?php /*
                                 if (isset($qArchivos_736)) {
                                     if ($qArchivos_736->num_rows() > 0) {
                                         foreach ($qArchivos_736->result() as $rArchivo) {
@@ -579,9 +541,10 @@
                                             <?php
                                         } // foreach
                                     } // if numrows
-                                } // if isset
+                                } // if isset */
                                 ?>
                             </tbody>
+                            -->
                         </table>
                     </div>
                 </div>

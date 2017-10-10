@@ -54,10 +54,64 @@ class concentracion_model extends CI_Model {
         return $return_arr; 
     }
     
-    public function fecha_ingreso_ot($ot){
+    public function detalles_archivo($ot){
+        $this->db->select("identificado, FechaExtincionDerechos");
+        $this->db->where('id', $ot);  
+        return $this->db->get("saaArchivo")->row_array(); 
+        
+        
+    }
+    public function fecha_ingreso($ot){
+        /* *
         $this->db->select("fecha_ingreso");
-        $this->db->get_where("saaRel_Archivo_Preregistro",array("idArchivo" => $id),100);
-        $this->db->order_by("OrdenTrabajo", "ASC");
-        $query2 = $this->db->get("saaArchivo",100); 
+        $this->db->distinct();
+        $this->db->where('id', $ot);
+        $this->db->order_by('fecha_ingreso', 'DESC');
+        $this->db->limit(1);
+        * */
+         
+        
+        $query = $this->db->query("SELECT DISTINCT fecha_ingreso 
+            FROM `saaRel_Archivo_Preregistro`
+            WHERE idArchivo = $ot
+            ORDER BY fecha_ingreso DESC
+            LIMIT 1");
+
+        $row = $query->row_array();
+        
+        return $row; 
+        
+        
+    }
+    
+    public function datos_concentracion_insert($data){
+        $this->db->insert('saaRel_ArchivoConcentracion_Ubicacion', $data);
+        $e = $this->db->_error_message();
+        $aff = $this->db->affected_rows();
+        $last_query = $this->db->last_query();
+        $registro = $this->db->insert_id();
+
+        if ($aff < 1) {
+            if (empty($e)) {
+                $e = "No se realizaron cambios";
+            }
+            // si hay debug
+            $e .= "<pre>" . $last_query . "</pre>";
+            return array("retorno" => "-1", "error" => $e);
+        } else {
+            return array("retorno" => "1", "registro" => $registro);
+        }
+    }
+    
+    public function capturar_datos_archivo($data, $id){
+        $this->db->where('id', $id);
+        $this->db->update('saaArchivo', $data);
+        $aff = $this->db->affected_rows();
+
+        if($aff < 1) {
+            return -1;
+        } else {
+            return 1;
+        }
     }
 }

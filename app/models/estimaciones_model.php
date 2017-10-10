@@ -49,6 +49,16 @@ class estimaciones_model extends CI_Model {
         
     }
     
+    public function get_no_documentos($relacion, $no_estimacion){
+        $sql= 'SELECT * FROM saaEstimaciones
+                WHERE idRel_Archivo_Documento = ?
+                AND Numero_Estimacion = ?
+                AND (copia = 1 OR original_recibido =1 OR no_aplica =1 )';
+        $query = $this->db->query($sql, array($relacion, $no_estimacion));
+        return $query->num_rows();
+    }
+
+
     public function estimaciones_existentes($idRel){
         $sql= 'SELECT DISTINCT Numero_Estimacion, idRel_Archivo_Documento FROM  `saaEstimaciones`
                 WHERE idRel_archivo_documento = ?

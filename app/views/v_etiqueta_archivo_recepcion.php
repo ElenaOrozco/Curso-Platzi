@@ -44,7 +44,7 @@ header("Expires: 0");*/
                 #div-tabla{
                     
                     height: 396px;
-                    width: 491px;
+                    width: 163px;
                     
                 }
                 .reducir{
@@ -77,8 +77,8 @@ header("Expires: 0");*/
                 
                 color: #FFF;
                 text-align: center;
-                font-size: 10pt;
-                line-height: 10pt;
+                font-size: 11pt;
+                line-height: 11pt;
                 font-weight: bold;
                 text-align: center;
                 width: 100%;
@@ -100,8 +100,8 @@ header("Expires: 0");*/
                 width: 100%;
                 
                 text-align: start;
-                font-size: 9pt;
-                line-height: 9pt;
+                font-size: 10pt;
+                line-height: 10pt;
             }
             
             #bloque_numero{
@@ -155,30 +155,25 @@ header("Expires: 0");*/
                                  
                                      <tr id="fila">
                                          <td id="idresult2">
-                                             Orden de Trabajo: 
+                                             Orden de Trabajo:  
                                          </td>
+                                         
+                                     </tr>
+                                     <tr id="fila">
+                                         
                                          <td id="idresult">
-                                              <?php echo $rOrden->OrdenTrabajo ?>
+                                             <?php echo $rOrden->OrdenTrabajo ?>
                                          </td>
                                      </tr>
-                                     <tr id="fila-obra">
-                                         <td id="idresult2">
-                                             <div class="fila-obra">
-                                                Nombre de la Obra:  
-                                             </div>
-                                            
-                                         </td>
-                                         <td id="idresult">
-                                             <div class="fila-obra">
-                                                 <?php echo substr($rOrden->Obra, 0, 150);  // bcd ?>
-                                             </div>
-                                               
-                                         </td>
-                                     </tr>
+                                     
                                      <tr id="fila">
                                          <td id="idresult2">
                                              Contrato: 
                                          </td>
+                                        
+                                     </tr>
+                                     <tr id="fila">
+                                         
                                          <td id="idresult">
                                               <?php echo $rOrden->Contrato ?>
                                          </td>
@@ -187,14 +182,24 @@ header("Expires: 0");*/
                                          <td id="idresult2">
                                              Modalidad: 
                                          </td>
+                                        
+                                     </tr>
+                                     
+                                     <tr id="fila">
+                                         
                                          <td id="idresult">
                                               <?php echo $rOrden->Modalidad ?>
                                          </td>
                                      </tr>
+                                     
                                      <tr id="fila">
                                          <td id="idresult2">
                                              Normatividad: 
                                          </td>
+                                         
+                                     </tr>
+                                     <tr id="fila">
+                                        
                                          <td id="idresult">
                                               <?php echo $rOrden->Normatividad ?>
                                          </td>
@@ -203,6 +208,10 @@ header("Expires: 0");*/
                                          <td id="idresult2"> 
                                              Supervisor: 
                                          </td>
+                                        
+                                     </tr>
+                                     <tr id="fila">
+                                        
                                          <td id="idresult">
                                               <?php echo $rOrden->Supervisor ?>
                                          </td>
@@ -211,6 +220,10 @@ header("Expires: 0");*/
                                          <td id="idresult2">
                                              Dirección Ejecutora: 
                                          </td>
+                                        
+                                     </tr>
+                                      <tr>
+                                        
                                          <td id="idresult">
                                               <?php echo $rOrden->Direccion ?>
                                          </td>
@@ -219,6 +232,10 @@ header("Expires: 0");*/
                                          <td id="idresult2">
                                              Fecha Inicio Contrato: 
                                          </td>
+                                       
+                                     </tr>
+                                      <tr id="fila">
+                                         
                                          <td id="idresult">
                                               <?php echo $rOrden->FechaInicio ?>
                                          </td>
@@ -227,6 +244,10 @@ header("Expires: 0");*/
                                          <td id="idresult2">
                                              Fecha Termino Contrato: 
                                          </td>
+                                         
+                                     </tr>
+                                     <tr id="fila">
+                                        
                                          <td id="idresult">
                                               <?php echo $rOrden->FechaTermino ?>
                                          </td>
@@ -235,6 +256,10 @@ header("Expires: 0");*/
                                          <td id="idresult2">
                                              Monto Contratado: 
                                          </td>
+                                         
+                                     </tr>
+                                     <tr id="fila">
+                                         
                                          <td id="idresult">
                                               <?php echo $rOrden->ImporteContratado ?>
                                          </td>
@@ -244,6 +269,10 @@ header("Expires: 0");*/
                                          <td id="idresult2">
                                              Monto Ejercido por SIOP: 
                                          </td>
+                                        
+                                     </tr>
+                                     <tr id="fila">
+                                        
                                          <td id="idresult">
                                               <?php echo $rOrden->ImporteEjercido ?>
                                          </td>
@@ -252,6 +281,10 @@ header("Expires: 0");*/
                                          <td id="idresult2">
                                              Finiquitada: 
                                          </td>
+                                        
+                                     </tr> 
+                                     <tr id="fila">
+                                         
                                          <td id="idresult">
                                               <?php if ($rOrden->Finiquitada) echo 'SI'; else echo 'NO'; ?>
                                          </td>
@@ -260,6 +293,10 @@ header("Expires: 0");*/
                                          <td id="idresult2">
                                              Ubicación de Revisión: 
                                          </td>
+                                        
+                                     </tr>
+                                     <tr id="fila">
+                                        
                                          <td id="idresult">
                                              <?php echo $addwUbicaciones[$idUbicacion] ?>
                                          </td>
@@ -268,6 +305,10 @@ header("Expires: 0");*/
                                          <td id="idresult2">
                                              Bloque: 
                                          </td>
+                                         
+                                     </tr>
+                                      <tr>
+                                        
                                          <td id="idresult">
                                              <table width="100%">
                                                  <tr>

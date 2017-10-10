@@ -41,8 +41,8 @@ class Impresiones_model extends CI_Model {
     }
     
     public function estimaciones_de_archivo($id){
-        $sql = 'SELECT * FROM `saaRel_Archivo_Documento`
-                WHERE idArchivo = ? AND idDocumento =114';
+        $sql = 'SELECT * FROM `saaRel_Archivo_Preregistro`
+                WHERE idArchivo = ? AND tipo_documento =4';
         $query = $this->db->query($sql, array($id));
         return $query;
     }
@@ -50,7 +50,16 @@ class Impresiones_model extends CI_Model {
     public function get_estimaciones_archivo($id, $usuario){
         $sql='SELECT * FROM `saaEstimaciones`
             WHERE idRel_Archivo_Documento = ? AND 
-            idUsuario_recibio=?
+            idUsuario=?
+            ORDER BY Numero_Estimacion, ordenar_subdocumento';
+        $query = $this->db->query($sql, array($id, $usuario));
+        return $query;
+    }
+    
+     public function get_estimaciones($id, $usuario){
+        $sql='SELECT * FROM `saaEstimaciones`
+            WHERE idRel_Archivo_Documento = ? AND 
+            idUsuario=?
             ORDER BY Numero_Estimacion, ordenar_subdocumento';
         $query = $this->db->query($sql, array($id, $usuario));
         return $query;
@@ -63,6 +72,18 @@ class Impresiones_model extends CI_Model {
             AND eliminacion_logica=0
             ORDER BY Numero_Estimacion, ordenar_subdocumento ';
         $query = $this->db->query($sql, array($id, $usuario));
+        return $query;
+    }
+    
+    public function estimaciones_direccion($id, $direccion){
+        $sql='SELECT `saaEstimaciones`.* , `saaRel_Archivo_Documento`.`idArchivo` 
+            FROM `saaEstimaciones` 
+            INNER JOIN `saaRel_Archivo_Documento` 
+            ON `saaRel_Archivo_Documento`.id= `saaEstimaciones`.`idRel_Archivo_Documento`
+            WHERE `saaRel_Archivo_Documento`.`idArchivo` = ?
+            AND `saaEstimaciones`.`idDireccion_responsable` =?
+            ORDER BY Numero_Estimacion,ordenar_subdocumento  ';
+        $query = $this->db->query($sql, array($id, $direccion));
         return $query;
     }
 
@@ -1016,7 +1037,7 @@ WHERE (`memMemorias`.`id` =?);';
     public function  datos_reporte_estatus_archivo ($id, $idDireccion_responsable){
        /*$query = $this->db->get_where("saaArchivo", array("id" => $id));
         return $query; */
-        $sql = 'SELECT 
+        /*$sql = "SELECT 
                 `saaRel_Archivo_Preregistro`.*,
                 `saaRel_Archivo_Documento`.`idTipoProceso`,
                 `saaDocumentos`.`Nombre`
@@ -1026,10 +1047,24 @@ WHERE (`memMemorias`.`id` =?);';
                 ON saaRel_Archivo_Documento.id = `saaRel_Archivo_Preregistro`.`id_Rel_Archivo_Documento`
                                 INNER JOIN saaDocumentos 
                                 ON saaRel_Archivo_Documento.idDocumento = saaDocumentos.id
-                                WHERE `saaRel_Archivo_Preregistro`.idArchivo= ? AND `saaRel_Archivo_Preregistro`.idDireccion_responsable =?
+                                WHERE ((`saaRel_Archivo_Preregistro`.idArchivo= $id AND `saaRel_Archivo_Preregistro`.idDireccion_responsable =$idDireccion_responsable )OR
+                                `saaRel_Archivo_Preregistro`.idArchivo= $id AND `saaRel_Archivo_Preregistro`.tipo_documento =4)
                                 AND `saaRel_Archivo_Preregistro`.preregistro_aceptado = 0 AND `saaRel_Archivo_Preregistro`.`eliminacion_logica`=0
-                                ORDER BY idTipoProceso, Nombre ASC
-                                            ';
+                                ORDER BY saaRel_Archivo_Documento.Ordenar ASC
+                                            ";*/
+        $sql = "SELECT 
+                `saaRel_Archivo_Preregistro`.*,
+                `saaRel_Archivo_Documento`.`idTipoProceso`,
+                `saaDocumentos`.`Nombre`
+
+                FROM saaRel_Archivo_Preregistro
+                INNER JOIN `saaRel_Archivo_Documento`
+                ON saaRel_Archivo_Documento.id = `saaRel_Archivo_Preregistro`.`id_Rel_Archivo_Documento`
+                INNER JOIN saaDocumentos 
+                ON saaRel_Archivo_Documento.idDocumento = saaDocumentos.id
+                WHERE ((`saaRel_Archivo_Preregistro`.idArchivo= ? AND `saaRel_Archivo_Preregistro`.idDireccion_responsable =? ) )
+                AND `saaRel_Archivo_Preregistro`.preregistro_aceptado = 0 AND `saaRel_Archivo_Preregistro`.`eliminacion_logica`=0
+                ORDER BY saaRel_Archivo_Documento.Ordenar ASC";
         $query = $this->db->query($sql, array($id, $idDireccion_responsable));
         return $query;
     }
@@ -1160,5 +1195,19 @@ WHERE (`memMemorias`.`id` =?);';
         }
         return $addw;
     }
+    
+    public function ot_preregistradas($id){
+        $this->db->select("idArchivo");
+        $this->db->distinct();
+        $this->db->where('idDireccion_responsable', $ot); 
+        $this->db->where('eliminacion_logica', 0);
+        return $this->db->get("saaRel_Archivo_Preregistro"); 
+        
+    }
+    
+    public function documentos_preregistro_ot() {
+        
+    }
+   
     
 }

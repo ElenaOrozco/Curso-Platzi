@@ -9,12 +9,10 @@ class Principal extends MY_Controller {
     protected $meta = array(
         array('name' => 'robots', 'content' => 'no-cache'),
         array('name' => 'description', 'Control de Obras'),
-        array('name' => 'AUTHOR', 'content' => 'Luis Fernando Chavez Villalobos'),
+        array('name' => 'AUTHOR', 'content' => 'Maria Elena Orozco Chavarria'),
         array('name' => 'AUTHOR', 'content' => 'Luis Montero Covarrubias'),
-        array('name' => 'AUTHOR', 'content' => 'Luis Alfredo Chávez Balvaneda'),
-        array('name' => 'AUTHOR', 'content' => 'Gabriel Hans Gonzalez Peña'),
-        array('name' => 'AUTHOR', 'content' => 'Virginia Leonila Ezquivel Garduño'),
-        array('name' => 'AUTHOR', 'content' => 'Pedro Joaquin Ponce Garcia'),
+       
+        
         array('name' => 'keywords', 'content' => 'tramites, transparencia, estimaciones, generadores, siop'),
         array('name' => 'Content-type', 'content' => 'text/html; charset=utf-8', 'type' => 'equiv'),
         array('name' => 'CACHE-CONTROL', 'content' => 'NO-CACHE', 'type' => 'equiv'),

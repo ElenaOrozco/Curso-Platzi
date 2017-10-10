@@ -22,6 +22,83 @@ class Autotasks extends CI_Controller {
         exit;
     }
     
+    public function actualizar_preregistros(){
+        $this->load->model('rel_archivo_preregistro_model');
+        
+        $preregistros_anteriores = $this->rel_archivo_preregistro_model->preregistros_anteriores();
+        foreach ($preregistros_anteriores->result() as $row){
+            $usuario = $this->rel_archivo_preregistro_model->preregistros_usuarios($row->id_Rel_Archivo_Documento);
+            if($usuario->num_rows() > 0){
+                foreach ($usuario->result() as $rRow ){
+                    
+                    $data = array (
+                        'idUsuario_preregistra' => $rRow->idUsuario,
+                    );
+                    echo "usuario " .  $rRow->idUsuario ;
+                    echo "idrel " . $row->id_Rel_Archivo_Documento;
+                    echo "id " . $row->id;
+                    var_dump($data);
+                $this->rel_archivo_preregistro_model->update_registro_autotask($data, $row->id);
+                }
+            }
+        }
+    }
+
+    public function ubicacion_fisica(){
+        $this->load->model('ubicacion_fisica_model');
+        array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+              'N', 'O', 'P');
+        
+        $Fila =4;
+        $Caja = 4;
+        
+        
+        $Apartado = 6;
+        $n =1;
+        foreach (range('A', 'P') as $Columna) {
+           
+           
+                    
+            for($i = 1; $i <= $Fila ; $i++){
+                
+               
+                for($j = 1; $j <= $Caja ; $j++){
+                    
+                    for($k = 1; $k <= $Apartado ; $k++){
+                        
+                        //agregar_ubicacion_fisica($data)
+                        $data=array(
+                            'id' => $n,
+                            'Columna' => $Columna,
+                            'Fila'    => $i,
+                            'Caja'    => $j,
+                            'Apartado'=> $k,
+                           
+                        );
+                        
+                         //echo " $Columna - $i - $j - $k<br>";
+
+                        $retorno = $this->ubicacion_fisica_model->datos_ubicacion_insert($data);
+                        $n++;
+                        //printf($retorno);
+
+                        if($retorno['retorno'] < 0)
+                            echo "Hubo error $Columna - $i - $j - $k<br>";
+                        else
+                            echo "OK  inserto $Columna - $i - $j - $k<br>";
+                        
+                         
+
+                    }
+                
+                }
+                
+            }
+            
+        }
+        
+    }
+    
    
     
     public function listado_obras(){

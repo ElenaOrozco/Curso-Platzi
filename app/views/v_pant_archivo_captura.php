@@ -27,7 +27,9 @@
         <link href="<?php echo site_url(); ?>css/dataTables.bootstrap.css" rel="stylesheet">
         <link href="<?php echo site_url(); ?>css/jquery.vegas.min.css" type="text/css" rel="stylesheet" />
         <link href="<?php echo site_url(); ?>css/font-awesome.min.css" type="text/css" rel="stylesheet" />
-        
+        <link href="<?php echo site_url(); ?>/js/select2/select2.css" rel="stylesheet">
+        <link href="<?php echo site_url(); ?>/js/select2/select2-bootstrap.css" rel="stylesheet">
+        <link href="<?php echo site_url(); ?>css/jquery-confirm.css" rel="stylesheet">
         <!-- Fav and touch icons -->
         <link rel="apple-touch-icon-precomposed" sizes="144x144" href="<?php echo site_url(); ?>img/apple-touch-icon-144-precomposed.png">
         <link rel="apple-touch-icon-precomposed" sizes="114x114" href="<?php echo site_url(); ?>img/apple-touch-icon-114-precomposed.png">
@@ -44,7 +46,9 @@
         <script type="text/javascript" src="<?php echo site_url(); ?>js/datatables.js"></script>
         <script type="text/javascript" src="<?php echo site_url(); ?>js/jquery.datatable.ajaxreload.js"></script>
         <script type="text/javascript" src="<?php echo site_url(); ?>js/jquery.datatable.extraorder.js"></script> 
-        <script type="text/javascript" src="<?php echo site_url(); ?>js/scripts.js"></script>        
+        <script type="text/javascript" src="<?php echo site_url(); ?>js/scripts.js"></script>      
+         <script type="text/javascript" src="<?php echo site_url(); ?>/js/select2/select2.min.js"></script> 
+         <script type="text/javascript" src="<?php echo site_url(); ?>js/jquery-confirm.js"></script>  
 
 
         <script>
@@ -52,6 +56,8 @@
             var ot_principal;
             $(document).ready(function() {
                 
+            
+               
                  ot_principal = $('#t_principal').dataTable({
                     'bProcessing': true,
                     //'sScrollY': '400px',                    
@@ -304,12 +310,14 @@
                                 $('#tabla-principal').html('Cargando...');
                              },
                             success: function(data) {
-                                 $('#tabla-principal').hide();
-                                 //$('#filtro-tabla').html(data["tabla"]);
-                                 $('#filtro-tabla').html(data["tabla"]);
-                                 $('#filtro-tabla').show();
+                                $('#orden_trabajo').html("");
+                                $('#orden_trabajo').append(data["tabla"]);
+                                $('#tabla-principal').hide();
+                                //$('#filtro-tabla').html(data["tabla"]);
+                                //$('#filtro-tabla').html(data["tabla"]);
+                                $('#filtro-tabla').show();
 
-                                 $('#t_listado').dataTable({
+                                $('#t_listado').dataTable({
                                     'bProcessing': true,
                                     //'sScrollY': '400px',                    
 
@@ -444,16 +452,25 @@
                 
             } 
             
-            function aceptar_preregistro(idArchivo, idDireccion_responsable){
+            function aceptar_preregistro(){
+            
+                var idArchivo = $("#orden_trabajo").val() ; 
+                var direccion = $("#slc_Direccion").val();
+                
+                //alert($("#slc_Direccion").val())
+           
                 $.ajax({
                         type:"POST",
-                        url: "<?php echo site_url('archivo/aceptar_preregistro') ?>/" + idArchivo + "/" + idDireccion_responsable,
+                        url: "<?php echo site_url('archivo/aceptar_preregistro') ?>/" + idArchivo + "/" + direccion,
 
                         success: function(data) {
-                             $("#recibir_preregistro_"+idArchivo).css("display", "none")
-                             //$("#preregistro_aceptado"+idArchivo).css("display", "block")
-                             $("#preregistro_ubi"+idArchivo).css("display", "block")
-                             
+                            
+                            if (data > 0){
+                                $("#aceptar").attr("disabled", "disabled")
+                                $("#doc-recibidos").html(data + " Documentos Recibidos");
+                                $("#doc-recibidos").show("sleep")
+                            }
+                            
                              
                         }
                     });
@@ -702,11 +719,168 @@
             
             }
             
+            function dibujar_tabla_ubicaciones(){
+                var idArchivo = $("#orden_trabajo").val();
+        
+                $.ajax({
+
+                        type: "POST",
+                        url: "<?php echo site_url('archivo/ver_ubicaciones_archivo'); ?>/" +idArchivo,
+                        success: function (data) {
+
+                             //alert("dib" +data["tabla"])
+                             $("#tabla_ubi_actualizada").html("");
+                             $("#tabla_ubi_actualizada").html(data["tabla"]); 
+                             $("#tabla_ubi_actualizada").show();
+
+                        }
+                    }) ;
+
+            }
+            
+            function uf_ver_ubicacion_fisica_libre() {
+                        
+                     var idArchivo = $("#orden_trabajo").val();   
+                        
+                        $.ajax({
+                           type:"POST",
+                           url:"<?php echo site_url('archivo/ver_ubicaciones_libres_captura'); ?>/" +idArchivo, 
+                           success: function(data) {
+                              
+                                $('#idUbicacionFisica_libre').html(data["ubicacion_fisica_libre"]); 
+                           }
+                         });
+                       
+            }
+            
+            
+            function imprimir_procesos() {
+                        
+                     var idArchivo = $("#orden_trabajo").val();   
+                        
+                        $.ajax({
+                           type:"POST",
+                           url:"<?php echo site_url('archivo/imprimir_procesos'); ?>/" +idArchivo, 
+                           success: function(data) {
+                              
+                                $('#proceso_ubi').html(data["resultado"]); 
+                               
+                           }
+                         });
+                       
+            }
+            
+             function uf_agregar_ubicacion_fisica(id,ubicacion_fisica)
+            {
+                $("#idUbicacionFisica").val(id);
+                $("#nomubicacionfisica").html(ubicacion_fisica);
+                $("#modal-cambiar-ubicacionfisica").modal('hide');
+                
+            }
+            
+            
+            function agregar_ubicacion_fisica(idArchivo){
+            
+            
+                var ubicacion = $("#nomubicacionfisica").html()
+                //alert(ubicacion)
+                var proceso = $("#procceso").val()
+                //alert("Proceso " +proceso)
+                $("#modal-agregar-ubicacion-fisica").modal('hide');
+                    $.ajax({
+                        beforeSend: function(){
+                            $("#tabla_ubi_actualizada_"+proceso).html("Cargando...")
+
+                        },
+                        data: {
+                            "idUbicacionFisica" :$("#idUbicacionFisica").val(), 
+                            "idArchivo" :  $("#orden_trabajo").val()  ,     
+                            "idTipoProceso" : $("#proceso_ubi").val(),
+
+                        },
+                        type: "POST",
+                        url: "<?php echo site_url('archivo/agregar_ubicacion_fisica/'); ?>",
+                         success: function (data, textStatus, jqXHR) {
+                            dibujar_tabla_ubicaciones()
+                            $("#idUbicacionFisica").val("") 
+                            //$("#idTipoProceso_ubicacion").val("")
+
+                         },
+                         error: function(jqXHR, estado, error){
+                            console.log(estado)
+                            console.log(error)
+                         }
+                    }) ;
+                
+                
+        }
+        
+        
+        function limpiar(){
+            $("#orden_trabajo").html("")  
+            $("#idUbicacionFisica").val("")
+            $("#nomubicacionfisica").val("")
+            $("#proceso_ubi").html("")
+            $("#slc_Direccion").val("")
+            $("#tabla_ubi_actualizada").html("")
+            $("#aceptar").removeAttr("disabled", "disabled")
+            $("#aceptar").prop('checked', false);
+            $("#doc-recibidos").css("display", "none");
+            
+        }
+        function eliminar_ubicacion(id, idUbi){
+            //alert("OK" +idRel);
+            //var idRel = idRel
+            
+            var idArchivo = $("#orden_trabajo").val()
+            
+            
+                $.confirm({
+                title: 'Eliminar Ubicación',
+                content: '¿Deseas Eliminar Ubicación?',
+                buttons: {
+                    Si: function () {
+                        $.ajax({
+                            
+                            type: "POST",
+                            url: "<?php echo site_url('archivo/eliminar_ubicacion');?>/"+id  + "/" +idUbi+ "/" +idArchivo,
+                             success: function (data, textStatus, jqXHR) {
+                                    //alert("Eliminado")
+                                     dibujar_tabla_ubicaciones()
+                                 
+                             },
+                             error: function(jqXHR, estado, error){
+                                console.log(estado)
+                                console.log(error)
+                             }
+                        }) ;
+                    },
+                    No: function () {
+                        //$.alert('Canceled!');
+                    }
+                    
+                }});
+            
+        }
+        
+        
+            
+            
+            
+           
           
            
 
         </script>
         <style>
+            
+            .check-lg{
+                width: 34px;
+                height: 34px;
+            }
+            .width-modal{
+                width: 1000px !important;
+            }
             body {
                 padding-top: 50px; 
                 padding-right: 10px;
@@ -729,6 +903,9 @@
             .m-b{
                 margin-bottom: 10px;
             }
+            .m-b-separacion{
+                margin-top: 40px;
+            }
             .m-t{
                 margin-top: 10px;
             }
@@ -738,7 +915,17 @@
             .d-n{
                 display: none;
             }
-            
+            .sombra{
+                -webkit-box-shadow: 0 8px 6px -6px black;
+                -moz-box-shadow: 0 8px 6px -6px black;
+                box-shadow: 0 8px 6px -6px black;
+            }
+            .form-color{
+                background: rgba(14, 95, 51, 0.16);
+            }
+            .a-e{
+                text-align: end;
+            }
         </style>
     </head>
     <body>
@@ -1440,43 +1627,75 @@
                         <div role="tabpanel" class="tab-pane"id="recepcion">
                             <div class="col-md-12 m-b m-t">
                     
-                                <h4>Archivos con bloques por Recibir</h4>
-                                <!--
-                                <div class="col-md-8"></div>
-                                <div class="col-xs-12 col-md-4">
-                                    <div class="form-group">
-                                          <label class="col-sm-4 control-label" for="filtroGrupo">Filtrar por Grupos: </label>
-                                          <div class="col-sm-8">
-                                              <select class="form-control" id="slc_Grupos" name="slc_Grupos" onchange="filtrar_archivos(2)">
-                                                    <option value="0">SELECCIONA</option>
-                                                    <?php //foreach ($qGrupos->result() as $rowdata) {  ?>
-                                                    <option value="<?php echo $rowdata->id; ?>"><?php echo $rowdata->Nombre; ?></option>
-                                                    <?php //} ?>
-                                              </select>
-                                          </div>
-
-                                    </div>
-
-                                </div>
-                                -->
+                               
                                 
                                 <?php if ($recibe == 1) { ?>
-                                <div class="col-xs-12 col-sm-8 m-b m-t-separacion">
-                                    <div class="form-group">
-                                          <label class="col-sm-4 control-label" for="filtroGrupo">Selecciona la Dirección: </label>
-                                          <div class="col-sm-8">
-                                              <select class="form-control" id="slc_Direccion" name="slc_Direccion" onchange="filtrar_archivos_direccion()">
-                                                    <option value="0">SELECCIONA</option>
-                                                    <?php foreach ($qDirecciones->result() as $rowdata) {  ?>
-                                                    <option value="<?php echo $rowdata->id; ?>"><?php echo $rowdata->Nombre; ?></option>
-                                                    <?php } ?>
-                                              </select>
-                                          </div>
+                                <div class="col-xs-12 col-sm-8 col-sm-offset-2 m-b m-t-separacion">
+                                    
+                                    <div class="row">
+                                        <div class="panel panel-primary">
+                                            <div class="panel-heading">
+                                                <h3 class="panel-title">Recibir Preregistro</h3>
+                                                
+                                            </div>
+                                            <div class="panel-body">
+                                                <form class="form-horizontal m-b-separacion" role="form">
+                                                      <div class="form-group">
+                                                        <label for="slc_Direccion" class="col-sm-2 control-label">Selecciona la Dirección: </label>
+                                                        <div class="col-sm-10">
+                                                          <select class="form-control" id="slc_Direccion" name="slc_Direccion" onchange="filtrar_archivos_direccion()">
+                                                            <option value="0">SELECCIONA</option>
+                                                            <?php foreach ($qDirecciones->result() as $rowdata) {  ?>
+                                                            <option value="<?php echo $rowdata->id; ?>"><?php echo $rowdata->Nombre; ?></option>
+                                                            <?php } ?>
+                                                          </select>
+                                                        </div>
+                                                      </div>
+                                                    <div class="form-group">
+                                                            <label for="ot" class="col-sm-2 control-label">Orden Trabajo: </label>
+                                                            <div class="col-sm-10">
+                                                              <select class="form-control" id="orden_trabajo" name="orden_trabajo" onchange="dibujar_tabla_ubicaciones()">
+                                                                
+                                                              </select>
+                                                            </div>
+                                                    </div>
+                                                
+                                                    <div class="form-group m-b">
+                                                        <label for="slc_Direccion" class="col-sm-2 control-label">Aceptar Preregistro: </label>
+                                                        <div class=" col-sm-10">
+                                                          <div class="checkbox">
+                                                            
+                                                              <input class="check-lg" id="aceptar" name="aceptar" type="checkbox" onclick="aceptar_preregistro()"> 
+                                                            
+                                                          </div>
+                                                        </div>
+                                                     </div>
+                                                <div class="col-md-10 col-md-offset-2 d-n m-b" id="doc-recibidos"></div>
+                                                      
+                                                    <div class="col-sm-10 col-sm-offset-2 m-b" id="tabla_ubi_actualizada" class="col-sm-12 d-n"></div>
+                                                        
+                                                      
 
+                                                      
+                                                      <div class="form-group">
+                                                        <div class="col-sm-offset-10 col-sm-2 a-e">
+                                                            <button type="button" class="btn btn-success" onclick="limpiar()">Limpiar</button>
+                                                        </div>
+                                                      </div>
+                                                  </form>
+                                            </div>
+                                        </div>
+                                        
+                                      
                                     </div>
+                                                  
+                                                  
+                                                    
+                                             
 
                                 </div>
                                 <?php } ?>
+                                
                                 <div class="col-xs-12 col-sm-4"></div>
                                 
                                 <div class="row clearfix">
@@ -1946,6 +2165,98 @@
                 </div>
             </div>
         </div> 
+        
+            <!-- Dialogo Agregar Ubicacion -->
+        <div class="modal fade" id="modal-agregar-ubicacion-fisica" role="dialog" aria-labelledby="modal-agregar-ubicacion-fisica_myModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                                ×
+                            </button>
+                            <h4 class="modal-titlsamplee" id="modal-nuevo_subdocumentomyModalLabel">Agregar Ubicación Física</h4>
+                        </div>
+                        <form  class="form-horizontal">
+                            <div class="modal-body">
+
+
+
+                                
+                                <div class="form-group">
+                                        <label for="idUbicacionFisica" class="col-sm-3 control-label">Ubicación Física</label>	
+                                         <div class="col-sm-7"> 
+                                             <div class="form-control" id="nomubicacionfisica"></div>
+                                             <input type="hidden" name="idUbicacionFisica" id="idUbicacionFisica" required value="0">
+                                             </div>
+                                         <div class="col-sm-2">    
+                                             <button class="btn btn-default" type="button" data-toggle="modal" data-target="#modal-cambiar-ubicacionfisica" onclick="uf_ver_ubicacion_fisica_libre()"  ><em class="glyphicon glyphicon-plus-sign" ></em> Seleccionar</button>
+                                        </div>
+                                </div>  
+                                
+                                
+                                <div class="form-group">
+                                    <label for="proceso_ub" class="control-label col-sm-3">Proceso:</label>
+                                    <div class="col-sm-7">
+                                        <select class="form-control"  id="proceso_ubi" name="proceso_ubi"></select>        
+                                    </div>
+                                </div>
+                                
+                                
+                                
+                                
+                                
+                 
+
+
+                            </div>
+                            <div class="modal-footer">
+                                <input type="hidden" name="idTipoProceso_ubicacion" id="idTipoProceso_ubicacion" required value="" class="form-control" >
+                                <a class="btn btn-success" onclick="agregar_ubicacion_fisica()">Guardar</a>                  
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                                    
+                                    Cancelar
+                                </button>
+                                
+                            </div>
+                        </form>                    
+                    </div>
+                </div>
+            </div>       <!-- gregar ubicación fisica --> 
+            
+             <!--Cambiar Ubicacion Fisica Tabla -->    
+        <div class="modal fade" id="modal-cambiar-ubicacionfisica" role="dialog" aria-labelledby="myModalLabel-modal-cambiar-ubicacionfisica" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <!--Forma-->
+
+                <div class="modal-content width-modal">
+                    <div class="modal-header panel-title width-modal">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                        <h4 class="modal-title" id="cambiar-concepto">Ubicación Física</h4>
+                    </div>
+                    <div class="modal-body">
+                        <fieldset>
+                            <div class="form-group">
+                                <label>Ubicaciones Física</label><br>
+                                <div class="col-sm-12">
+                                    <div class="input-group" id="subConcepto">
+                                        
+                                        <div id="idUbicacionFisica_libre"></div>
+                                        
+                                       
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset> 
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+                <!--fin forma-->
+            </div>
+        </div>
+        <!---Fin dialog----> 
+        
+        
         
     </div>
    

@@ -12,626 +12,1072 @@ class Impresion extends MY_Controller {
         @set_time_limit(0);
         @ini_set('memory_limit', '-1');
     }
-
-    
-    public function listado_archivos(){
         
-        $this->load->model('impresiones_model');
-        
-        $qDetalle = $this->impresiones_model->get_listado_archivos();
-        $data['datos'] = $qDetalle->result_array();
-        
-        $this->load->view('v_listado_archivos', $data); // este manda a pantalla HTML normal
-    }
-
-    public function detalle_memoria($idMemoria, $pdf = 1) {
-        $this->load->model('memorias_model');
-        $this->load->model('impresiones_model');
-
-        $qDetalle = $this->memorias_model->get_datalles_memoria($idMemoria);
-        $data['datos'] = $qDetalle->result_array();
-
-        $qMemoria = $this->memorias_model->datos_memoria($idMemoria);
-        $data['memoria'] = $qMemoria->row_array();
-
-        $qObra = $this->memorias_model->datos_obra($data['memoria']['idObra']);
-        $data['obra'] = $qObra->row_array();
-
-        $qPartida = $this->memorias_model->datos_partida($data['obra']['idPartidaPresupuestal']);
-        $data['partida'] = $qPartida->row_array();
-
-        $qDireccion = $this->memorias_model->datos_partida($data['obra']['idDireccion']);
-        $data['direccion'] = $qDireccion->row_array();
-
-
-        $qFirmas = $this->impresiones_model->get_firmas_memoria($data['memoria']['idAutorizo']);
-        $data['autorizo'] = $qFirmas[$data['memoria']['idAutorizo']];
-
-        $qFirmas = $this->impresiones_model->get_firmas_memoria($data['memoria']['idVoBo']);
-        $data['vo_bo'] = $qFirmas[$data['memoria']['idElaboro']];
-
-        $qFirmas = $this->impresiones_model->get_firmas_memoria($data['memoria']['idElaboro']);
-        $data['elaboro'] = $qFirmas[$data['memoria']['idAutorizo']];
-
-
-        $subtipopago = $this->impresiones_model->get_SubTiposPago($data['memoria']['id_subtipopago'])->row_array();
-        $idTipoPago = $subtipopago['idTipoPago'];
-
-
-        if ($pdf == 1) {
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter-L');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->shrink_tables_to_fit = 1;
-            $mpdf->forcePortraitHeaders = true;
-
-            switch ($idTipoPago) {
-                case 1:
-                    $outputhtml = $this->load->view('v_memoria_detalle_materiales', $data, true);
-                    break;
-                case 2:
-                    $outputhtml = $this->load->view('v_memoria_detalle_materiales', $data, true);
-                    break;
-                case 3:
-                    $outputhtml = $this->load->view('v_memoria_detalle_nomina', $data, true);
-                    break;
-                case 4:
-                    $outputhtml = $this->load->view('v_memoria_detalle_nomina', $data, true);
-                    break;
-                case 5:
-                    $outputhtml = $this->load->view('v_memoria_detalle_nomina', $data, true);
-                    break;
-                case 6:
-                    $outputhtml = $this->load->view('v_memoria_detalle_materiales', $data, true);
-                    break;
-                case 7:
-                    $outputhtml = $this->load->view('v_memoria_detalle_materiales', $data, true);
-                    break;
-                case 15:
-                    $outputhtml = $this->load->view('v_memoria_detalle_nomina', $data, true);
-                    break;
-                default:
-                    $outputhtml = $this->load->view('v_memoria_detalle_materiales', $data, true);
-                    break;
-            }
-
-            /*
-              if ($idTipoPago==0){
-              $outputhtml = $this->load->view('v_memoria_detalle_nomina', $data, true);
-              } */
-            $mpdf->WriteHTML($outputhtml);
-            $mpdf->Output();
-        } else {
-            $this->load->view('v_memoria_detalle_nomina', $data); // este manda a pantalla HTML normal
-        }
-    }
-
-    public function Imprime_memoria($idMemoria, $pdf = 1) {
-        $this->load->model('memorias_model');
-        $this->load->model('impresiones_model');
-        $this->load->library('ferfunc');
-        $dMemoria = $this->impresiones_model->datos_memoria($idMemoria);
-
-
-        $data = $dMemoria;
-        
-
-
-        $idTipoPago = $data['idTipoPago'];
-
-        
-
-        if ($pdf == 1) {
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter-L');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->shrink_tables_to_fit = 1;
-            $mpdf->forcePortraitHeaders = true;
-
-            /*
-            if ($data['memoria']['Estatus'] < 40) {
-                $mpdf->SetWatermarkText('SIN VALIDEZ OFICIAL');
-                $mpdf->showWatermarkText = true;
-            }*/
-
-            switch ($idTipoPago) {
-                case 1:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales', $data, true);
-                    break;
-                case 2:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales', $data, true);
-                    break;
-                case 3:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_nomina', $data, true);
-                    break;
-                case 4:
-                   /*
-                    if ($dMemoria['memoria']['amortizado'] > 0)
-                        $outputhtml = $this->load->view('v_memoria_estado_contable_imss_fondo', $data, true);
-                    else
-                        $outputhtml = $this->load->view('v_memoria_estado_contable_imss', $data, true);
-                    break;
-                    * 
-                    */
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_imss', $data, true);
-                     break;
-                case 5:
-                   
-                    
-                   
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_servicios_personales', $data, true);
-                    
-                    //$outputhtml = $this->load->view('v_memoria_estado_contable_nomina', $data, true);
-                    
-                    break;
-                case 6:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales', $data, true);
-                    break;
-                case 7:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales', $data, true);
-                    break;
-                case 15:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_nomina', $data, true);
-                    break;
-                case 18:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_servicios_personales', $data, true);
-                    break;
-                default:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales', $data, true);
-                    break;
-            }
-
-            
-            /*
-              if ($idTipoPago==0){
-              $outputhtml = $this->load->view('v_memoria_detalle_nomina', $data, true);
-              } */
-            $mpdf->WriteHTML($outputhtml);
-            $mpdf->Output();
-        } else {
-                        switch ($idTipoPago) {
-                case 1:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales', $data, true);
-                    break;
-                case 2:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales', $data, true);
-                    break;
-                case 3:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_nomina', $data, true);
-                    break;
-                case 4:
-                    /*
-                    if ($dMemoria['memoria']['amortizado'] > 0)
-                        $outputhtml = $this->load->view('v_memoria_estado_contable_imss_fondo', $data, true);
-                    else
-                        $outputhtml = $this->load->view('v_memoria_estado_contable_imss', $data, true);
-                     * 
-                     */
-                    
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_imss', $data, true);
-                    break;
-                case 5:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_nomina', $data, true);
-                    break;
-                case 6:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales', $data, true);
-                    break;
-                case 7:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales', $data, true);
-                    break;
-                case 15:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_nomina', $data, true);
-                    break;
-                case 18:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_servicios_personales', $data, true);
-                    break;
-                default:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales', $data, true);
-                    break;
-            }
-
-        }
-    }
-
-    
-     public function Imprime_memoria_parcial($idMemoria, $pdf = 1) {
-        $this->load->model('memorias_model');
-        $this->load->model('impresiones_model');
-        $this->load->library('ferfunc');
-        $dMemoria = $this->impresiones_model->datos_memoria($idMemoria);
-
-
-        $data = $dMemoria;
-        
-
-
-        $idTipoPago = $data['idTipoPago'];
-
-       
-       
-        
-        
-
-        if ($pdf == 1) {
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter-L');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->shrink_tables_to_fit = 1;
-            $mpdf->forcePortraitHeaders = true;
-
-            /*
-            if ($data['memoria']['Estatus'] < 40) {
-                $mpdf->SetWatermarkText('SIN VALIDEZ OFICIAL');
-                $mpdf->showWatermarkText = true;
-            }*/
-
-            
-           
-            
-            switch ($idTipoPago) {
-                case 1:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales_parcial', $data, true);
-                    break;
-                case 2:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales_parcial', $data, true);
-                    break;
-                case 3:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_nomina_parcial', $data, true);
-                    break;
-                case 4:
-                   /*
-                    if ($dMemoria['memoria']['amortizado'] > 0)
-                        $outputhtml = $this->load->view('v_memoria_estado_contable_imss_fondo', $data, true);
-                    else
-                        $outputhtml = $this->load->view('v_memoria_estado_contable_imss', $data, true);
-                    break;
-                    * 
-                    */
-                   
-                    
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_imss_parcial', $data, true);
-                     break;
-                case 5:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_nomina_parcial', $data, true);
-                    break;
-                case 6:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales_parcial', $data, true);
-                    break;
-                case 7:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales_parcial', $data, true);
-                    break;
-                case 15:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_nomina_parcial', $data, true);
-                    break;
-                default:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales_parcial', $data, true);
-                    break;
-            }
-
-            
-            /*
-              if ($idTipoPago==0){
-              $outputhtml = $this->load->view('v_memoria_detalle_nomina', $data, true);
-              } */
-           
-            $mpdf->WriteHTML($outputhtml);
-            $mpdf->Output();
-        } else {
-                        switch ($idTipoPago) {
-                case 1:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales', $data, true);
-                    break;
-                case 2:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales', $data, true);
-                    break;
-                case 3:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_nomina', $data, true);
-                    break;
-                case 4:
-                    /*
-                    if ($dMemoria['memoria']['amortizado'] > 0)
-                        $outputhtml = $this->load->view('v_memoria_estado_contable_imss_fondo', $data, true);
-                    else
-                        $outputhtml = $this->load->view('v_memoria_estado_contable_imss', $data, true);
-                     * 
-                     */
-                    
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_imss_parcial', $data, true);
-                    break;
-                case 5:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_nomina', $data, true);
-                    break;
-                case 6:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales', $data, true);
-                    break;
-                case 7:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales', $data, true);
-                    break;
-                case 15:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_nomina', $data, true);
-                    break;
-                default:
-                    $outputhtml = $this->load->view('v_memoria_estado_contable_materiales', $data, true);
-                    break;
-            }
-
-        }
-        
-    }
-
-    
-    
-    public function detalle_memoria_materiales($idmemoria, $pdf = 1){
-        $this->load->model('memorias_model');
-        $this->load->model('facturas_model');
-        $this->load->model('conceptos_model');
-        $this->load->model('impresiones_model');
-        $this->load->model('obras_model');
-
-
-        $this->load->library('ferfunc');
-
-        $dMemoria = $this->memorias_model->datos_memoria($idmemoria)->row_array();
-        $dObra = $this->obras_model->datos_obra($dMemoria['idObra'])->row_array();
-
-        $qConceptos = $this->impresiones_model->facturas_memorias($idmemoria);
-        $this->db->where('id',$dObra['idResidencia']);
-        $dResidencia=  $this->db->get_where('memResidencias');
-
-        $residencia="";
-        if ($dResidencia->num_rows()>0){
-        	$aResidencia=$dResidencia->row_array();
-        	$residencia=$aResidencia["Nombre"];
-        }
-
-        echo $residencia;
-       
-        
-        $this->db->where('idObra', $dObra['id']);
-        $qPartida = $this->db->get_where('catObrasRelPartidasPresupuestales');
-        
-        $this->db->where('id', $dMemoria['idClavePresupuestal']);
-        $qClave = $this->db->get_where('catClavesPresupuestales');
-        
-        $claves_presupuestales="";
-        
-        $aClave=$qClave->row_array();
-         $claves_presupuestales=$aClave['ClavePresupuestal'];
-           
-        
+    public function etiqueta_transferencia($pdf= 0){
         /*
-        $claves_presupuestales="";
-        foreach ($qPartida->result() as $rPartida) {
-            $sql ='select catClavesPresupuestales.* from catObrasRelClavesPresupuestales inner join catClavesPresupuestales on 
-            catObrasRelClavesPresupuestales.idClavePresupuestal = catClavesPresupuestales.id
-            where idRelPartidaPresupuestal=? order by id asc '; 
-            $qClave = $this->db->query($sql, array($rPartida->id));
-            foreach ($qClave->result() as $rClave) {
-               $claves_presupuestales.=$rClave->ClavePresupuestal.'<br/>';
-            }
-
-        }
-        */
-       
-        $partidas_presupuestales="";
-        foreach ($qPartida->result() as $rPartida) {
-            $sql ='select Nombre from catPartidasPresupuestales
-            where id=?'; 
-            $qClave = $this->db->query($sql, array($rPartida->idPartidaPresupuestal));
-            foreach ($qClave->result() as $rClave) {
-               $partidas_presupuestales.=$rClave->Nombre.'<br/>';
-            }
-
-        }
-        
-        
-        
-        $direccion = $this->impresiones_model->direccion($dObra['idDireccion']);
-
-
-        $data = array(
-            'obra' => $dObra,
-            'memoria' => $dMemoria,
-            'claves_presupuestales' => $claves_presupuestales,
-            'logo' => '<img  src="' . site_url('images/logo-secretaria-mini.fw.png') . '" id="logo">',
-            'qConceptos' => $qConceptos,
-            'direccion' => $direccion,
-            'residencia' => $residencia,
-            'partidas_presupuestales' => $partidas_presupuestales,
-            'autorizo' => $this->impresiones_model->firma_funcionario($dMemoria['idAutorizo']),
-            'vo_bo' => $this->impresiones_model->firma_funcionario($dMemoria['idVoBo']),
-            'elaboro' => $this->impresiones_model->firma_funcionario($dMemoria['idElaboro']),
-            'reviso' => $this->impresiones_model->firma_funcionario($dMemoria['idReviso'])    
-        );
-
         if ($pdf == 1) {
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter-L');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->shrink_tables_to_fit = 1;
-            $mpdf->forcePortraitHeaders = true;
-
-            /*
-            if ($dMemoria['Estatus'] < 40) {
-                $mpdf->SetWatermarkText('SIN VALIDEZ OFICIAL');
-                $mpdf->showWatermarkText = true;
-            }
-            */
-            $cadena_footer = $this->load->view('v_reporte_memoria_materiales_pie', $data, true);
-            $mpdf->SetHTMLFooter($cadena_footer);
+            $this->load->library('mpdf'); 
+            $mpdf = new mPDF('','', 0, '', 15, 15, 16, 16, 9, 9, 'L');
             
-            $output = $this->load->view('v_reporte_detalle_memoria_materiales', $data, true);
+         
+            $output = $this->load->view('v_etiqueta_transferencia');
             $mpdf->WriteHTML($output);
             $mpdf->Output();
         } else {
-            $this->load->view('v_reporte_detalle_memoria_materiales', $data);
-        }
-    }
+            //$this->load->view('v_reporte_orden_trabajo', $data);
+           $this->load->view('v_etiqueta_transferencia');
+        }*/
+        /*$html = '
+        <html>
+            <head>
+                <style>
+                    body{
+                        font-size: 7pt;
+                        font-family: "Arial";
+                    }
+                    .normal {
+                       text-transform: uppercase;
+                    }
+                    .normal th, .normal td {
+                      border: 1px solid #000;
+                    }
+                    .titulo{
+                        background: #691726;
+                        color: #FFF;
+                        padding:2px;
+                        text-transform: uppercase;
+                    }
+                </style>
+            </head>
+            <body>
+        <table width="756" heigth="453">
+            <thead>
+            
+                <tr>
+                    <th colspan="3" rowspan="3"><img src="' . site_url('assets/logo_chico.png') .'"  width="100" style="margin-bottom:10px"/></th> 
+                    <th colspan="6" align="center"></th>
 
+                </tr>
+                <tr>
 
-    
-    public function solicitud_aprovisionamiento($idaprovisionamiento, $pdf = 1) {
-        $this->load->model('aprovisionamientos_model');
-        $this->load->model('impresiones_model');
-        $this->load->model('obras_model');
-        $this->load->model('residencias_model');
-        
-        
-        
-        $this->load->library('ferfunc');
+                    <th colspan="6"  align="center"><span style="vertical-align: bottom; font-size: 10pt; font-weigth:bold;">SECRETARÍA DE INFRAESTRUCTURA Y OBRA PÚBLICA<span></th>
 
-        $dAprovisionamiento = $this->aprovisionamientos_model->datos_aprovisionamiento($idaprovisionamiento)->row_array();
-        $dObra = $this->obras_model->datos_obra($dAprovisionamiento['idObra'])->row_array();
-        $qConceptos = $this->impresiones_model->conceptos_aprovisionamiento($idaprovisionamiento);
-        $direccion = $this->impresiones_model->direccion($dObra['idDireccion']);
+                </tr>
+                <tr>
 
+                    <th colspan="6"  align="center"></th>
 
-        $data = array(
-            'obra' => $dObra,
-            'aprovisionamiento' => $dAprovisionamiento,
-            'logo' => '<img  src="' . site_url('images/logo-secretaria-mini.fw.png') . '" id="logo">',
-            'qconceptos' => $qConceptos,
-            'direccion' => $direccion,
-            'autorizo' => $this->impresiones_model->firma_funcionario($dAprovisionamiento['idAutorizo']),
-            'vo_bo' => $this->impresiones_model->firma_funcionario($dAprovisionamiento['idVoBo']),
-            'elaboro' => $this->impresiones_model->firma_funcionario($dAprovisionamiento['idElaboro']),
-            'recibe' => $this->impresiones_model->firma_funcionario($dAprovisionamiento['idRecibio'])
-        );
+                </tr>
+                <tr>
 
-        
-        
-        $data['ClavePresupuestal']= $this->aprovisionamientos_model->get_clave_presupuestal($dAprovisionamiento['idClavePresupuestal']);
-       
+                    <th colspan="9"  align="center"></th>
+
+                </tr>
+                <tr class="normal">
                 
-        
-        /*
-         $this->load->library('mpdf');
-            //$mpdf = new mPDF('utf-8', 'Letter');
-            $mpdf = new mPDF('utf-8', 'Letter',12,'',5,5,5,30,0,10,'');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->allow_charset_conversion = false;
-            $mpdf->pagenumPrefix = 'Página ';
-            $mpdf->pagenumSuffix = ' de ';
+                    <th colspan="2" align="end" class="titulo">Dirección General:</th>
+                    <th colspan="3" align="start">Dirección General Administrativa</th>
+                    <th colspan="2" align="end" class="titulo">Caja: </th>
+                    <th colspan="2" align="start">1/2</th>
 
+                </tr>
+                <tr class="normal">
+
+                    <th colspan="2" align="end" class="titulo">Dirección Área:</th>
+                    <th colspan="3" align="start">Dirección Recursos Humanos</th>
+                    <th colspan="2" align="end" class="titulo">Año: </th>
+                    <th colspan="2" align="start">2014</th>
+
+                </tr>
+                
+                <tr>
+
+                    <th colspan="9"  align="center" class="titulo">Expedientes</th>
+
+                </tr>
+                <tr>
+                    <th colspan="1"  align="center" class="titulo">Carpeta</th>
+                    <th colspan="4"  align="center" class="titulo">Descripción</th>
+                    <th colspan="2"  align="center" class="titulo">Clasificador</th>
+                    <th colspan="2"  align="center" class="titulo">OT</th>
+                </tr>
+                
+            </thead>
+            <tbody class="normal">
+                <tr> 
+                    <td colspan="1"  align="center">1</td>
+                    <td colspan="4"  align="center">Bloque uno proyecto Mascota</td>
+                    <td colspan="2"  align="center">1S.3</td>
+                    <td colspan="2"  align="center">Lp0001-15</td>
+                </tr>
+                <tr> 
+                    <td colspan="1"  align="center">2</td>
+                    <td colspan="4"  align="center">Bloque uno proyecto Mascota</td>
+                    <td colspan="2"  align="center">1S.3</td>
+                    <td colspan="2"  align="center">Lp0001-15</td>
+                </tr>
+                <tr> 
+                    <td colspan="1"  align="center">3</td>
+                    <td colspan="4"  align="center">Bloque uno proyecto Mascota</td>
+                    <td colspan="2"  align="center">1S.3</td>
+                    <td colspan="2"  align="center">Lp0001-15</td>
+                </tr>
+                <tr> 
+                    <td colspan="1"  align="center">4</td>
+                    <td colspan="4"  align="center">Bloque uno proyecto Mascota</td>
+                    <td colspan="2"  align="center">1S.3</td>
+                    <td colspan="2"  align="center">Lp0001-15</td>
+                </tr>
+                <tr> 
+                    <td colspan="1"  align="center">5</td>
+                    <td colspan="4"  align="center">Bloque uno proyecto Mascota</td>
+                    <td colspan="2"  align="center">1S.3</td>
+                    <td colspan="2"  align="center">Lp0001-15</td>
+                </tr>
+                <tr> 
+                    <td colspan="1"  align="center">6</td>
+                    <td colspan="4"  align="center">Bloque uno proyecto Mascota</td>
+                    <td colspan="2"  align="center">1S.3</td>
+                    <td colspan="2"  align="center">Lp0001-15</td>
+                </tr>
+                <tr> 
+                    <td colspan="1"  align="center">7</td>
+                    <td colspan="4"  align="center">Bloque uno proyecto Mascota</td>
+                    <td colspan="2"  align="center">1S.3</td>
+                    <td colspan="2"  align="center">Lp0001-15</td>
+                </tr>
+                
+            </tbody>   
+                
+                
+
+
+
+            </table>
+            </body>
+        </html>
+        ';
+        */
+        $html = '
+        <html>
+            <head>
+                <style>
+                    body{
+                        font-size: 7pt;
+                        font-family: "Arial";
+                        text-transform: uppercase;
+                    }
+                    .normal {
+                       text-transform: uppercase;
+                    }
+                    .normal th, .normal td {
+                      border: 1px solid #000;
+                      heigth: 50pt;
+                    }
+                    .titulo{
+                        background: #13AEBA;
+                        color: #FFF;
+                        padding:11pt;
+                        text-transform: uppercase;
+                        font-size: 11pt;
+                        vertical-align: bottom; 
+                        text-align="center" 
+                        font-weigth:bold;
+                    }
+                    .linea{
+                        border-bottom : 1px solid #000;
+                       
+                    }
+                    .principal{
+                        width:756px !important; 
+                        heigth:453px !important; 
+                        border:3px solid #13AEBA;
+                    }
+                    
+                </style>
+            </head>
+            <body>
             
-            //$mpdf->forcePortraitHeaders = true;
-            
-            //$mpdf->mirrorMargins = 1;
-            
-            
-            if ($dMemoria['estatus'] < 50) {
-                $mpdf->SetWatermarkText('SIN VALIDEZ OFICIAL');
-                $mpdf->showWatermarkText = true;
-            }
-             $mpdf->useOddEven = false;
+        <div class="principal">
+            <div style="width:756px; heigth:100px;" class="titulo">
+                <table width="100%">
+                    
+                    <tr class="titulo">
+
+                        <th colspan="4" style="font-weigth:bold;"  align="center"><span class="titulo">SIOP<span></th>
+
+                    </tr>
+                    <tr class="titulo">
+
+                        <th colspan="4" style="font-weigth:bold;" align="center"><span class="titulo">SECRETARIA DE INFRAESTRUCTURA Y OBRA PUBLICA<span></th>
+
+                    </tr>
+
+
+                </table>
+
+            </div>
+            <div style="width:756px; heigth:353px;">
+                <table width="100%">
+                    <tr>
+                        <td width="20%"  style="text-align:end; text-transform:uppercase; ">Dirección General:</td>
+                        <th width="60%" style="text-align:start; text-transform:uppercase; ">Dirección General Administrativa</th>
+                        <td width="10%" style="text-align:end; text-transform:uppercase; ">Caja: </td>
+                        <th width="10%" style="text-align:start; text-transform:uppercase; ">1/2</th>
+
+                    </tr>
+                    <tr>
+
+                        <td width="20%" style="text-align:end; text-transform:uppercase; ">Dirección Área:</td>
+                        <th width="60%" style="text-align:start; text-transform:uppercase; ">Dirección Recursos Humanos</th>
+                        <td width="10%" style="text-align:end; text-transform:uppercase; ">Año: </td>
+                        <th width="10%" style="text-align:start; text-transform:uppercase; ">2014</th>
+
+                    </tr>
+                     <tr>
+
+                        <td width="20%" style="text-align:end; text-transform:uppercase; "></td>
+                        <th width="60%" style="text-align:start; text-transform:uppercase; "></th>
+                        <td width="10%" style="text-align:end; text-transform:uppercase; ">Folio: </td>
+                        <th width="10%" style="text-align:start; text-transform:uppercase; ">T-001</th>
+
+                    </tr>  
+                </table>
+                <p align="center">Expedientes </p>
+                <table  width="100%"  class="normal-linea">
+                    
+                        <tr>
+                            <td height="320" style=" vertical-align:top; ">
+                                <table  width ="100%" heigth="100%">
+                                   <thead>
+                                       <tr>
+                                           <td width="10%"  align="center">No </td>
+                                           <td width="50%"  align="center">Descripcion</td>
+                                           <td width="20%"  align="center">Identificador</td>
+                                           <td width="20%"  align="center">OT</td>
+                                       </tr>
+                                   </thead>
+                                   <tbody>
+                                       <tr>
+                                           <td width="10%" class="linea" align="center" >1</td>
+                                           <td width="50%" class="linea">REFACCIONES, MANTENIMIENTOS, SERVICIOS E INSUMOS PARA MAQUINARIA PESADA.</td>
+                                           <td width="20%" class="linea" align="center">1S.3</td>
+                                           <td width="20%" class="linea" align="center">Lp0001-15</td>
+                                       </tr>
+                                       <tr>
+                                           <td width="10%" class="linea" align="center">2</td>
+                                           <td width="50%" class="linea">REMODELACIÓN DEL SÓTANO DE LA SECRETARÍA DE INFRAESTRUCTURA Y OBRA PÚBLICA.</td>
+                                           <td width="20%" class="linea" align="center">1S.3</td>
+                                           <td width="20%" class="linea" align="center">Lp0001-15</td>
+                                       </tr>
+                                       <tr>
+                                           <td width="10%" class="linea" align="center">3</td>
+                                           <td width="50%" class="linea">REMODELACIÓN DE LA PLANTA BAJA Y LA DIRECCIÓN ADMINISTRATIVA DE LA SECRETARÍA DE INFRAESTRUCTURA Y OBRA PÚBLICA.</td>
+                                           <td width="20%" class="linea" align="center">1S.3</td>
+                                           <td width="20%" class="linea" align="center">Lp0001-15</td>
+                                       </tr>
+                                       <tr>
+                                           <td width="10%" class="linea" align="center">4</td>
+                                           <td width="50%" class="linea">TRABAJOS EMERGENTES EN LA CONSERVACIÓN DE CAMINOS EN LA RESIDENCIA DE SAN MIGUEL PARA EL CAMINO 323 ARANDAS-MARTÍNEZ VALADEZ-SAN DIEGO DE ALEJANDRÍA, DEL KM. 17+000 AL 52+000.</td>
+                                           <td width="20%" class="linea" align="center">1S.3</td>
+                                           <td width="20%" class="linea" align="center">Lp0001-15</td>
+                                       </tr>
+                                       
+                                       <tr>
+                                           <td width="10%" class="linea" align="center">5</td>
+                                           <td width="50%" class="linea">TRABAJOS EMERGENTES EN LA CONSERVACIÓN DE CAMINOS EN LA RESIDENCIA DE SAN MIGUEL PARA EL CAMINO 302 LAGOS DE MORENO-UNIÓN DE SAN ANTONIO-SAN DIEGO DE ALEJANDRÍA, DEL KM. 0+000 AL 41+700.</td>
+                                           <td width="20%" class="linea" align="center">1S.3</td>
+                                           <td width="20%" class="linea" align="center">Lp0001-15</td>
+                                        </tr>
+                                        <tr>
+                                           <td width="10%" class="linea" align="center">6</td>
+                                           <td width="50%" class="linea">REMODELACIÓN DEL SÓTANO DE LA SECRETARÍA DE INFRAESTRUCTURA Y OBRA PÚBLICA.</td>
+                                           <td width="20%" class="linea" align="center">1S.3</td>
+                                           <td width="20%" class="linea" align="center">Lp0001-15</td>
+                                       </tr>
+                                       <tr>
+                                           <td width="10%" class="linea" align="center">7</td>
+                                           <td width="50%" class="linea">REMODELACIÓN DE LA PLANTA BAJA Y LA DIRECCIÓN ADMINISTRATIVA DE LA SECRETARÍA DE INFRAESTRUCTURA Y OBRA PÚBLICA.</td>
+                                           <td width="20%" class="linea" align="center">1S.3</td>
+                                           <td width="20%" class="linea" align="center">Lp0001-15</td>
+                                       </tr>
+                                       <tr>
+                                           <td width="10%" class="linea" align="center">8</td>
+                                           <td width="50%" class="linea">TRABAJOS EMERGENTES EN LA CONSERVACIÓN DE CAMINOS EN LA RESIDENCIA DE SAN MIGUEL PARA EL CAMINO 323 ARANDAS-MARTÍNEZ VALADEZ-SAN DIEGO DE ALEJANDRÍA, DEL KM. 17+000 AL 52+000.</td>
+                                           <td width="20%" class="linea" align="center">1S.3</td>
+                                           <td width="20%" class="linea" align="center">Lp0001-15</td>
+                                       </tr>
+                                       
+                                       <tr>
+                                           <td width="10%" class="linea" align="center">9</td>
+                                           <td width="50%" class="linea">TRABAJOS EMERGENTES EN LA CONSERVACIÓN DE CAMINOS EN LA RESIDENCIA DE SAN MIGUEL PARA EL CAMINO 302 LAGOS DE MORENO-UNIÓN DE SAN ANTONIO-SAN DIEGO DE ALEJANDRÍA, DEL KM. 0+000 AL 41+700.</td>
+                                           <td width="20%" class="linea" align="center">1S.3</td>
+                                           <td width="20%" class="linea" align="center">Lp0001-15</td>
+                                       </tr>
+                                        <tr>
+                                           <td width="10%" class="linea" align="center">10</td>
+                                           <td width="50%" class="linea">REMODELACIÓN DEL SÓTANO DE LA SECRETARÍA DE INFRAESTRUCTURA Y OBRA PÚBLICA.</td>
+                                           <td width="20%" class="linea" align="center">1S.3</td>
+                                           <td width="20%" class="linea" align="center">Lp0001-15</td>
+                                       </tr>
+                                       <tr>
+                                           <td width="10%" class="linea" align="center">11</td>
+                                           <td width="50%" class="linea">REMODELACIÓN DE LA PLANTA BAJA Y LA DIRECCIÓN ADMINISTRATIVA DE LA SECRETARÍA DE INFRAESTRUCTURA Y OBRA PÚBLICA.</td>
+                                           <td width="20%" class="linea" align="center">1S.3</td>
+                                           <td width="20%" class="linea" align="center">Lp0001-15</td>
+                                       </tr>
+                                    
+                                       <!--
+                                       <tr>
+                                           <td width="10%"  align="center">6</td>
+                                           <td width="50%">ELABORACIÓN DE ESTUDIOS TÉCNICOS DE SOPORTE Y EVALUACIÓN SOCIOECONÓMICA PARA LA OBRA DE REHABILITACIÓN Y CONSTRUCCIÓN DE NUEVA INFRAESTRUCTURA DEPORTIVA Y RECREATIVA EN EL PARQUE DE LA SOLIDARIDAD.</td>
+                                           <td width="20%" align="center">1S.3</td>
+                                           <td width="20%"  align="center">Lp0001-15</td>
+                                       </tr>
+                                       
+                                       <tr>
+                                           <td width="10%" align="center">7</td>
+                                           <td width="50%">PROYECTO INTEGRAL PARA MITIGAR INUNDACIIONES EN LA ZONA DE PORTALES DEL MUNICIPIO DE PUERTO VALLARTA, FOPREDEN (AMPLIACIÓN Y REENCAUSAMIENTO DE ARROYO LA VIRGEN EN CONCRETO HIDRÁULICO DEL CADENAMIENTO 0+470 AL 0+560)</td>
+                                           <td width="20%"  align="center">1S.3</td>
+                                           <td width="20%"  align="center">Lp0001-15</td>
+                                           
+                                       </tr>
+                                       <tr>
+                                           <td width="10%" align="center">8</td>
+                                           <td width="50%">TRABAJOS EMERGENTES EN LA CONSERVACIÓN DE CAMINOS EN LA RESIDENCIA DE SAN MIGUEL PARA EL CAMINO 302 LAGOS DE MORENO-UNIÓN DE SAN ANTONIO-SAN DIEGO DE ALEJANDRÍA, DEL KM. 0+000 AL 41+700.</td>
+                                           <td width="20%"  align="center">1S.3</td>
+                                           <td width="20%"  align="center">Lp0001-15</td>
+                                       </tr>
+                                         <tr>
+                                           <td width="10%" align="center">7</td>
+                                           <td width="50%">PROYECTO INTEGRAL PARA MITIGAR INUNDACIIONES EN LA ZONA DE PORTALES DEL MUNICIPIO DE PUERTO VALLARTA, FOPREDEN (AMPLIACIÓN Y REENCAUSAMIENTO DE ARROYO LA VIRGEN EN CONCRETO HIDRÁULICO DEL CADENAMIENTO 0+470 AL 0+560)</td>
+                                           <td width="20%"  align="center">1S.3</td>
+                                           <td width="20%"  align="center">Lp0001-15</td>
+                                           
+                                       </tr>
+                                       <tr>
+                                           <td width="10%" align="center">8</td>
+                                           <td width="50%">TRABAJOS EMERGENTES EN LA CONSERVACIÓN DE CAMINOS EN LA RESIDENCIA DE SAN MIGUEL PARA EL CAMINO 302 LAGOS DE MORENO-UNIÓN DE SAN ANTONIO-SAN DIEGO DE ALEJANDRÍA, DEL KM. 0+000 AL 41+700.</td>
+                                           <td width="20%"  align="center">1S.3</td>
+                                           <td width="20%"  align="center">Lp0001-15</td>
+                                       </tr>
+                                       <tr>
+                                           <td width="10%"  align="center">9</td>
+                                           <td width="50%">ELABORACIÓN DE ESTUDIOS TÉCNICOS DE SOPORTE Y EVALUACIÓN SOCIOECONÓMICA PARA LA OBRA DE REHABILITACIÓN Y CONSTRUCCIÓN DE NUEVA INFRAESTRUCTURA DEPORTIVA Y RECREATIVA EN EL PARQUE DE LA SOLIDARIDAD.</td>
+                                           <td width="20%" align="center">1S.3</td>
+                                           <td width="20%"  align="center">Lp0001-15</td>
+                                       </tr>
+                                       
+                                       <tr>
+                                           <td width="10%" align="center">10</td>
+                                           <td width="50%">PROYECTO INTEGRAL PARA MITIGAR INUNDACIIONES EN LA ZONA DE PORTALES DEL MUNICIPIO DE PUERTO VALLARTA, FOPREDEN (AMPLIACIÓN Y REENCAUSAMIENTO DE ARROYO LA VIRGEN EN CONCRETO HIDRÁULICO DEL CADENAMIENTO 0+470 AL 0+560)</td>
+                                           <td width="20%"  align="center">1S.3</td>
+                                           <td width="20%"  align="center">Lp0001-15</td>
+                                           
+                                       </tr>-->
+                                     <!--
+                                       <tr>
+                                           <td width="10%" height="50" align="center"></td>
+                                           <td width="50%" height="50" ></td>
+                                           <td width="20%" height="50"  align="center"></td>
+                                           <td width="20%" height="50"  align="center"></td>
+                                           
+                                       </tr>-->
+                                       
+
+                                   </tbody>
+                               </table>
+                            
+                            </td>
+                            
+                        </tr>
+                    </table>
            
             
-            
-            $cadena_footer = $this->load->view('v_reporte_solicitud_de_cotizacion_pie', $data, true);
-            $mpdf->SetHTMLFooter($cadena_footer);
-            
-            $output = $this->load->view('v_reporte_solicitud_de_cotizacion', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-            */
-        
-        $data['residencias']=$this->residencias_model->addwResidencias();
-        
-        if ($pdf == 1) {
-            
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter-L');
-            //$mpdf = new mPDF('utf-8', 'Letter-L',12,'',5,5,5,30,0,10,'');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->allow_charset_conversion = false;
-            //$mpdf->shrink_tables_to_fit = 1;
-            //$mpdf->forcePortraitHeaders = true;
-                        
-            if ($dAprovisionamiento['Estatus'] < 40) {
-                $mpdf->SetWatermarkText('SIN VALIDEZ OFICIAL');
-                $mpdf->showWatermarkText = true;
-            }
-            
-            $mpdf->useOddEven = false;
+           
 
-            if ($dAprovisionamiento["fondo_revolvente"]==1){
-                $cadena_footer = $this->load->view('v_reporte_aprovisionamiento_pie', $data, true);
-            }else{
-                 $cadena_footer = $this->load->view('v_reporte_aprovisionamiento_fondo_pie', $data, true);
-            }
-             $mpdf->SetHTMLFooter($cadena_footer);
-            
-            $output = $this->load->view('v_reporte_aprovisionamiento', $data, true);
-                        
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-        } else {
-            $this->load->view('v_reporte_aprovisionamiento', $data);
-        }
+
+        
+        
+        
+        </div>
+        
+        
+        
+    </div>
+            </body>
+        </html>
+        ';
+        $this->load->library('mpdf');
+
+         $mpdf=new mPDF('c','A4','','',42,15,67,67,20,15); 
+ 
+        //$mpdf=new mpdf('c','A4','','',42,15,67,67,20,15); 
+        $mpdf->AddPage('L','','','','',10,10,5,25,18,12);
+ 
+        //$mpdf->shrink_tables_to_fit = 0;
+        $mpdf->WriteHTML($html);
+        $mpdf->WriteHTML('<tocentry content="150mm square" /><p>Pegar esta etiqueta al frente de la caja y laterales</p>');
+
+        //$mpdf->WriteHTML($html);
+      
+
+
+        $mpdf->Output();
+    }
+
+
+    public function pruebas ($pdf=0){
+        
+           
+     
+        
+                $html = '
+                <html>
+                    <head>
+                        <style>
+                            body{
+                                font-size: 7pt;
+                                font-family: "Arial";
+                            }
+                            .normal {
+                               text-transform: uppercase;
+                            }
+                            .normal th, .normal td{
+                              border: 1px  solid  #424242;
+                              padding:5px;
+                            }
+                            
+                            
+                            .titulo{
+                                background: #9e2138;
+                                color: #FFF;
+                                padding:2px;
+                                text-transform: uppercase;
+                            }
+                            .upper {
+                                text-transform: uppercase;
+                            }
+                            .p-box{
+                                display: inline-block;
+                                width: 20%;
+                            }
+                        </style>
+                    </head>
+                    <body>
+
+                        <table width="100%">
+                            <tr>
+                                <td colspan="1" width="200" rowspan="3"><img src="' . site_url('assets/logo_chico.png') .'" width="150px"  height="70" /></td> 
+                                <td colspan="4"></td> 
+                                
+                            </tr>
+                            <tr>
+
+                                <td colspan="4" ></td> 
+
+                            </tr>
+                            <tr>
+
+                                <td colspan="4" ></td> 
+
+                            </tr>
+                            <tr>
+
+                                <td colspan="5"  align="center"><span style="vertical-align: bottom; text-align="center" font-weigth:bold; font-size:9pt;">INVENTARIO DE TRANSFERENCIA<span></td>
+
+                            </tr>
+                        </table>
+
+
+
+
+
+                        <table class="normal" width="100%" border="1">
+
+                            <thead>
+
+                                <tr>
+                                    <th colspan="1" class="titulo" style="text-align: right;">Direccion General: </th>
+                                    <th colspan="3" style="text-align: lefth;" class="upper">Obras públicas </th>
+                                    <th colspan="1" class="titulo" style="text-align: right;">Fecha de Registro:</th>
+                                    <th colspan="1" style="text-align: lefth;">12/02/1017 </th>
+                                    <th colspan="1" class="titulo" style="text-align: right;">Folio:</th>
+                                    <th colspan="2" style="text-align: lefth;"><span style="font-weight: bold;">T-0002</span></th>
+
+
+
+                                </tr>
+                                <tr>
+                                    <th colspan="1" class="titulo" style="text-align: right;">Direccion Área: </th>
+                                    <th colspan="3" style="text-align: lefth;" class="upper">Obras General públicas </th>
+                                    <th colspan="1" class="titulo" style="text-align: right;">Fecha de Transferencia: </th>
+                                    <th colspan="1" style="text-align: lefth;">19/02/1017 </th>
+                                    <th colspan="1" class="titulo" style="text-align: right;">Cajas: </th>
+                                    <th colspan="2" style="text-align: lefth;"><span>6</span></th>
+
+
+
+                                </tr>
+                            </thead>
+
+
+                        </table>
+
+                        <table width="100%" class="normal" border="1">
+
+
+                            <tbody>
+
+                                <tr>
+                                    <td colspan="1" class="titulo" rowspan="2" align="center" >NO</td>
+                                    <td colspan="1" class="titulo" rowspan="2" align="center">CAJA</td>
+                                    <td colspan="1" class="titulo" rowspan="2" align="center">CARPETA</td>
+                                    <td colspan="1" class="titulo" rowspan="2" align="center">DESCRIPCIÓN</td>
+                                    <td colspan="1" class="titulo" rowspan="2" align="center">CLASIFICADOR</td>
+                                    <td colspan="1" class="titulo" rowspan="2" align="center">OT</td>
+                                    <td colspan="1" class="titulo" rowspan="2" align="center">AÑO</td>
+                                    <td colspan="1" class="titulo" rowspan="2" align="center">FOJAS</td>
+                                    <td colspan="3" class="titulo" align="center">VALOR</td>
+                                    <td colspan="3" class="titulo" align="center">DESTINO</td>
+                                    <td colspan="2" class="titulo" align="center">OBSERVACIÓN</td>
+
+                                </tr>
+
+                                <tr>
+                                    <td colspan="1" class="titulo" align="center">ADM</td>
+                                    <td colspan="1" class="titulo" align="center">LEG</td>
+                                    <td colspan="1" class="titulo" align="center">CON</td>
+                                    <td colspan="1" class="titulo" align="center">BAJ </td>
+                                    <td colspan="1" class="titulo" align="center">MUE</td>
+                                    <td colspan="1" class="titulo" align="center">HIS</td>
+                                    <td colspan="2" class="titulo" align="center">Reservado</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">Proyecto de ciudad judicial, sala de juicios orales</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">2</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">2</td>
+                                    <td colspan="1">Proyecto de ciudad judicial, sala de juicios orales, detalle de comunicaciones</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">200</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2"></td>
+                                </tr>
+                               <tr>
+                                    <td colspan="1">3</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">3</td>
+                                    <td colspan="1">Proyecto de ciudad judicial, sala de juicios orales, detalle sin especificar</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">99</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">Construcción de Especificación col. Puerta del Sol</td>
+                                    <td colspan="1">SIOP/1S1.3/LP028/15</td>
+                                    <td colspan="1">LP028/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">135</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">Construcción de Especificación col. Puerta del Sol, detalles tecnicos</td>
+                                    <td colspan="1">SIOP/1S1.3/LP028/15</td>
+                                    <td colspan="1">LP028/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr class="evenrow">
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr class="evenrow">
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr class="evenrow">
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr class="evenrow">
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">3</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">3</td>
+                                    <td colspan="1">Proyecto de ciudad judicial, sala de juicios orales, detalle sin especificar</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">99</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">Construcción de Especificación col. Puerta del Sol</td>
+                                    <td colspan="1">SIOP/1S1.3/LP028/15</td>
+                                    <td colspan="1">LP028/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">135</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">Construcción de Especificación col. Puerta del Sol, detalles tecnicos</td>
+                                    <td colspan="1">SIOP/1S1.3/LP028/15</td>
+                                    <td colspan="1">LP028/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr class="evenrow">
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr class="evenrow">
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr class="evenrow">
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr class="evenrow">
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">3</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">3</td>
+                                    <td colspan="1">Proyecto de ciudad judicial, sala de juicios orales, detalle sin especificar</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">99</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">Construcción de Especificación col. Puerta del Sol</td>
+                                    <td colspan="1">SIOP/1S1.3/LP028/15</td>
+                                    <td colspan="1">LP028/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">135</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">Construcción de Especificación col. Puerta del Sol, detalles tecnicos</td>
+                                    <td colspan="1">SIOP/1S1.3/LP028/15</td>
+                                    <td colspan="1">LP028/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr class="evenrow">
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr class="evenrow">
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr class="evenrow">
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr class="evenrow">
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">235</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">3</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">3</td>
+                                    <td colspan="1">Proyecto de ciudad judicial, sala de juicios orales, detalle sin especificar</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">99</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">1</td>
+                                    <td colspan="1">Construcción de Especificación col. Puerta del Sol</td>
+                                    <td colspan="1">SIOP/1S1.3/LP028/15</td>
+                                    <td colspan="1">LP028/15</td>
+                                    <td colspan="1">2015</td>
+                                    <td colspan="1">135</td>
+                                    <td colspan="1">xx</td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1">x</td>
+                                    <td colspan="1">x </td>
+                                    <td colspan="1"></td>
+                                    <td colspan="1"></td>
+                                    <td colspan="2">Reservado</td>
+                                </tr>
+
+
+
+                            </tbody>
+                             
+
+                        </table>
+
+                        <table width="100%">
+                                <tr>
+                                    <td width="100%" colspan="5" height="80px"></td>
+                                </tr>
+                                
+                                <tr>
+
+                                    <td width="20%" style="border-top: 1px solid #000; font-size:8pt" ></td>
+                                    <td  width="20%" > </td>
+                                    <td  width="20%" style="border-top: 1px solid #000; font-size:8pt">Gracia Ramirez Ruíz</td>
+                                    <td  width="20%"  > </td>
+                                    <td  width="20%" style="border-top: 1px solid #000; font-size:8pt"></td>
+
+                                </tr> 
+                                <tr>
+
+                                    <td width="20%" style="font-size:8pt" >Responsable Oficina Generadora</td>
+                                    <td  width="20%" > </td>
+                                    <td  width="20%" style="font-size:8pt">Responsable Archivo Concentración</td>
+                                    <td  width="20%"  > </td>
+                                    <td  width="20%" style="font-size:8pt">Responsable Área de depósito</td>
+
+                                </tr> 
+
+
+                        </table>
+
+                    </body>
+                </html>
+
+
+        ';
+        
+        $this->load->library('mpdf');
+        $mpdf=new mPDF('c','A4','','',42,15,67,67,20,15); 
+
+        //$mpdf=new mpdf('c','A4','','',42,15,67,67,20,15); 
+         // ('L','','','','',10,10,TOP,BOTTOM,18,12
+        $mpdf->AddPage('L','','','','',25,25,5,25,18,12);
+
+
+
+       // $mpdf->mirrorMargins = 1;
+
+
+        $footer= 
+                '
+                <div style="text-align:center; font-family:mono;font-size:7pt;font-weight:bold;font-style:italic;">
+                  
+                     
+                        <p >Folio T-0002 - {PAGENO} de {nbpg} </p>
+                  
+                   
+
+                </div>
+                <div style="font-family:mono;font-size:7pt;font-weight:bold;font-style:italic; width:100%; border-top: 1px solid #000">
+                  * IMPORTANTE: SOLO SE ACEPTARAN DOCUMENTOS EN SOBRE AMARILLO O COCIDOS <br>
+                  
+
+                </div>';
+
+        //$mpdf->SetHTMLHeader($header);
+        //$mpdf->SetHTMLHeader($headerE,'E');
+        //$mpdf->setFooter('Folio T-0002 ||{PAGENO} de {nbpg}') ;
+
+        $mpdf->setHTMLFooter($footer) ;
+        
+        //$mpdf->setFooter('Folio T-0002 ||{PAGENO} de {nbpg}') ;
+        $mpdf->WriteHTML($html);
+
+        $mpdf->Output('mpdf.pdf','I');
+    
+         
     }
     
     
-    
-    
-     public function solicitud_aprovisionamiento_umom($idaprovisionamiento, $pdf = 1) {
-        $this->load->model('aprovisionamientos_model');
+    /*
+   
+    public function reporte_uso(){
         $this->load->model('impresiones_model');
-        $this->load->model('obras_model');
-        $this->load->model('residencias_model');
+        $this->load->model('direcciones_model');
         
-        $this->load->library('ferfunc');
-
-        $dAprovisionamiento = $this->aprovisionamientos_model->datos_aprovisionamiento($idaprovisionamiento)->row_array();
-        $dObra = $this->obras_model->datos_obra($dAprovisionamiento['idObra'])->row_array();
-        $qConceptos = $this->impresiones_model->conceptos_aprovisionamiento($idaprovisionamiento);
-        $direccion = $this->impresiones_model->direccion($dObra['idDireccion']);
-
-        $data = array(
-            'obra' => $dObra,
-            'aprovisionamiento' => $dAprovisionamiento,
-            'logo' => '<img  src="' . site_url('images/logo-secretaria-mini.fw.png') . '" id="logo">',
-            'qconceptos' => $qConceptos,
-            'direccion' => $direccion,
-            'autorizo' => $this->impresiones_model->firma_funcionario($dAprovisionamiento['idAutorizo']),
-            'vo_bo' => $this->impresiones_model->firma_funcionario($dAprovisionamiento['idVoBo']),
-            'elaboro' => $this->impresiones_model->firma_funcionario($dAprovisionamiento['idElaboro']),
-            'recibe' => $this->impresiones_model->firma_funcionario($dAprovisionamiento['idRecibio'])
-        );
+        $qDirecciones = $this->direcciones_model->listado_catDirecciones();
         
-        $data['ClavePresupuestal']= $this->aprovisionamientos_model->get_clave_presupuestal($dAprovisionamiento['idClavePresupuestal']);
        
-        /*
-         $this->load->library('mpdf');
-            //$mpdf = new mPDF('utf-8', 'Letter');
-            $mpdf = new mPDF('utf-8', 'Letter',12,'',5,5,5,30,0,10,'');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->allow_charset_conversion = false;
-            $mpdf->pagenumPrefix = 'Página ';
-            $mpdf->pagenumSuffix = ' de ';
-
+        foreach ($qDirecciones->result() as $rDirecciones){
+            $ot_preregistradas = $this->impresiones_model->ot_preregistradas($rDirecciones->id)->num_rows();
+            $documentos = $this->impresiones_model->documentos_preregistrados()->num_rows();
             
-            //$mpdf->forcePortraitHeaders = true;
-            
-            //$mpdf->mirrorMargins = 1;
-            
-            
-            if ($dMemoria['estatus'] < 50) {
-                $mpdf->SetWatermarkText('SIN VALIDEZ OFICIAL');
-                $mpdf->showWatermarkText = true;
-            }
-             $mpdf->useOddEven = false;
-           
-            
-            
-            $cadena_footer = $this->load->view('v_reporte_solicitud_de_cotizacion_pie', $data, true);
-            $mpdf->SetHTMLFooter($cadena_footer);
-            
-            $output = $this->load->view('v_reporte_solicitud_de_cotizacion', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-            */
+        }
+          
         
-        $data['residencias']=$this->residencias_model->addwResidencias();
         
         if ($pdf == 1) {
             $this->load->library('mpdf');
@@ -648,1530 +1094,35 @@ class Impresion extends MY_Controller {
             }            
             $mpdf->useOddEven = false;            
            
-            $cadena_footer = $this->load->view('v_reporte_aprovisionamiento_umom_pie', $data, true);            
+            $cadena_footer = "Reporte Uso";
             $mpdf->SetHTMLFooter($cadena_footer);            
-            $output = $this->load->view('v_reporte_aprovisionamiento', $data, true);
+            $output = $this->load->view('v_reporte_uso', $data, true);
             
             $mpdf->WriteHTML($output);
             $mpdf->Output();
         } else {
-            $this->load->view('v_reporte_aprovisionamiento', $data);
+            $this->load->view('v_reporte_uso', $data);
         }
+        
+        
     }
-    
-    
-    public function solicitud_orden_compra($idOrdenCompra, $pdf = 1) {
-        $this->load->model('cotizaciones_model');
-        $this->load->model('aprovisionamientos_model');
-        $this->load->model('ordenescompra_model');
-        $this->load->model('proveedores_model');
+
+    public function listado_archivos(){
+        
         $this->load->model('impresiones_model');
-        $this->load->model('obras_model');
-
-        $this->load->library('ferfunc');
-
-        $dOrdenCompra = $this->ordenescompra_model->datos_ordencompra($idOrdenCompra)->row_array();
-        $dObra = $this->obras_model->datos_obra($dOrdenCompra['idObra'])->row_array();
-        $dProveedor = $this->proveedores_model->get_proveedor($dOrdenCompra['idProveedor'])->row_array();
         
-        $direccion = $this->impresiones_model->direccion($dObra['idDireccion']);
+        $qDetalle = $this->impresiones_model->get_listado_archivos();
+        $data['datos'] = $qDetalle->result_array();
         
-        $qConceptos = $this->impresiones_model->conceptos_ordencompra($idOrdenCompra);
-               
-        //--- clave presupuestal
-        
-        
-        $ClavesPresupuestales = $this->aprovisionamientos_model->get_clave_presupuestal($dOrdenCompra['idClavePresupuestal']); // MAVS
-                       
-        $qCotizaciones=$this->impresiones_model->cotizaciones_orden_compra($idOrdenCompra);
-        
-        $FolioCotizacion="";
-        foreach ($qCotizaciones->result_array() as $cotizaciones):
-            $aCotizacion = $this->cotizaciones_model->datos_cotizacion($cotizaciones['idCotizacion'])->row_array();
-            $FolioCotizacion=$aCotizacion['Folio'];
-        endforeach;
-        
-        $qAprovisionamientos=$this->impresiones_model->aprivisionamientos_orden_compra($idOrdenCompra);
-        
-        $FolioAprovisionamiento="";
-        foreach ($qAprovisionamientos->result_array() as $aprovisionamiento):
-            if ($FolioAprovisionamiento==""){
-                $FolioAprovisionamiento.=$aprovisionamiento['Folio'];
-            }else{
-                 $FolioAprovisionamiento.=','.  $aprovisionamiento['Folio'];
-            }
-        endforeach;
-       
-        $data = array(
-            'obra' => $dObra,
-            'ordencompra' => $dOrdenCompra,
-            'logo' => '<img  src="' . site_url('images/logo-secretaria-mini.fw.png') . '" id="logo">',
-            'qconceptos' =>  $qConceptos,
-            'direccion' => $direccion,
-            'proveedor' =>$dProveedor,
-            'autorizo' => $this->impresiones_model->firma_funcionario($dOrdenCompra['idAutorizo']),
-            'vo_bo' => $this->impresiones_model->firma_funcionario($dOrdenCompra['idVoBo']),
-            'elaboro' => $this->impresiones_model->firma_funcionario($dOrdenCompra['idElaboro']),
-            'recibio' => $this->impresiones_model->firma_funcionario($dOrdenCompra['idRecibio']),
-            'VoBoEjecutor' => $this->impresiones_model->firma_funcionario($dOrdenCompra['idVoBoEjecutor']),
-            'FolioCotizacion'=>$FolioCotizacion,
-            'FolioAprovisionamiento'=>$FolioAprovisionamiento,
-            'ClavesPresupuestales' => $ClavesPresupuestales
-        );
-
-        if ($pdf == 1) {
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter-L');
-            $mpdf = new mPDF('utf-8', 'Letter-L',12,'',5,5,5,30,0,10,'');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->shrink_tables_to_fit = 1;
-            $mpdf->forcePortraitHeaders = true;
-            
-            
-            if ($dOrdenCompra['Estatus'] < 40) {
-                $mpdf->SetWatermarkText('SIN VALIDEZ OFICIAL');
-                $mpdf->showWatermarkText = true;
-            }
- 
-          
-        
-           
-            $cadena_footer = $this->load->view('v_reporte_solicitud_orden_compra_pie', $data, true);
-            $mpdf->SetHTMLFooter($cadena_footer);
-            
-            $output = $this->load->view('v_reporte_solicitud_orden_compra', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-        } else {
-            $this->load->view('v_reporte_solicitud_orden_compra', $data);
-        }
+        $this->load->view('v_listado_archivos', $data); // este manda a pantalla HTML normal
     }
 
     
-   public function solicitud_cotizacion($id, $pdf = 1) {
-        $this->load->model('proveedores_participantes_model');
-        $this->load->model('cotizaciones_model');
-        $this->load->model('proveedores_model');
-        $this->load->model('impresiones_model');
-
-        $this->load->library('ferfunc');
-        
-        $dProveedoresCotizacion = $this->proveedores_participantes_model->datos_ProveedoresCotizacion($id)->row_array();
-        $dCotizacion = $this->cotizaciones_model->datos_cotizacion($dProveedoresCotizacion['idCotizacion'])->row_array();
-        $dProveedor = $this->proveedores_model->get_proveedor($dProveedoresCotizacion['idProveedor'])->row_array(); 
-        $qConceptos = $this->cotizaciones_model->conceptos_cotizacion_proveedor($id);
-       
-        $data = array(
-            'cotizacion' => $dCotizacion,
-            //'logo' => '<img  src="' . site_url('images/logo-secretaria-mini.fw.png') . '" id="logo">',
-            'qconceptos' =>  $qConceptos,
-            'proveedor' =>$dProveedor,
-            'autorizo' => $this->impresiones_model->firma_funcionario($dCotizacion['idAutorizo']),
-            'vo_bo' => $this->impresiones_model->firma_funcionario($dCotizacion['idVobo']),
-            'elaboro' => $this->impresiones_model->firma_funcionario($dCotizacion['idElaboro']),
-            'Fecha' =>  strtoupper($this->ferfunc->fechacascompleta($dCotizacion['Fecha']))        
-        );
-        
-        if ($pdf == 1) {
-            $this->load->library('mpdf');
-            //$mpdf = new mPDF('utf-8', 'Letter');
-            $mpdf = new mPDF('utf-8', 'Letter',12,'',5,5,5,30,0,10,'');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->allow_charset_conversion = false;
-            $mpdf->pagenumPrefix = 'Página ';
-            $mpdf->pagenumSuffix = ' de ';
-            
-            //$mpdf->forcePortraitHeaders = true;
-            
-            //$mpdf->mirrorMargins = 1;
-            
-            /*
-            if ($dMemoria['estatus'] < 50) {
-                $mpdf->SetWatermarkText('SIN VALIDEZ OFICIAL');
-                $mpdf->showWatermarkText = true;
-            }*/
-             $mpdf->useOddEven = false;
-            
-            $cadena_footer = $this->load->view('v_reporte_solicitud_de_cotizacion_pie', $data, true);
-            $mpdf->SetHTMLFooter($cadena_footer);
-            
-            $output = $this->load->view('v_reporte_solicitud_de_cotizacion', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-            
-           
-            
-        } else {
-            $this->load->view('v_reporte_solicitud_de_cotizacion', $data);
-        }
-    }
-
-     function checkDateTime($data) {
-    if (date('Y-m-d', strtotime($data)) == $data) {
-        return true;
-    } else {
-        return false;
-    }
- }
-    
-    
-    public function comparativo_cotizacion($id, $pdf = 1) {
-        $this->load->model('proveedores_participantes_model');
-        $this->load->model('cotizaciones_model');
-        $this->load->model('proveedores_model');
-        $this->load->model('impresiones_model');
-
-
-        $this->load->library('ferfunc');
-
-        
-        
-        $fecha_impresion=date('Y-m-d');
-        if ($this->checkDateTime($this->input->post('Fecha_Cuadro_Comparativo'))==true){
-           $fecha_impresion=$this->input->post('Fecha_Cuadro_Comparativo'); 
-        }
-        
-        
-        
-        $this->modificar_fecha_solicitud($id,$fecha_impresion);
-        
-        
-        $dCotizacion = $this->cotizaciones_model->datos_cotizacion($id)->row_array();
-        
-       
-        $data = array(
-            'cotizacion' => $dCotizacion,
-            'autorizo' => $this->impresiones_model->firma_funcionario($dCotizacion['idAutorizo']),
-            'vo_bo' => $this->impresiones_model->firma_funcionario($dCotizacion['idVoBo']),
-            'elaboro' => $this->impresiones_model->firma_funcionario($dCotizacion['idElaboro'])
-        );
-        
-        
-        
-        //$dProveedoresCotizacion = $this->proveedores_participantes_model->datos_ProveedoresCotizacion($id)->row_array();
-        //$dCotizacion = $this->cotizaciones_model->datos_cotizacion($dProveedoresCotizacion['idCotizacion'])->row_array();
-        //$dProveedor = $this->proveedores_model->get_proveedor($dProveedoresCotizacion['idProveedor'])->row_array(); 
-        
-        $qConceptos = $this->cotizaciones_model->conceptos_cotizacion($id);
-        $qProveedores = $this->proveedores_participantes_model->listado($id);
-        
-        
-         $listadoPrecios = array();
-
-         
-        foreach ($qConceptos->result() as $aConceptos) {
-
-            $itemEmpleado = array();
-            $itemEmpleado['Cantidad'] = $aConceptos->Cantidad;
-            $itemEmpleado['Concepto'] = trim($aConceptos->Concepto).' '. trim($aConceptos->Descripcion);
-            $itemEmpleado['UnidadMedida'] = $aConceptos->UnidadMedida;
-            $itemEmpleado['id'] = $aConceptos->id;
-            
-            $i=0;
-            
-            $itemEmpleado['Proveedor1'] = "";
-            $itemEmpleado['marca1'] = "";
-            $itemEmpleado['precio_unitario1'] =  0.0000;
-            $itemEmpleado['total1'] = 0.00;
-            $itemEmpleado['iva1'] = 0.00;
-
-            $itemEmpleado['Proveedor2'] = "";
-            $itemEmpleado['marca2'] = "";
-            $itemEmpleado['precio_unitario2'] =  0.0000;
-            $itemEmpleado['total2'] = 0.00;
-            $itemEmpleado['iva2'] = 0.00;
-
-            $itemEmpleado['Proveedor3'] = "";
-            $itemEmpleado['marca3'] = "";
-            $itemEmpleado['precio_unitario3'] =  0.0000;
-            $itemEmpleado['total3'] = 0.00;
-            $itemEmpleado['iva3'] = 0.00;    
-          
-           foreach ($qProveedores->result() as $aProveedores) {
-                $aProveedorConcepto = $this->proveedores_participantes_model->datos_ProveedoresConceptos($aConceptos->id,$aProveedores->id)->row_array();
-                $i+=1;
-                $itemEmpleado['marca'.$i] = $aProveedorConcepto['marca'];
-                $itemEmpleado['precio_unitario'.$i] =  $aProveedorConcepto['Precio'];
-                $itemEmpleado['total'.$i] = $aProveedorConcepto['Precio']*$aProveedorConcepto['Cantidad'];
-                $itemEmpleado['iva'.$i] =  $aProveedorConcepto['IVA'];
-                
-            }
-
-
-            /*
-            foreach ($qProveedores->result() as $aProveedores) {
-                $aProveedorConcepto = $this->proveedores_participantes_model->datos_ProveedoresConceptos($aConceptos->id,$aProveedores->id)->row_array();
-                $itemEmpleado['marca'.$aConceptos->id.'-'.$aProveedores->id] = "";
-                $itemEmpleado['precio_unitario'.$aConceptos->id.'-'.$aProveedores->id] =  $aProveedorConcepto['Precio'];
-                $itemEmpleado['total'.$aConceptos->id.'-'.$aProveedores->id] = $aProveedorConcepto['Precio']*$aConceptos->Cantidad;
-            }*/
-            
-            
-            
-            $listadoPrecios[] = $itemEmpleado;
-        }
-        
-        $data['conceptos'] = $listadoPrecios;
-        
-        
-        
-        $i=0;
-        
-        $itemProveedor = array();
-        $itemProveedor['Proveedor1']="";
-        $itemProveedor['Proveedor2']="";      
-        $itemProveedor['Proveedor3']="";
-        
-        $itemProveedor['Telefono1']="";
-        $itemProveedor['Telefono2']="";      
-        $itemProveedor['Telefono3']="";
-        
-        
-        $itemProveedor['Persona_Cotizo1']="";
-        $itemProveedor['Persona_Cotizo2']="";      
-        $itemProveedor['Persona_Cotizo3']="";
-                
-        $itemProveedor['Plazo_Entrega1']="";
-        $itemProveedor['Plazo_Entrega2']="";      
-        $itemProveedor['Plazo_Entrega3']="";
-        
-        
-        $itemProveedor['Condiciones_Pago1']="";
-        $itemProveedor['Condiciones_Pago2']="";      
-        $itemProveedor['Condiciones_Pago3']="";
-        
-        
-        $itemProveedor['Vigencia_Cotizacion1']="";
-        $itemProveedor['Vigencia_Cotizacion2']="";      
-        $itemProveedor['Vigencia_Cotizacion3']="";
-
-        foreach ($qProveedores->result() as $aProveedores) {
-           $i+=1; 
-           $itemProveedor['Proveedor'.$i] = trim($aProveedores->nombre); 
-           $itemProveedor['Telefono'.$i] = trim($aProveedores->telefono);
-           $itemProveedor['Persona_Cotizo'.$i] = trim($aProveedores->Persona_Cotizo); 
-           $itemProveedor['Plazo_Entrega'.$i] = $aProveedores->Plazo_Entrega; 
-           $itemProveedor['Condiciones_Pago'.$i] = $aProveedores->Condiciones_Pago; 
-           $itemProveedor['Vigencia_Cotizacion'.$i] = $aProveedores->Vigencia_Cotizacion;
-           $itemProveedor['descuento'.$i] = $aProveedores->descuento;
-           
-          
-           
-        }
-        
-       
-        
-        $data['Proveedores'] = $itemProveedor;
-
-       
-        
-       
-         
-        if ($pdf == 1) {
-            
-            
-            
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter-L');
-            //$mpdf = new mPDF('utf-8', 'Letter-L',12,'',5,5,5,30,0,10,'');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->allow_charset_conversion = false;
-            //$mpdf->pagenumPrefix = 'Página ';
-            //$mpdf->pagenumSuffix = ' de ';
-
-            
-            //$mpdf->forcePortraitHeaders = true;
-            
-            //$mpdf->mirrorMargins = 1;
-            
-            /*
-            if ($dMemoria['estatus'] < 50) {
-                $mpdf->SetWatermarkText('SIN VALIDEZ OFICIAL');
-                $mpdf->showWatermarkText = true;
-            }*/
-             $mpdf->useOddEven = false;
-           
-            
-            
-            //$cadena_footer = $this->load->view('v_reporte_comparativo_cotizaciones_pie', $data, true);
-            //$mpdf->SetHTMLFooter($cadena_footer);
-            
-            $cadena_footer='<table width="900" border="0" cellspacing="0"> <tr>
-           <td align="left" width="100%" >Pagina {PAGENO} de {nbpg}</td>
-        </tr> </table>';   
-            $mpdf->SetHTMLFooter($cadena_footer); 
-            
-            $output = $this->load->view('v_reporte_comparativo_cotizaciones', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-            
-           
-            
-        } else {
-            $this->load->view('v_reporte_comparativo_cotizaciones', $data);
-        }
-    }
-
-
-      public function comparativo_cotizacion_cuatro($id, $pdf = 1) {
-        $this->load->model('proveedores_participantes_model');
-        $this->load->model('cotizaciones_model');
-        $this->load->model('proveedores_model');
-        $this->load->model('impresiones_model');
-
-
-        $this->load->library('ferfunc');
-
-        
-        
-        $dCotizacion = $this->cotizaciones_model->datos_cotizacion($id)->row_array();
-        
-       
-        $data = array(
-            'cotizacion' => $dCotizacion,
-            'autorizo' => $this->impresiones_model->firma_funcionario($dCotizacion['idAutorizo']),
-            'vo_bo' => $this->impresiones_model->firma_funcionario($dCotizacion['idVoBo']),
-            'elaboro' => $this->impresiones_model->firma_funcionario($dCotizacion['idElaboro'])
-        );
-        
-        
-        
-        //$dProveedoresCotizacion = $this->proveedores_participantes_model->datos_ProveedoresCotizacion($id)->row_array();
-        //$dCotizacion = $this->cotizaciones_model->datos_cotizacion($dProveedoresCotizacion['idCotizacion'])->row_array();
-        //$dProveedor = $this->proveedores_model->get_proveedor($dProveedoresCotizacion['idProveedor'])->row_array(); 
-        
-        $qConceptos = $this->cotizaciones_model->conceptos_cotizacion($id);
-        $qProveedores = $this->proveedores_participantes_model->listado($id);
-        
-        
-         $listadoPrecios = array();
-
-         
-        foreach ($qConceptos->result() as $aConceptos) {
-
-            $itemEmpleado = array();
-            $itemEmpleado['Cantidad'] = $aConceptos->Cantidad;
-            $itemEmpleado['Concepto'] = trim($aConceptos->Concepto).' '. trim($aConceptos->Descripcion);
-            $itemEmpleado['UnidadMedida'] = $aConceptos->UnidadMedida;
-            $itemEmpleado['id'] = $aConceptos->id;
-            
-            $i=0;
-            
-            $itemEmpleado['Proveedor1'] = "";
-            $itemEmpleado['marca1'] = "";
-            $itemEmpleado['precio_unitario1'] =  0.00;
-            $itemEmpleado['total1'] = 0.00;
-            $itemEmpleado['iva1'] = 0.00;
-
-            $itemEmpleado['Proveedor2'] = "";
-            $itemEmpleado['marca2'] = "";
-            $itemEmpleado['precio_unitario2'] =  0.00;
-            $itemEmpleado['total2'] = 0.00;
-            $itemEmpleado['iva2'] = 0.00;
-
-            $itemEmpleado['Proveedor3'] = "";
-            $itemEmpleado['marca3'] = "";
-            $itemEmpleado['precio_unitario3'] =  0.00;
-            $itemEmpleado['total3'] = 0.00;
-            $itemEmpleado['iva3'] = 0.00;    
-
-            $itemEmpleado['Proveedor4'] = "";
-            $itemEmpleado['marca4'] = "";
-            $itemEmpleado['precio_unitario4'] =  0.00;
-            $itemEmpleado['total4'] = 0.00;
-            $itemEmpleado['iva4'] = 0.00;    
-          
-           foreach ($qProveedores->result() as $aProveedores) {
-                $aProveedorConcepto = $this->proveedores_participantes_model->datos_ProveedoresConceptos($aConceptos->id,$aProveedores->id)->row_array();
-                $i+=1;
-                $itemEmpleado['marca'.$i] = $aProveedorConcepto['marca'];
-                $itemEmpleado['precio_unitario'.$i] =  $aProveedorConcepto['Precio'];
-                $itemEmpleado['total'.$i] = $aProveedorConcepto['Precio']*$aProveedorConcepto['Cantidad'];
-                $itemEmpleado['iva'.$i] =  $aProveedorConcepto['IVA'];
-                
-            }
-
-
-            /*
-            foreach ($qProveedores->result() as $aProveedores) {
-                $aProveedorConcepto = $this->proveedores_participantes_model->datos_ProveedoresConceptos($aConceptos->id,$aProveedores->id)->row_array();
-                $itemEmpleado['marca'.$aConceptos->id.'-'.$aProveedores->id] = "";
-                $itemEmpleado['precio_unitario'.$aConceptos->id.'-'.$aProveedores->id] =  $aProveedorConcepto['Precio'];
-                $itemEmpleado['total'.$aConceptos->id.'-'.$aProveedores->id] = $aProveedorConcepto['Precio']*$aConceptos->Cantidad;
-            }*/
-            
-            
-            
-            $listadoPrecios[] = $itemEmpleado;
-        }
-        
-        $data['conceptos'] = $listadoPrecios;
-        
-        
-        
-        $i=0;
-        
-        $itemProveedor = array();
-        $itemProveedor['Proveedor1']="";
-        $itemProveedor['Proveedor2']="";      
-        $itemProveedor['Proveedor3']="";
-        $itemProveedor['Proveedor4']="";
-        
-        $itemProveedor['Telefono1']="";
-        $itemProveedor['Telefono2']="";      
-        $itemProveedor['Telefono3']="";
-        $itemProveedor['Telefono4']="";
-        
-        
-        $itemProveedor['Persona_Cotizo1']="";
-        $itemProveedor['Persona_Cotizo2']="";      
-        $itemProveedor['Persona_Cotizo3']="";
-        $itemProveedor['Persona_Cotizo4']="";
-                
-        $itemProveedor['Plazo_Entrega1']="";
-        $itemProveedor['Plazo_Entrega2']="";      
-        $itemProveedor['Plazo_Entrega3']="";
-        $itemProveedor['Plazo_Entrega4']="";
-        
-        
-        $itemProveedor['Condiciones_Pago1']="";
-        $itemProveedor['Condiciones_Pago2']="";      
-        $itemProveedor['Condiciones_Pago3']="";
-        $itemProveedor['Condiciones_Pago4']="";
-        
-        
-        $itemProveedor['Vigencia_Cotizacion1']="";
-        $itemProveedor['Vigencia_Cotizacion2']="";      
-        $itemProveedor['Vigencia_Cotizacion3']="";
-        $itemProveedor['Vigencia_Cotizacion4']="";
-
-
-
-
-        foreach ($qProveedores->result() as $aProveedores) {
-           $i+=1; 
-           $itemProveedor['Proveedor'.$i] = trim($aProveedores->nombre); 
-           $itemProveedor['Telefono'.$i] = trim($aProveedores->telefono);
-           $itemProveedor['Persona_Cotizo'.$i] = trim($aProveedores->Persona_Cotizo); 
-           $itemProveedor['Plazo_Entrega'.$i] = $aProveedores->Plazo_Entrega; 
-           $itemProveedor['Condiciones_Pago'.$i] = $aProveedores->Condiciones_Pago; 
-           $itemProveedor['Vigencia_Cotizacion'.$i] = $aProveedores->Vigencia_Cotizacion; 
-        }
-        
-       
-        
-        $data['Proveedores'] = $itemProveedor;
-
-       
-        
-       
-         
-        if ($pdf == 1) {
-            
-            
-            
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter-L');
-            //$mpdf = new mPDF('utf-8', 'Letter-L',12,'',5,5,5,30,0,10,'');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->allow_charset_conversion = false;
-            //$mpdf->pagenumPrefix = 'Página ';
-            //$mpdf->pagenumSuffix = ' de ';
-
-            
-            //$mpdf->forcePortraitHeaders = true;
-            
-            //$mpdf->mirrorMargins = 1;
-            
-            /*
-            if ($dMemoria['estatus'] < 50) {
-                $mpdf->SetWatermarkText('SIN VALIDEZ OFICIAL');
-                $mpdf->showWatermarkText = true;
-            }*/
-             $mpdf->useOddEven = false;
-           
-            
-            
-            $cadena_footer = $this->load->view('v_reporte_comparativo_cotizaciones_pie', $data, true);
-            $mpdf->SetHTMLFooter($cadena_footer);
-            
-            $output = $this->load->view('v_reporte_comparativo_cotizaciones4', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-            
-           
-            
-        } else {
-            $this->load->view('v_reporte_comparativo_cotizaciones4', $data);
-        }
-    }
-
-
-      public function comparativo_cotizacion_cinco($id, $pdf = 1) {
-        $this->load->model('proveedores_participantes_model');
-        $this->load->model('cotizaciones_model');
-        $this->load->model('proveedores_model');
-        $this->load->model('impresiones_model');
-
-
-        $this->load->library('ferfunc');
-
-        
-        
-        $dCotizacion = $this->cotizaciones_model->datos_cotizacion($id)->row_array();
-        
-       
-        $data = array(
-            'cotizacion' => $dCotizacion,
-            'autorizo' => $this->impresiones_model->firma_funcionario($dCotizacion['idAutorizo']),
-            'vo_bo' => $this->impresiones_model->firma_funcionario($dCotizacion['idVoBo']),
-            'elaboro' => $this->impresiones_model->firma_funcionario($dCotizacion['idElaboro'])
-        );
-        
-        
-        
-        //$dProveedoresCotizacion = $this->proveedores_participantes_model->datos_ProveedoresCotizacion($id)->row_array();
-        //$dCotizacion = $this->cotizaciones_model->datos_cotizacion($dProveedoresCotizacion['idCotizacion'])->row_array();
-        //$dProveedor = $this->proveedores_model->get_proveedor($dProveedoresCotizacion['idProveedor'])->row_array(); 
-        
-        $qConceptos = $this->cotizaciones_model->conceptos_cotizacion($id);
-        $qProveedores = $this->proveedores_participantes_model->listado($id);
-        
-        
-         $listadoPrecios = array();
-
-         
-        foreach ($qConceptos->result() as $aConceptos) {
-
-            $itemEmpleado = array();
-            $itemEmpleado['Cantidad'] = $aConceptos->Cantidad;
-            $itemEmpleado['Concepto'] = trim($aConceptos->Concepto).' '. trim($aConceptos->Descripcion);
-            $itemEmpleado['UnidadMedida'] = $aConceptos->UnidadMedida;
-            $itemEmpleado['id'] = $aConceptos->id;
-            
-            $i=0;
-            
-            $itemEmpleado['Proveedor1'] = "";
-            $itemEmpleado['marca1'] = "";
-            $itemEmpleado['precio_unitario1'] =  0.00;
-            $itemEmpleado['total1'] = 0.00;
-            $itemEmpleado['iva1'] = 0.00;
-
-            $itemEmpleado['Proveedor2'] = "";
-            $itemEmpleado['marca2'] = "";
-            $itemEmpleado['precio_unitario2'] =  0.00;
-            $itemEmpleado['total2'] = 0.00;
-            $itemEmpleado['iva2'] = 0.00;
-
-            $itemEmpleado['Proveedor3'] = "";
-            $itemEmpleado['marca3'] = "";
-            $itemEmpleado['precio_unitario3'] =  0.00;
-            $itemEmpleado['total3'] = 0.00;
-            $itemEmpleado['iva3'] = 0.00;    
-
-            $itemEmpleado['Proveedor4'] = "";
-            $itemEmpleado['marca4'] = "";
-            $itemEmpleado['precio_unitario4'] =  0.00;
-            $itemEmpleado['total4'] = 0.00;
-            $itemEmpleado['iva4'] = 0.00;   
-          
-
-            $itemEmpleado['Proveedor5'] = "";
-            $itemEmpleado['marca5'] = "";
-            $itemEmpleado['precio_unitario5'] =  0.00;
-            $itemEmpleado['total5'] = 0.00;
-            $itemEmpleado['iva5'] = 0.00;   
-
-           foreach ($qProveedores->result() as $aProveedores) {
-                $aProveedorConcepto = $this->proveedores_participantes_model->datos_ProveedoresConceptos($aConceptos->id,$aProveedores->id)->row_array();
-                $i+=1;
-                $itemEmpleado['marca'.$i] = $aProveedorConcepto['marca'];
-                $itemEmpleado['precio_unitario'.$i] =  $aProveedorConcepto['Precio'];
-                $itemEmpleado['total'.$i] = $aProveedorConcepto['Precio']*$aProveedorConcepto['Cantidad'];
-                $itemEmpleado['iva'.$i] =  $aProveedorConcepto['IVA'];
-                
-            }
-
-
-            /*
-            foreach ($qProveedores->result() as $aProveedores) {
-                $aProveedorConcepto = $this->proveedores_participantes_model->datos_ProveedoresConceptos($aConceptos->id,$aProveedores->id)->row_array();
-                $itemEmpleado['marca'.$aConceptos->id.'-'.$aProveedores->id] = "";
-                $itemEmpleado['precio_unitario'.$aConceptos->id.'-'.$aProveedores->id] =  $aProveedorConcepto['Precio'];
-                $itemEmpleado['total'.$aConceptos->id.'-'.$aProveedores->id] = $aProveedorConcepto['Precio']*$aConceptos->Cantidad;
-            }*/
-            
-            
-            
-            $listadoPrecios[] = $itemEmpleado;
-        }
-        
-        $data['conceptos'] = $listadoPrecios;
-        
-        
-        
-        $i=0;
-        
-        $itemProveedor = array();
-        $itemProveedor['Proveedor1']="";
-        $itemProveedor['Proveedor2']="";      
-        $itemProveedor['Proveedor3']="";
-        $itemProveedor['Proveedor4']="";
-        $itemProveedor['Proveedor5']="";
-        
-        $itemProveedor['Telefono1']="";
-        $itemProveedor['Telefono2']="";      
-        $itemProveedor['Telefono3']="";
-        $itemProveedor['Telefono4']="";      
-        $itemProveedor['Telefono5']="";
-        
-        
-        $itemProveedor['Persona_Cotizo1']="";
-        $itemProveedor['Persona_Cotizo2']="";      
-        $itemProveedor['Persona_Cotizo3']="";
-        $itemProveedor['Persona_Cotizo4']="";      
-        $itemProveedor['Persona_Cotizo5']="";
-                
-        $itemProveedor['Plazo_Entrega1']="";
-        $itemProveedor['Plazo_Entrega2']="";      
-        $itemProveedor['Plazo_Entrega3']="";
-        $itemProveedor['Plazo_Entrega4']="";      
-        $itemProveedor['Plazo_Entrega5']="";
-        
-        
-        $itemProveedor['Condiciones_Pago1']="";
-        $itemProveedor['Condiciones_Pago2']="";      
-        $itemProveedor['Condiciones_Pago3']="";
-        $itemProveedor['Condiciones_Pago4']="";      
-        $itemProveedor['Condiciones_Pago5']="";
-        
-        $itemProveedor['Vigencia_Cotizacion1']="";
-        $itemProveedor['Vigencia_Cotizacion2']="";      
-        $itemProveedor['Vigencia_Cotizacion3']="";
-        $itemProveedor['Vigencia_Cotizacion4']="";      
-        $itemProveedor['Vigencia_Cotizacion5']="";
-
-        foreach ($qProveedores->result() as $aProveedores) {
-           $i+=1; 
-           $itemProveedor['Proveedor'.$i] = trim($aProveedores->nombre); 
-           $itemProveedor['Telefono'.$i] = trim($aProveedores->telefono);
-           $itemProveedor['Persona_Cotizo'.$i] = trim($aProveedores->Persona_Cotizo); 
-           $itemProveedor['Plazo_Entrega'.$i] = $aProveedores->Plazo_Entrega; 
-           $itemProveedor['Condiciones_Pago'.$i] = $aProveedores->Condiciones_Pago; 
-           $itemProveedor['Vigencia_Cotizacion'.$i] = $aProveedores->Vigencia_Cotizacion; 
-        }
-        
-       
-        
-        $data['Proveedores'] = $itemProveedor;
-
-       
-        
-       
-         
-        if ($pdf == 1) {
-            
-            
-            
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter-L');
-            //$mpdf = new mPDF('utf-8', 'Letter-L',12,'',5,5,5,30,0,10,'');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->allow_charset_conversion = false;
-            //$mpdf->pagenumPrefix = 'Página ';
-            //$mpdf->pagenumSuffix = ' de ';
-
-            
-            //$mpdf->forcePortraitHeaders = true;
-            
-            //$mpdf->mirrorMargins = 1;
-            
-            /*
-            if ($dMemoria['estatus'] < 50) {
-                $mpdf->SetWatermarkText('SIN VALIDEZ OFICIAL');
-                $mpdf->showWatermarkText = true;
-            }*/
-             $mpdf->useOddEven = false;
-           
-            
-            
-            $cadena_footer = $this->load->view('v_reporte_comparativo_cotizaciones_pie', $data, true);
-            $mpdf->SetHTMLFooter($cadena_footer);
-            
-            $output = $this->load->view('v_reporte_comparativo_cotizaciones5', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-            
-           
-            
-        } else {
-            $this->load->view('v_reporte_comparativo_cotizaciones5', $data);
-        }
-    }
-
-    
-    
-    
-    
-    public function detalle_memoria_nomina($idmemoria, $pdf = 1) {
-        $this->load->model('memorias_model');
-        $this->load->model('facturas_model');
-        $this->load->model('conceptos_model');
-        $this->load->model('impresiones_model');
-        $this->load->model('obras_model');
-
-
-        $this->load->library('ferfunc');
-        $this->load->library('table');
-
-        $dMemoria = $this->memorias_model->datos_memoria($idmemoria)->row_array();
-        $dObra = $this->obras_model->datos_obra($dMemoria['idObra'])->row_array();
-
-        $this->db->where('idObra', $dObra['id']);
-        $qPartida = $this->db->get_where('catObrasRelPartidasPresupuestales');
-
-        $this->db->where('id',$dObra['idResidencia']);
-        $dResidencia=  $this->db->get_where('memResidencias');
-
-        $residencia="";
-        if ($dResidencia->num_rows()>0){
-        	$aResidencia=$dResidencia->row_array();
-        	$residencia=$aResidencia["Nombre"];
-        }
-
-        echo $residencia;
-       // exit();
-        
-        
-        $this->db->where('idObra', $dObra['id']);
-        $qPartida = $this->db->get_where('catObrasRelPartidasPresupuestales');
-        
-        $this->db->where('id', $dMemoria['idClavePresupuestal']);
-        $qClave = $this->db->get_where('catClavesPresupuestales');
-        
-        $claves_presupuestales="";
-        
-        $aClave=$qClave->row_array();
-        $claves_presupuestales=$aClave['ClavePresupuestal'];
-        
-        
-        /*
-        
-        $claves_presupuestales="";
-        foreach ($qPartida->result() as $rPartida) {
-            $sql ='select catClavesPresupuestales.* from catObrasRelClavesPresupuestales inner join catClavesPresupuestales on 
-            catObrasRelClavesPresupuestales.idClavePresupuestal = catClavesPresupuestales.id
-            where idRelPartidaPresupuestal=? order by id asc '; 
-            $qClave = $this->db->query($sql, array($rPartida->id));
-            foreach ($qClave->result() as $rClave) {
-               $claves_presupuestales.=$rClave->ClavePresupuestal.'<br/>';
-            }
-
-        }
-        */
-
-        $partidas_presupuestales="";
-        foreach ($qPartida->result() as $rPartida) {
-            $sql ='select Nombre from catPartidasPresupuestales
-            where id=?'; 
-            $qClave = $this->db->query($sql, array($rPartida->idPartidaPresupuestal));
-            foreach ($qClave->result() as $rClave) {
-               $partidas_presupuestales.=$rClave->Nombre.'<br/>';
-            }
-
-        }
-
-
-
-        
-        
-        $qConceptos = $this->facturas_model->listado_nominas($idmemoria);
-        
-        
-        
-//        $aCheques = $this->impresiones_model->cheques_memorias($idmemoria);
-        $direccion = $this->impresiones_model->direccion($dObra['idDireccion']);
-        $partida = $this->impresiones_model->partida_presupuestal($dObra['idPartidaPresupuestal'])->row_array();
-        
-        
-       
-        
-       
-        /*
-        
-        $this->table->set_template(
-                array(
-                    'table_open' => '<table id="facturas">',
-                    'heading_row_start' => '<tr>',
-                    'heading_row_end' => '</tr>',
-                    'heading_cell_start' => '<th style="vertical-align: top; text-align: center;">',
-                    'heading_cell_end' => '</th>',
-                    'row_start' => '<tr>',
-                    'row_end' => '</tr>',
-                    'cell_start' => '<td>',
-                    'cell_end' => '</td>',
-                    'table_close' => '</table>'
-        ));
-        $this->table->set_heading(array('NUMERO CONSECUTIVO', 'PERIODO', 'CONCEPTO', 'IMPORTE'));
-        $i=1;
-        $total=0;
-        foreach ($qConceptos->result() as $rConcepto) {
-            $i++;
-            $total+=$rConcepto->importe;
-            $tabla = array(
-                array('data' => $i, 'style' => 'vertical-align: top; text-align: center'),
-                array('data' => $rConcepto->periodo, 'style' => 'vertical-align: top; text-align: center'),
-                array('data' => $rConcepto->concepto, 'style' => 'vertical-align: top; text-align: center'),
-                array('data' => $this->ferfunc->formato_dinero($rConcepto->importe), 'style' => 'vertical-align: top;text-align: right')
-            );
-            $this->table->add_row($tabla);
-            $cheques = $this->facturas_model->listado_cheques_cancelados($rConcepto->id);
-            foreach ($cheques->result() as $rCheques) {
-                $importe = 0 - $rCheques->importe;
-                $i++;
-                $total+=$importe;
-                $tabla = array(
-                    array('data' => $i, 'style' => 'vertical-align: top; text-align: center'),
-                    array('data' => $rConcepto->periodo, 'style' => 'vertical-align: top; text-align: center'),
-                    array('data' => 'DEDUCTIVA POR CANCELACION', 'style' => 'vertical-align: top; text-align: center'),
-                    array('data' => '-' . $this->ferfunc->formato_dinero($importe), 'style' => 'vertical-align: top;text-align: right;color: #990000')
-                );
-                $this->table->add_row($tabla);
-            }
-        }
-        $this->table->add_row(array(
-            'data' => $this->ferfunc->fechacascompleta($dMemoria['fecha']),
-            'colspan' => 2,
-            'style' => 'font-size: 10pt;font-weight: bold;text-align: center'
-                ), array('data' => 'TOTAL',
-            'class' => 'titulosCabezera',
-            'style' => 'text-align: center;'), array('data' => $this->ferfunc->formato_dinero($total),
-            'style' => 'text-align: right;')
-        );
-
-       
-        */
-         
-        
-        $data = array(
-            'obra' => $dObra,
-            'memoria' => $dMemoria,
-            'claves_presupuestales' => $claves_presupuestales,
-            'logo' => '<img  src="' . site_url('images/logo-secretaria-mini.fw.png') . '" id="logo">',
-            //'tabla' => $this->table->generate(),
-            'direccion' => $direccion,
-            'autorizo' => $this->impresiones_model->firma_funcionario($dMemoria['idAutorizo']),
-            'vo_bo' => $this->impresiones_model->firma_funcionario($dMemoria['idVoBo']),
-            'elaboro' => $this->impresiones_model->firma_funcionario($dMemoria['idElaboro']),
-            'reviso'  => $this->impresiones_model->firma_funcionario($dMemoria['idReviso']),
-//            'cheques' => $aCheques,
-            'partidas_presupuestales' => $partidas_presupuestales,
-            'residencia'=>$residencia,
-            //'total' => $total,
-            'qConceptos' => $qConceptos,
-        );
-
-        
-        
-        if ($pdf == 1) {
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter-L');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->shrink_tables_to_fit = 1;
-            $mpdf->forcePortraitHeaders = true;
-
-            /*
-            if ($dMemoria['Estatus'] < 40) {
-                $mpdf->SetWatermarkText('SIN VALIDEZ OFICIAL');
-                $mpdf->showWatermarkText = true;
-            }*/
-
-            $output = $this->load->view('v_reporte_detalle_memoria_nomina', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-        } else {
-            $this->load->view('v_reporte_detalle_memoria_nomina', $data);
-        }
-    }
-
-    public function nomina_ot($idObra) {
-        $this->load->model('obras_model');
-        $this->load->model('memorias_model');
-        $this->load->model('impresiones_model');
-        $this->load->model('facturas_model');
-        $this->load->model('residencias_model');
-        $this->load->model('conceptos_model');
-
-        $this->load->library('ferfunc');
-        $this->load->library('excel');
-
-        $dObra = $this->obras_model->datos_obra($idObra)->row_array();
-        $memorias = $this->impresiones_model->memorias_nominas($idObra);
-        $aResidencias = $this->residencias_model->aResidencias();
-        $aConceptos = $this->conceptos_model->aConceptos();
-        $datos = array(
-            array(
-                'Orden Trabajo',
-                'Memoria',
-                'Residencia',
-                'Concepto',
-                'Periodo',
-                'Fecha',
-                'Importe',
-                'ISPT',
-                'ISR',
-                '2 al Millar',
-                'Deductiva Cheque',
-                'ISR ASIM',
-                '2 al Millar a deduccion',
-                'Neto 2 al Millar',
-                'Neto ISR',
-                'Neto',
-                
-        ));
-        $this->excel->setActiveSheetIndex(0);
-//        $this->excel->getActiveSheet()->fromArray($titCabecera, null, 'A1');
-
-        foreach ($memorias->result() as $rmemoria) {
-            $nominas = $this->facturas_model->listado_nominas($rmemoria->id);
-            foreach ($nominas->result() as $rnominas) {
-                $retDeduccion = $rnominas->deduChecquecancelado * 0.002;
-                $netoRetencion = $rnominas->importe_retencion - $retDeduccion;
-                $netoISR = $rnominas->isr - $rnominas->isr_asim;
-                $neto = $rnominas->importe - $rnominas->deduChecquecancelado;
-                $datos[] = array(
-                    $dObra['OrdenTrabajo'],
-                    $rmemoria->numero,
-                    $aResidencias[$rnominas->idResidencia],
-                    $rnominas->concepto,
-                    $rnominas->periodo,
-                    $this->ferfunc->fechacas($rnominas->fecha_nomina),
-                    $this->ferfunc->formato_dinero($rnominas->importe),
-                    $this->ferfunc->formato_dinero($rnominas->ISPT),
-                    $this->ferfunc->formato_dinero($rnominas->isr),
-                    $this->ferfunc->formato_dinero($rnominas->importe_retencion),
-                    $this->ferfunc->formato_dinero($rnominas->deduChecquecancelado),
-                    $this->ferfunc->formato_dinero($rnominas->isr_asim),
-                    $this->ferfunc->formato_dinero($retDeduccion),
-                    $this->ferfunc->formato_dinero($netoRetencion),
-                    $this->ferfunc->formato_dinero($netoISR),
-                    $this->ferfunc->formato_dinero($neto)
-                );
-            }
-        }
-        
-        $filename = 'Reporte nominas OT-' . $dObra['OrdenTrabajo'] . '.xls';
-        $this->excel->getActiveSheet()->fromArray($datos, null, 'A1');
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-        $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');
-        $objWriter->save('php://output');
-        //$this->excel->stream('Reporte nominas OT-' . $dObra['OrdenTrabajo'] .'.xls');
-    }
-    
-    
-
-    public function reporte_facturas_proveedor($idObra, $pdf = 1) {
-        $this->load->model('impresiones_model');
-        $this->load->library('ferfunc');
-
-        $facturas = $this->impresiones_model->get_facturas_obra($idObra);
-        $data = array(
-            'logo' => '<img  src="' . site_url('images/logo-secretaria-mini.fw.png') . '" id="logo">',
-            'facturas' => $facturas
-        );
-
-        if ($pdf == 1) {
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->shrink_tables_to_fit = 1;
-            $mpdf->forcePortraitHeaders = true;
-
-            $output = $this->load->view('v_reporte_facturas_proveedor', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-        } else {
-            $this->load->view('v_reporte_facturas_proveedor', $data);
-        }
-    }
-    
-    /*public function reporte_facturas_proveedor_nomina($idObra, $pdf = 1) {
-        $this->load->model('impresiones_model');
-        $this->load->library('ferfunc');
-
-        $facturas = $this->impresiones_model->get_facturas_obra($idObra);
-        $data = array(
-            'logo' => '<img  src="' . site_url('images/logo-secretaria-mini.fw.png') . '" id="logo">',
-            'facturas' => $facturas
-        );
-
-        if ($pdf == 1) {
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->shrink_tables_to_fit = 1;
-            $mpdf->forcePortraitHeaders = true;
-
-            $output = $this->load->view('v_reporte_facturas_proveedor', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-        } else {
-            $this->load->view('v_reporte_facturas_proveedor', $data);
-        }
-    }
-    
-    public function reporte_completo($idObra, $pdf = 1){
-        $this->load->model('impresiones_model');
-    }*/
-
-    public function recibo_nomina($idMemoria, $pdf = 1) {
-        $this->load->model('impresiones_model');
-        $this->load->model('obras_model');
-        $this->load->model('direcciones_model');
-        $this->load->model('firmas_model');
-        $this->load->model('leyendas_model');
-        $this->load->model('bancos_model');
-
-        
-        $this->load->library('ferfunc');
-
-        $memoria = $this->impresiones_model->recibo_nomina($idMemoria)->row_array();
-        $obra = $this->obras_model->datos_obra($memoria['idObra'])->row_array();
-        $direccion = $this->direcciones_model->datos_direccion($obra['idDireccion'])->row_array();
-        //$funcionario = $this->firmas_model->datos_firma($memoria['idAutorizo'])->row_array();
-
-        $aBancos = $this->bancos_model->datos_banco($memoria["idBanco"])->row_array();
-        
-        if ($obra['OrdenTrabajo']=="OAD-0055-17"){ 
-            $funcionario = $this->firmas_model->datos_firma($memoria['idVoBo'])->row_array();
-        }else{
-            $funcionario = $this->firmas_model->datos_firma($memoria['idAutorizo'])->row_array();
-        }
-        
-        $data = array(
-            'memoria' => $memoria,
-            'obra' => $obra,
-            'direccion' => $direccion['nombre'],
-            'funcionario' => $funcionario,
-            'leyenda' => $this->leyendas_model->datos_leyenda_ejercicio(date('Y')),
-            'Bancos' => $aBancos    
-        );
-        if ($pdf == 1) {
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->shrink_tables_to_fit = 1;
-            $mpdf->forcePortraitHeaders = true;
-            $mpdf->setHTMLFooter('<span style="font-weight:bold">Favor de realizar el depósito a la Cuenta Bancaria Número 030 320 90000040782 2
-BANCO DEL BAJÍO, S.A.</span>');
-
-            $output = $this->load->view('v_recibo_nomina', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-        } else {
-            $this->load->view('v_recibo_nomina', $data);
-        }
-    }
-
-    public function recibo_imss($idMemoria, $pdf = 1) {
-        $this->load->model('impresiones_model');
-        $this->load->model('obras_model');
-        $this->load->model('direcciones_model');
-        $this->load->model('firmas_model');
-        $this->load->model('leyendas_model');
-        $this->load->model('bancos_model');
-        
-        $this->load->library('ferfunc');
-
-        $memoria = $this->impresiones_model->recibo_nomina($idMemoria)->row_array();
-        $obra = $this->obras_model->datos_obra($memoria['idObra'])->row_array();
-        $direccion = $this->direcciones_model->datos_direccion($obra['idDireccion'])->row_array();
-        //$funcionario = $this->firmas_model->datos_firma($memoria['idAutorizo'])->row_array();
-        $aBancos = $this->bancos_model->datos_banco($memoria["idBanco"])->row_array();
-        
-        if ($obra['OrdenTrabajo']=="OAD-0055-17"){ 
-            $funcionario = $this->firmas_model->datos_firma($memoria['idVoBo'])->row_array();
-        }else{
-            $funcionario = $this->firmas_model->datos_firma($memoria['idAutorizo'])->row_array();
-        }
-        
-        $data = array(
-            'memoria' => $memoria,
-            'obra' => $obra,
-            'direccion' => $direccion['nombre'],
-            'funcionario' => $funcionario,
-            'leyenda' => $this->leyendas_model->datos_leyenda_ejercicio(date('Y')),
-            'Bancos' => $aBancos
-        );
-        if ($pdf == 1) {
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->shrink_tables_to_fit = 0;
-            $mpdf->forcePortraitHeaders = true;
-
-//            $mpdf->setHTMLFooter('<span style="font-weight:bold">Favor de realizar el depósito a la Cuenta Bancaria Número 030 320 90000040782 2
-//BANCO DEL BAJÍO, S.A.</span>');
-            if ($memoria['amortizado'] > 0)
-                //$output = $this->load->view('v_recibo_imss_fondo', $data, true);
-                $output = $this->load->view('v_recibo_imss', $data, true);
-            else
-                $output = $this->load->view('v_recibo_imss', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-        } else {
-            $this->load->view('v_recibo_imss', $data);
-        }
-    }
-
-    
-    
-    
-    
-    public function recibo_servicios_personales($idMemoria, $pdf = 1) {
-        $this->load->model('impresiones_model');
-        $this->load->model('obras_model');
-        $this->load->model('direcciones_model');
-        $this->load->model('firmas_model');
-        $this->load->model('leyendas_model');
-        $this->load->model('bancos_model');
-        
-        $this->load->library('ferfunc');
-
-        $memoria = $this->impresiones_model->recibo_nomina($idMemoria)->row_array();
-        $obra = $this->obras_model->datos_obra($memoria['idObra'])->row_array();
-        $direccion = $this->direcciones_model->datos_direccion($obra['idDireccion'])->row_array();
-        //$funcionario = $this->firmas_model->datos_firma($memoria['idAutorizo'])->row_array();
-        $aBancos = $this->bancos_model->datos_banco($memoria["idBanco"])->row_array();
-        
-        if ($obra['OrdenTrabajo']=="OAD-0055-17"){ 
-            $funcionario = $this->firmas_model->datos_firma($memoria['idVoBo'])->row_array();
-        }else{
-            $funcionario = $this->firmas_model->datos_firma($memoria['idAutorizo'])->row_array();
-        }
-        
-        $data = array(
-            'memoria' => $memoria,
-            'obra' => $obra,
-            'direccion' => $direccion['nombre'],
-            'funcionario' => $funcionario,
-            'leyenda' => $this->leyendas_model->datos_leyenda_ejercicio(date('Y')),
-            'Bancos' => $aBancos
-        );
-        if ($pdf == 1) {
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->shrink_tables_to_fit = 0;
-            $mpdf->forcePortraitHeaders = true;
-
-//            $mpdf->setHTMLFooter('<span style="font-weight:bold">Favor de realizar el depósito a la Cuenta Bancaria Número 030 320 90000040782 2
-//BANCO DEL BAJÍO, S.A.</span>');
-            if ($memoria['amortizado'] > 0)
-                //$output = $this->load->view('v_recibo_imss_fondo', $data, true);
-                $output = $this->load->view('v_recibo_servicios_personales', $data, true);
-            else
-                $output = $this->load->view('v_recibo_servicios_personales', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-        } else {
-            $this->load->view('v_recibo_servicios_personales', $data);
-        }
-    }
-
-    
-    
-    public function recibo_materiales($idMemoria, $pdf = 1) {
-        $this->load->model('impresiones_model');
-        $this->load->model('obras_model');
-        $this->load->model('direcciones_model');
-        $this->load->model('firmas_model');
-        $this->load->model('leyendas_model');
-        $this->load->model('bancos_model');
-        
-        $this->load->library('ferfunc');
-
-        $memoria = $this->impresiones_model->recibo_materiales($idMemoria)->row_array();
-        $obra = $this->obras_model->datos_obra($memoria['idObra'])->row_array();
-        $direccion = $this->direcciones_model->datos_direccion($obra['idDireccion'])->row_array();
-        //$funcionario = $this->firmas_model->datos_firma($memoria['idAutorizo'])->row_array();
-        $aBancos = $this->bancos_model->datos_banco($memoria["idBanco"])->row_array();
-
-        if ($obra['OrdenTrabajo']=="OAD-0055-17"){ 
-            $funcionario = $this->firmas_model->datos_firma($memoria['idVoBo'])->row_array();
-        }else{
-            $funcionario = $this->firmas_model->datos_firma($memoria['idAutorizo'])->row_array();
-        }
-
-        $data = array(
-            'memoria' => $memoria,
-            'obra' => $obra,
-            'direccion' => $direccion['nombre'],
-            'funcionario' => $funcionario,
-            'leyenda' => $this->leyendas_model->datos_leyenda_ejercicio(date('Y')),
-            'Bancos' => $aBancos   
-        );
-        if ($pdf == 1) {
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->shrink_tables_to_fit = 1;
-            $mpdf->setHTMLFooter('<span style="font-weight:bold">Favor de realizar el depósito a la Cuenta Bancaria Número 030 320 90000040782 2
-BANCO DEL BAJÍO, S.A.</span>');
-
-            $output = $this->load->view('v_recibo_materiales', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-        } else {
-            $this->load->view('v_recibo_materiales', $data);
-        }
-    }
-
-    
-    
-    
-    
-    public function imprime_cheque($idChque, $pdf = 1) {
-        $this->load->model('cheque_model');
-     
-        
-        $this->load->library('ferfunc');
-
-        $aCheque = $this->cheque_model->datos_cheque($idChque)->row_array();
-       
-       
-       
-        $data = array(
-            'cheque' => $aCheque,
-        );
-        
-        $data['importe_lentra'] =$this->ferfunc->numerosaletras($aCheque["importecheque"],1);
-        $data['aLeyendacheque']=$this->cheque_model->addw_leyenda_cheque(); 
-        //$this->load->view('v_reporte_cheque_aux', $data); 
-         
-
-        if ($pdf == 1) {
-            $this->load->library('mpdf');
-            //$mpdf = new mPDF('utf-8', 'Letter');
-            //$mpdf = new mPDF('utf-8', 'Legal');
-            //$mpdf = new mPDF('utf-8', 'Letter',12,'',5,5,5,58,0,10,'');
-            
-            //$mpdf = new mPDF('utf-8', 'Letter-L',12,'',96,0,80.5,0,0,0,'');
-            
-            $mpdf = new mPDF('utf-8', array(70,183),0, '', 10, 0, 20, 0, 0, 0, 'L');
-            
-            
-            $mpdf->keep_table_proportions = true;
-            $mpdf->shrink_tables_to_fit = 1;
-            $mpdf->forcePortraitHeaders = true;
-           
-             
-            $mpdf->pagenumPrefix = 'Página ';
-            $mpdf->pagenumSuffix = ' de ';
-            $mpdf->autoPageBreak = true;
-            
-          
-            
-            $output = $this->load->view('v_reporte_cheque', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-        } else {
-            $this->load->view('v_reporte_cheque', $data);
-        }
-       
-    }
-    
+    */
    
-     
-    public function poliza_cheque($idChque, $pdf = 1) {
-        $this->load->model('cheque_model');
-        $this->load->model('funcionarios_model');
-        
-        
-        $this->load->library('ferfunc');
-
-        $aCheque = $this->cheque_model->datos_cheque($idChque)->row_array();
-       
-        
-        
-        
-       
-        $data = array(
-            'cheque' => $aCheque,
-            'formulo' => $this->funcionarios_model->firma_funcionario($aCheque['idFomulo']),
-            'reviso' => $this->funcionarios_model->firma_funcionario($aCheque['idReviso']),
-            'cuentabanco' => $this->funcionarios_model->firma_funcionario($aCheque['idCuentaBanco']),
-        );
-        
-        
-        
-        $data['importe_lentra'] =$this->ferfunc->numerosaletras($aCheque["importecheque"],1);
-        
-        
-        $this->load->model('funcionarios_model');
-        $data['aFuncionarios']=$this->funcionarios_model->addw_funcionarios();
-        
-        $this->load->model('bancos_model');
-        $data['aBancos']=$this->bancos_model->addw_bancos();
-        
-
-        
-        
-        if ($pdf == 1) {
-            $this->load->library('mpdf');
-            $mpdf = new mPDF('utf-8', 'Letter');
-            //$mpdf = new mPDF('utf-8', 'Legal');
-            //$mpdf = new mPDF('utf-8', 'Letter-L',12,'',5,5,5,58,0,10,'');
-            $mpdf = new mPDF('utf-8', 'Letter',12,'',20,20,5,5,0,10,'');
-            
-            $mpdf->keep_table_proportions = true;
-            $mpdf->shrink_tables_to_fit = 1;
-            $mpdf->forcePortraitHeaders = true;
-           
-             
-            $mpdf->pagenumPrefix = 'Página ';
-            $mpdf->pagenumSuffix = ' de ';
-            $mpdf->autoPageBreak = true;
-            
-           /*
-            if ($dOrdenCompra['Estatus'] < 30) {
-                $mpdf->SetWatermarkText('SIN VALIDEZ OFICIAL');
-                $mpdf->showWatermarkText = true;
-            }*/
- 
-            /*
-            $cadena_footer = $this->load->view('v_reporte_solicitud_orden_compra_pie', $data, true);
-            $mpdf->SetHTMLFooter($cadena_footer);
-            //$mpdf->setFooter('{PAGENO}');
-            if ($letras>100){
-                $output = $this->load->view('v_reporte_solicitud_orden_compra_aux', $data, true);
-            }else{
-                $output = $this->load->view('v_reporte_solicitud_orden_compra', $data, true);
-            }*/
-            
-            $output = $this->load->view('v_poliza_cheque', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-        } else {
-            $this->load->view('v_poliza_cheque', $data);
-        }
-    }
-    
-    
-    
-    public function solicitud_cotizacion_sin_proveedor($idCotizacion,$pdf = 1) {
-        $this->load->model('proveedores_participantes_model');
-        $this->load->model('cotizaciones_model');
-        $this->load->model('proveedores_model');
-        $this->load->model('impresiones_model');
-        $this->load->model('usuarios_model');
-        $this->load->model('obras_model');
-        $this->load->model('residencias_model');
-        
-        
-
-
-        $this->load->library('ferfunc');
-        
-        
-        $idUsuario=$this->session->userdata('id');
-        $aUsuario = $this->usuarios_model->datos_usuario($idUsuario)->row_array();
-        
-        
-        
-        $dCotizacion = $this->cotizaciones_model->datos_cotizacion($idCotizacion)->row_array();
-        
-        $qConceptos = $this->cotizaciones_model->conceptos_cotizacion($idCotizacion);
-
-       $qObra = $this->obras_model->datos_obra($dCotizacion['idObra']);
-       $aObra = $qObra -> row_array();
-
-        //$qObra = $this->obras_model->datos_obra($id_obra);
-        //$data['aObra'] = $qObra->row_array();
-
-       
-        //$aResidencia = $qResidencia
-        
-        $aResidencia = $this->residencias_model->datos_residencia($aObra['idResidencia'])->row_array();
-        
-                
-       
-        
-       
-        $data = array(
-            'obra' => $aObra,
-            'Email' => $aUsuario['correo'],
-            'ext' => $aUsuario['ext'],
-            'cotizacion' => $dCotizacion,
-            'Residencia' => $aResidencia['Nombre'],
-            //'logo' => '<img  src="' . site_url('images/logo-secretaria-mini.fw.png') . '" id="logo">',
-            'qconceptos' =>  $qConceptos,
-            'autorizo' => $this->impresiones_model->firma_funcionario($dCotizacion['idAutorizo']),
-            'vo_bo' => $this->impresiones_model->firma_funcionario($dCotizacion['idVoBo']),
-            'elaboro' => $this->impresiones_model->firma_funcionario($dCotizacion['idElaboro']),
-            'Fecha' =>  strtoupper($this->ferfunc->fechacascompleta($dCotizacion['Fecha']))        
-        );
-
-       
-        
-        if ($pdf == 1) {
-            
-            $this->load->library('mpdf');
-            //$mpdf = new mPDF('utf-8', 'Letter');
-            $mpdf = new mPDF('utf-8', 'Letter',12,'',5,5,5,30,0,10,'');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->allow_charset_conversion = false;
-            $mpdf->pagenumPrefix = 'Página ';
-            $mpdf->pagenumSuffix = ' de ';
-            
-            //$mpdf->forcePortraitHeaders = true;
-            //$mpdf->mirrorMargins = 1;
-            /*
-            if ($dMemoria['estatus'] < 50) {
-                $mpdf->SetWatermarkText('SIN VALIDEZ OFICIAL');
-                $mpdf->showWatermarkText = true;
-            }*/
-            $mpdf->useOddEven = false;
-            
-            $cadena_footer = $this->load->view('v_reporte_solicitud_de_cotizacion_pie', $data, true);
-            $mpdf->SetHTMLFooter($cadena_footer);
-            
-            $output = $this->load->view('v_reporte_solicitud_de_cotizacion_sin_proveedor', $data, true);
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-            
-           
-            
-        } else {
-            $this->load->view('v_reporte_solicitud_de_cotizacion_sin_proveedor', $data);
-        }
-    }
-
-    
-    
-    public function modificar_fecha_solicitud($id,$Fecha) {
-        $this->load->model('cotizaciones_model');
-        
-        
-        
-        
-        $data = array(
-            'Fecha_Cuadro_Comparativo' => $Fecha,
-           
-        );
-        $retorno = $this->cotizaciones_model->datos_cotizacion_update($data,$id);
-        print_r($retorno);
-        
-       
-        
-        //$this->comparativo_cotizacion( $id,$this->input->post('fecha_impresion'),$pdf = 1);
-        
-       
   
-        
-    }
+
+     
     
     
     public function reporte_documentos_por_bloque($pdf=1){
@@ -2408,83 +1359,7 @@ BANCO DEL BAJÍO, S.A.</span>');
     }
 
 
-    public function reporte_memoria_nomina(){
-
-    	/*$this->load->library('excel');
-
-
-        $filename = 'Reporte de Nomina -' . $datos. '.xls';
-        $this->excel->getActiveSheet()->fromArray($datos, null, 'A1');
-        header('Content-Type: application/vnd.ms-excel');
-        header('Content-Disposition: attachment;filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-        $objWriter = PHPExcel_IOFactory::createWriter($this->excel, 'Excel5');
-        $objWriter->save('php://output');*/
-
-    	    /*$this->load->library('mpdf60');
-            $mpdf = new mPDF('utf-8','Legal-L');
-            $mpdf->keep_table_proportions = true;
-            $mpdf->shrink_tables_to_fit = 1;
-            $mpdf->forcePortraitHeaders = true;*/ 
-
-
-            $this->load->model('impresiones_model');
-           
-            $qMemorias = $this->impresiones_model->listado_memorias_nominas($this->input->post('fecha_inicio_nomina'),$this->input->post('fecha_termino_nomina'));
-
-
-            $datos = array(
-        	//'obra' => $dObra,
-        	'qMemorias' => $qMemorias,
-        	);
-
-           // if(isset($datos)){
-           // print_r($datos);
-           // exit();
-           // }
-            
-            /*$outputhtml = $this->load->view('v_reporte_memoria_nomina',$datos);
-            $mpdf->WriteHTML($outputhtml);
-            $mpdf->Output();*/
-
-
-              $this->load->view('v_reporte_memoria_nomina', $datos);
-
-    		
-    }
-
-    public function reporte_memoria_retenciones(){
-
-    	$this->load->model('obras_model');
-    	$this->load->model('impresiones_model');
-    	$this->load->model('residencias_model');
-    	$this->load->model('conceptos_model');
-
-
-
-        //$dObra = $this->obras_model->datos_obra($idObra)->row_array();
-        $qMemorias = $this->impresiones_model->listado_memorias_nominas_retenciones($this->input->post('fecha_inicio_orden'),$this->input->post('fecha_termino_orden'));
-        //$aResidencias = $this->residencias_model->aResidencias();
-        //$aConceptos = $this->conceptos_model->aConceptos();
-
-
-
-        $datos = array(
-        	//'obra' => $dObra,
-        	'qMemorias' => $qMemorias,
-        	 );
-
-        
-           
-      
-            $this->load->view('v_reporte_memorias_retenciones', $datos);
-
-         
-    		
-
-
-
-    }
+   
     
     public function  etiqueta_orden_trabajo ($id){
         $porciones = explode("%20", $id);
@@ -2725,7 +1600,7 @@ BANCO DEL BAJÍO, S.A.</span>');
         $aSubDocumentos = $this->subdocumentos_model->addw_subDocumentos();
         //Rel archivo documento por archivo
         $qStatus = $this->impresiones_model->datos_reporte_estatus_archivo ($id, $this->session->userdata('idDireccion_responsable'));
-        $qEstimaciones_archivo = $this->impresiones_model->estimaciones_de_archivo($id);
+        /*$qEstimaciones_archivo = $this->impresiones_model->estimaciones_de_archivo($id);
         echo 'Entro';
         if (isset($qEstimaciones_archivo)){
             if ($qEstimaciones_archivo->num_rows() > 0){
@@ -2734,12 +1609,14 @@ BANCO DEL BAJÍO, S.A.</span>');
                 foreach ($qEstimaciones_archivo->result() as $estimaciones){
 
                         echo 'hay tipo id est '. $estimaciones->id;
-                        $estimaciones_archivo=$this->impresiones_model->get_estimaciones_archivo_preregistro($estimaciones->id,  $this->session->userdata('id'));
+                        $estimaciones_archivo=$this->impresiones_model->get_estimaciones_archivo_preregistro($estimaciones->id_Rel_Archivo_Documento,  $this->session->userdata('id'));
+                        //$estimaciones_archivo=$this->impresiones_model->get_estimaciones_archivo($estimaciones->id);
                         if ($estimaciones_archivo->num_rows() > 0){
-                                            echo 'Rows'. $estimaciones_archivo->num_rows();
+                                            echo 'Rows controller'. $estimaciones_archivo->num_rows();
+                                            $estimaciones_usuario= 1;
 
                                             foreach ($estimaciones_archivo->result() as $estimaciones_a){
-                                                echo $estimaciones_a->idSubDocumento;
+                                                //echo $estimaciones_a->idSubDocumento;
                                             }
                         }
                         $hay_estimaciones =1;
@@ -2751,6 +1628,13 @@ BANCO DEL BAJÍO, S.A.</span>');
                 $hay_estimaciones =-1;
                 echo $estimaciones_archivo;
             }
+        
+        }*/
+        $qEstimaciones_archivo = $this->impresiones_model->estimaciones_direccion($id, $this->session->userdata('idDireccion_responsable'));
+        if ($qEstimaciones_archivo->num_rows() > 0){
+            $hay_estimaciones =1;
+        }else {
+            $hay_estimaciones =-1;
         }
         $qArchivo = $this->datos_model-> get_Archivo_id($id);
         $qObra = $this->impresiones_model->datos_obra ($id);
@@ -2776,7 +1660,7 @@ BANCO DEL BAJÍO, S.A.</span>');
         $data = array(
         	
         	'qStatus' => $qStatus,
-                'estimaciones_archivo' =>$estimaciones_archivo,
+                'estimaciones_archivo' =>$qEstimaciones_archivo,
                 'aSubDocumentos'=> $aSubDocumentos ,
                 'OrdenTrabajo' => $OrdenTrabajo,
                 'Obra' =>  $Obra,
@@ -2792,6 +1676,10 @@ BANCO DEL BAJÍO, S.A.</span>');
                 'hay_estimaciones'=>$hay_estimaciones
             
         	);
+        
+                
+                
+                
         
         //$pdf = 0;
         if ($pdf == 1) {
@@ -2920,6 +1808,161 @@ BANCO DEL BAJÍO, S.A.</span>');
             $mpdf->Output();
         } else {
             $this->load->view('v_reporte_estatus_archivo', $data);
+        } 
+          
+        
+        
+        
+    }
+    
+    public function documentos_preregistro_ot( $pdf = 1) {
+        
+        $this->load->model('impresiones_model');
+        $this->load->model('rel_archivo_preregistro_model');
+        
+       
+        $qOT = $this->rel_archivo_preregistro_model->ot_preregistradas();
+        $data = array();
+        $i = 0;
+        if (isset($qOT)){
+            if ($qOT->num_rows() > 0){
+                
+                
+
+                foreach ($qOT->result() as $OT){
+                   
+                        
+                    $total_documentos = $this->rel_archivo_preregistro_model->total_documentos($OT->idArchivo);
+                    $documentos_preregistrados = $this->rel_archivo_preregistro_model->documentos_preregistrados($OT->idArchivo);
+                    
+                    
+                    $resultado[$i]= array(
+                                "OT" => $OT->OrdenTrabajo ,
+                                "total_documentos" => $total_documentos,
+                                "documentos_preregistrados" => $documentos_preregistrados,
+                               
+                                );
+                    $i++;
+                    echo $OT->OrdenTrabajo;
+                    echo $total_documentos;
+                    echo $documentos_preregistrados ."<br>";
+
+                }
+            }
+            
+        }
+        
+       
+
+        
+        
+        $data = array(
+        	
+        	'resultado' => $resultado,
+            );
+        
+         
+        
+        
+        //$pdf = 0;
+        if ($pdf == 1) {
+            $this->load->library('mpdf');
+            //$mpdf = new mPDF('utf-8', 'Letter');
+            //$mpdf = new mPDF('utf-8', 'Legal');
+            $mpdf = new mPDF('utf-8');
+            
+            
+        
+          
+           
+            
+            
+            $output = $this->load->view('v_reporte_avance_ot', $data, true);
+            $mpdf->WriteHTML($output);
+            $mpdf->Output();
+        } else {
+            $this->load->view('v_reporte_avance_ot', $data);
+        } 
+          
+        
+        
+        
+    }
+    
+    
+    public function reporte_uso($pdf = 1 ) {
+        
+        $this->load->model('impresiones_model');
+        $this->load->model('rel_archivo_preregistro_model');
+        $this->load->model('direcciones_model');
+        
+       
+        $qDirecciones = $this->direcciones_model->listado_catDirecciones();
+        
+        $i = 0;
+       
+                
+
+                foreach ($qDirecciones->result() as $rRow){
+                   
+                    $usuarios_direccion =     
+                    $ot_preregistradas = $this->rel_archivo_preregistro_model->ot_preregistradas_direccion($rRow->id);
+                    $documentos_preregistrados = $this->rel_archivo_preregistro_model->documentos_preregistrados_direccion($rRow->id);
+                    $usuarios =  $this->rel_archivo_preregistro_model->usuarios_preregistran_direccion($rRow->id);
+                    
+                    $usuario = "";
+                    foreach ($usuarios->result() as $u){
+                        
+                        $usuario .= $u->Nombre."<br>";
+                        print_r($usuario);
+                    }
+                    
+                    
+                    $resultado[$i]= array(
+                        "Direccion" => $rRow->Nombre ,
+                        "ot_preregistradas" => $ot_preregistradas,
+                        "documentos_preregistrados" => $documentos_preregistrados,
+                        "usuarios" => $usuario,
+                       
+
+                    );
+                    $i++;
+                    $usuario .="<br><br>";
+
+                }
+                
+           
+        
+        
+        
+        $data = array(
+        	
+        	'resultado' => $resultado,
+            );
+        
+         //array_multisort($sortArray[$orderby],SORT_DESC,$data); 
+         
+        // var_dump($data);
+        
+        
+        //$pdf = 0;
+        if ($pdf == 1) {
+            $this->load->library('mpdf');
+            //$mpdf = new mPDF('utf-8', 'Letter');
+            //$mpdf = new mPDF('utf-8', 'Legal');
+            $mpdf = new mPDF('utf-8');
+            
+            
+        
+          
+           
+            
+            
+            $output = $this->load->view('v_reporte_avance_ot', $data, true);
+            $mpdf->WriteHTML($output);
+            $mpdf->Output();
+        } else {
+            $this->load->view('v_reporte_avance_ot', $data);
         } 
           
         

@@ -35,6 +35,27 @@ class Datos_model extends CI_Model {
         }
         
     }
+    public function filtrar_archivos_ejercicio($filtro){
+         $sql= "SELECT *
+                FROM `saaArchivo`
+               WHERE OrdenTrabajo LIKE '%-15'";
+        $query = $this->db->query($sql, array($filtro));
+        return $query;
+    }
+     
+    public function  get_estimaciones($id){
+        
+
+         $sql= 'SELECT `saaEstimaciones`.* , `saaRel_Archivo_Documento`.`idArchivo` 
+            FROM `saaEstimaciones` 
+            INNER JOIN `saaRel_Archivo_Documento` 
+            ON `saaRel_Archivo_Documento`.id= `saaEstimaciones`.`idRel_Archivo_Documento`
+            WHERE `saaRel_Archivo_Documento`.`idArchivo` = ?
+            ORDER BY Numero_Estimacion,ordenar_subdocumento ASC';
+        $query = $this->db->query($sql, array($id));
+        return $query;
+        
+    }
     
     public function historico_archivo($idArchivo){
         $this->db->where("idArchivo", $idArchivo);
@@ -269,8 +290,26 @@ class Datos_model extends CI_Model {
         return $this->db->get("saaTipoProceso");
     }
     
-    public function procesos_de_archivo($id){
-        $sql= 'SELECT DISTINCT rel.idTipoProceso,
+    public function usuario_trabajando($idArchivo){
+       $sql= 'SELECT DISTINCT idUsuario_Trabajando FROM `saaRel_Archivo_Documento`
+            WHERE idArchivo =?';
+        $usuario = $this->db->query($sql, array($idArchivo));
+        return $usuario; 
+    }
+
+    public function cargar_documentos($idArchivo, $idproceso, $idsubproceso){
+        $sql= 'SELECT * FROM plantilla_documento 
+            WHERE idArchivo=? AND 
+            idTipoProceso= ?
+            AND idSubTipoProceso =? AND 
+            `eliminacion_logica`= 0
+            ORDER BY `Nombre` ASC';
+        $query = $this->db->query($sql, array($idArchivo, $idproceso, $idsubproceso));
+        return $query;
+    }
+
+        public function procesos_de_archivo($id){
+        $sql= 'SELECT DISTINCT rel.idTipoProceso, rel.idUsuario_Trabajando,
                 p.Nombre,
                 rel.`Estatus`
                 FROM saaRel_Archivo_Documento AS rel
@@ -290,21 +329,96 @@ class Datos_model extends CI_Model {
                 ON rel.`idSubTipoProceso` = p.`id`
                 WHERE rel.idArchivo=?
                 AND rel.`idTipoProceso` = ?
-                ORDER BY p.Ordenar';
+                ORDER BY p.Ordenar, p.Nombre';
         $query = $this->db->query($sql, array($idArchivo, $idProceso));
         return $query;
     }
     
     public function documentos_de_archivo($idArchivo, $idSubProceso){
-        $sql= 'SELECT id,
-                documento,
-                idDireccion_responsable,
-                id_preregistro,
-                idDocumento
+        $sql= 'SELECT *
                 FROM plantilla_documento
-                WHERE idArchivo=? AND idSubproceso =?
-                ORDER BY documento ASC';
+                WHERE idArchivo=? AND idSubTipoProceso =? 
+                ORDER BY Nombre ASC';
         $query = $this->db->query($sql, array($idArchivo, $idSubProceso));
+        return $query;
+    }
+    
+    public function documentos_de_archivo_direccion($idRel, $idDireccion){
+        $sql= 'SELECT *
+                FROM plantilla_documento
+                WHERE idRAD =?
+                AND direccion_preregistra = ? AND eliminacion_logica = 0
+               ';
+        $query = $this->db->query($sql, array($idRel, $idDireccion));
+        return $query;
+    }
+    
+    public function documentos_de_archivo_relacion($idRel){
+        $sql= 'SELECT *
+                FROM plantilla_documento
+                WHERE idRAD =? LIMIT 1
+                
+               ';
+        $query = $this->db->query($sql, array($idRel));
+        return $query;
+    }
+    
+     public function listado_registros_revisados_por_sub_tipo_proceso($idArchivo,$idSubTipoProceso) {
+        $sql = 'SELECT idRAD FROM plantilla_documento
+                WHERE idArchivo=? AND idSubTipoProceso = ? AND revisado=1';
+        $query = $this->db->query($sql, array($idArchivo,$idSubTipoProceso));
+        return $query;
+    }
+    
+    public function listado_registros_revisados_por_tipo_proceso($idArchivo,$idTipoProceso) {
+        $sql = 'SELECT idRAD FROM plantilla_documento
+                WHERE idArchivo=? AND idTipoProceso = ? AND revisado=1';
+        $query = $this->db->query($sql, array($idArchivo,$idTipoProceso));
+        return $query;
+    }
+    
+    //Documentos ya revisados
+    public function documentos_de_archivo_definitivos($idRel){
+        $sql= 'SELECT *
+                FROM plantilla_documento
+                WHERE idRAD =?
+                
+               ';
+        $query = $this->db->query($sql, array($idRel));
+        return $query;
+    }
+    
+    public function documentos_de_archivo_relacion_limit($idRel){
+        $sql= 'SELECT *
+                FROM plantilla_documento
+                WHERE idRAD =?
+                LIMIT 1
+                
+               ';
+        $query = $this->db->query($sql, array($idRel));
+        return $query;
+    }
+    
+    public function documentos_de_archivo_recibir($idRel){
+        $sql= 'SELECT *
+                FROM plantilla_documento
+                WHERE idRAD =?
+                AND preregistro_aceptado=1
+                AND eliminacion_logica = 0
+                
+               ';
+        $query = $this->db->query($sql, array($idRel));
+        return $query;
+    }
+    
+    public function documentos_de_archivo_revisar($idRel){
+        $sql= 'SELECT *
+                FROM plantilla_documento
+                WHERE idRAD =?
+                AND recibido_cid=1
+                
+               ';
+        $query = $this->db->query($sql, array($idRel));
         return $query;
     }
     
@@ -333,10 +447,86 @@ class Datos_model extends CI_Model {
                   `saaRel_Archivo_Preregistro`.tipo_documento=4
                 ) 
 
-                AND `saaRel_Archivo_Documento`.`idTipoProceso` = ?";
+                AND `saaRel_Archivo_Documento`.`idTipoProceso` = ? AND
+                 `saaRel_Archivo_Preregistro`.`preregistro_aceptado` = 1
+                 AND `saaRel_Archivo_Preregistro`.`eliminacion_logica`=0"
+                ;
         $query = $this->db->query($sql, array($id, $id_proceso));
         return $query;
         
+    }
+    
+    public function get_folio($idArchivo, $idProceso){
+        $sql = "SELECT Folio_Desde, Folio_Hasta FROM `saaRel_Archivo_Documento` 
+                WHERE idArchivo = ?
+                AND idTipoProceso = ? LIMIT 1";
+        $query = $this->db->query($sql, array($idArchivo, $idProceso));
+        return $query;
+    }
+
+    public function documentos_subproceso($id, $id_subproceso){
+        $sql= "SELECT idRAD FROM plantilla_documento WHERE idArchivo=? AND recibido_cid= 1 
+                AND idSubTipoProceso =? AND eliminacion_logica = 0";
+        $query = $this->db->query($sql, array($id, $id_subproceso));
+        return $query;
+        
+    }
+    
+    public function documentos_proceso_recibidos($id, $proceso){
+        $sql= "SELECT idRAD FROM plantilla_documento WHERE idArchivo=? AND recibido_cid= 1 
+                AND idTipoProceso =? AND eliminacion_logica = 0";
+        $query = $this->db->query($sql, array($id, $proceso));
+        return $query;
+       
+    }
+    
+    public function documentos_proceso_distinct($id, $proceso){
+        $sql= "SELECT DISTINCT idRAD FROM plantilla_documento WHERE idArchivo=? AND recibido_cid= 1 
+                AND idTipoProceso =? AND eliminacion_logica = 0";
+        $query = $this->db->query($sql, array($id, $proceso));
+        return $query;
+       
+    }
+    
+    public function ot_json($term = null, $id = null){
+        $aRow = array();
+        $return_arr = array();            
+        if (!empty($term) || !empty($id)){
+            if ($id > 0){
+
+
+                $this->db->select("id,OrdenTrabajo");
+                $this->db->order_by("OrdenTrabajo", "ASC");
+                $query2 = $this->db->get_where("saaArchivo",array("id" => $id),100);
+
+            }else{
+
+
+                $this->db->select("id,OrdenTrabajo");
+                $this->db->like("OrdenTrabajo",$term);
+                $this->db->order_by("OrdenTrabajo", "ASC");
+                $query2 = $this->db->get("saaArchivo",100);                    
+            }
+
+            if ($query2->num_rows() > 0){
+
+
+                foreach ($query2->result() as $row ){
+                    $aRow["id"] = $row->id;
+                    $aRow["text"] = $row->OrdenTrabajo;
+                    $return_arr["results"][] = $aRow;
+                }
+            }else{
+                $aRow["id"] = "newremit";
+                $aRow["text"] = 'No se encontro OT';
+                $return_arr["results"][] = $aRow;
+            }
+        }else{
+            $aRow["id"] = "";
+            $aRow["text"] = "";
+            $return_arr["results"][] = $aRow;
+        } 
+        return $return_arr; 
     }
     
     public function documentos_proceso_por_direccion($id,$idDireccion_responsable, $id_proceso){
@@ -357,10 +547,35 @@ class Datos_model extends CI_Model {
         
     }
     
+    public function documentos_subproceso_por_direccion($id,$idDireccion_responsable, $id_subproceso){
+        $sql= "SELECT DISTINCT `saaRel_Archivo_Documento`.`idTipoProceso`, 
+                `saaRel_Archivo_Documento`.`idSubTipoProceso`,`saaRel_Archivo_Preregistro`.* 
+                FROM `saaRel_Archivo_Documento`
+                INNER JOIN `saaRel_Archivo_Preregistro`
+                ON `saaRel_Archivo_Documento`.id = `saaRel_Archivo_Preregistro`.`id_Rel_Archivo_Documento`
+                WHERE `saaRel_Archivo_Preregistro`.idArchivo=?
+                AND (`saaRel_Archivo_Preregistro`.tipo_documento = 1 OR `saaRel_Archivo_Preregistro`.tipo_documento =2 OR `saaRel_Archivo_Preregistro`.tipo_documento =3) 
+                AND `saaRel_Archivo_Preregistro`.idDireccion_responsable = ?
+                AND `saaRel_Archivo_Documento`.`idSubTipoProceso` = ?";
+        $query = $this->db->query($sql, array($id, $idDireccion_responsable, $id_subproceso));
+        return $query;
+        
+    }
+    
+    
+    
     public function total_procesos($id, $id_proceso){
         $sql= "SELECT id FROM `saaRel_Archivo_Documento`
                 WHERE idArchivo= ? AND idTipoProceso=?";
         $query = $this->db->query($sql, array($id, $id_proceso));
+        return $query;
+        
+    }
+    
+    public function total_subprocesos($id, $id_subproceso){
+        $sql= "SELECT id FROM `saaRel_Archivo_Documento`
+                WHERE idArchivo= ? AND idSubTipoProceso=? ORDER BY Ordenar";
+        $query = $this->db->query($sql, array($id, $id_subproceso));
         return $query;
         
     }
@@ -1635,7 +1850,7 @@ class Datos_model extends CI_Model {
                 INNER JOIN `saaRel_Archivo_Documento`
                 ON `saaRel_Archivo_Documento`.`id` = `saaRel_Archivo_Preregistro`.`id_Rel_Archivo_Documento`
                 
-                WHERE `saaRel_Archivo_Documento`.`Estatus`=10 
+                WHERE `saaRel_Archivo_Documento`.`Estatus`=10
                 AND `saaArchivo`.`eliminacion_logica` = 0  
                 AND `saaRel_Archivo_Preregistro`.idDireccion_responsable = ?
                 AND `saaRel_Archivo_Preregistro`.preregistro_aceptado = 0   

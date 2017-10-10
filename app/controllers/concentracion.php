@@ -52,39 +52,87 @@ class Concentracion extends MY_Controller {
         echo json_encode($aOT, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
     }
     
-    public function fecha_ingreso_ot ($ot){
+    public function detalles_archivo (){
         $this->load->model('concentracion_model');
-       
-        $fecha = $this->concentracion_model->fecha_ingreso_ot ($ot);
         
+        $id = $this->input->post("ot");
+       
+        $aArchivo = $this->concentracion_model->detalles_archivo ($id);
+        $aFechaIngreso = $this->concentracion_model->fecha_ingreso ($id);
+        
+        
+        $data=array(
+            'fecha_ingreso'=> date( 'Y-m-d', strtotime( $aFechaIngreso['fecha_ingreso'] ) ),
+            'fecha_cierre'=> $aArchivo['FechaExtincionDerechos'],
+            'identificador'=> $aArchivo['identificado'],
+        );        
         header('Cache-Control: no-cache, must-revalidate');
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
         header('Content-type: application/json');
-        echo json_encode($fecha, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
     }
 
-    public function agregar_cat() {
-        $this->load->model('seccion_model');
-         
+    public function asignar_ubicacion() {
+        $this->load->model('concentracion_model');
+        
+        $errores ="";
+        
+       
+        $idArchivo = $this->input->post('idArchivo');
+        $legajos = $this->input->post('legajos');
+        $data_archivo =  array(
+            'identificado' => $this->input->post('identificador'),
+            'FechaExtincionDerechos' => $this->input->post('cierre_expediente'),
+        ); 
+        
+         //Guardar datos propios de archivo
+        $retorno = $this->capturar_datos_archivo($data_archivo, $idArchivo);
+        
+        if( $retorno == 1 ){
+            //Verificar ubicaciones
+        $ubicaciones =  $this->verificar_ubicaciones($legajos, $idArchivo);
+        
+        } else {
+            $errores .= "Error al guardar datos del Archivo <br>";
+        }
+        
+        
          
         $data = array(
-            'Nombre' => strtoupper($this->input->post('Nombre')),
-            'Codigo' => $this->input->post('Codigo'),
+            'Fojas_utiles' => $this->input->post('fojas_utiles'),
+            'Legajos' => $this->input->post('legajos'),
+            'Fojas_utiles' => $this->input->post('fojas_utiles'),
+            'Legajos' => $this->input->post('legajos'),
+            'Fojas_utiles' => $this->input->post('fojas_utiles'),
+            'Legajos' => $this->input->post('legajos'),
+            'Fojas_utiles' => $this->input->post('fojas_utiles'),
+            'Legajos' => $this->input->post('legajos'),
+            'Fojas_utiles' => $this->input->post('fojas_utiles'),
+            'Legajos' => $this->input->post('legajos'),
             
         );
          
-        $retorno = $this->seccion_model->datos_seccion_insert($data);
-        
+        $retorno = $this->concentracion_model->datos_concentracion_insert($data);
+        echo $retorno['retorno'];
 
-        if($retorno['retorno'] < 0){
-            header('Location:'.site_url('seccion/index/' . $retorno['error']));
-        }
-        else {
-            header('Location:'.site_url('seccion')); 
-        }
+        
     }
     
+    public function capturar_datos_archivo($data, $idArchivo){
+        $this->load->model('concentracion_model');
+        return $this->concentracion_model->capturar_datos_archivo($data, $idArchivo);
+        
+    }
     
+    public function verificar_ubicaciones($legajos, $idArchivo){
+        
+        
+        
+        
+    }
+
+    
+
     public function modificar_cat() {
          $this->load->model('seccion_model');
          

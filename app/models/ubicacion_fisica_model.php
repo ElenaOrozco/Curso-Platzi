@@ -192,6 +192,20 @@ class ubicacion_fisica_model extends CI_Model {
         $query = $this->db->query($sql, array($idArchivo, $proceso));
         return $query;
     }
+    
+    public function listado_ubicaciones_captura($idArchivo){
+        $sql = 'SELECT `saaUbicacionFisica`.* , `saaRel_TipoProceso_UbicacionFisica`.*, saaUbicacionFisica.id AS idUbi, `saaRel_TipoProceso_UbicacionFisica`.`Caja` AS CajaUbi, `saaUbicacionFisica`.Caja AS C,
+                `saaRel_TipoProceso_UbicacionFisica`.`id` AS idRel
+                FROM `saaRel_TipoProceso_UbicacionFisica`
+                INNER JOIN `saaUbicacionFisica`
+                ON `saaUbicacionFisica`.`id` = `saaRel_TipoProceso_UbicacionFisica`.`idUbicacionFisica`
+                WHERE saaRel_TipoProceso_UbicacionFisica.`idArchivo` =? AND
+                `saaRel_TipoProceso_UbicacionFisica`.Estatus = 1
+                ';
+       
+        $query = $this->db->query($sql, array($idArchivo));
+        return $query;
+    }
 
         public function actualizar_estado_ubicacion($data, $id){
         

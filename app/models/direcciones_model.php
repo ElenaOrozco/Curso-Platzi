@@ -15,7 +15,7 @@ class direcciones_model extends CI_Model {
             return $query; 
     }
     public function listado_catDirecciones() {
-            $sql = 'SELECT * FROM catDirecciones WHERE Estatus=1 ORDER BY id DESC';
+            $sql = 'SELECT * FROM catDirecciones WHERE Estatus=1 AND Nivel = 0 ORDER BY id DESC';
             $query = $this->db->query($sql);
             return $query; 
     }

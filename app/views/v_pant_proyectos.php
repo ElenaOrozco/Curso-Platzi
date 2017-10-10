@@ -47,11 +47,13 @@
                 display: none;
             }
             .btn-sm{
-                padding: 5px 5px 8px 8px;
+                padding: 5px 7px 7px 7px ;
                 font-size: 12px;
                 line-height: 1.5;
                 border-radius: 3px;
+               
             }
+            
         </style>
         
         <script>
@@ -432,30 +434,30 @@
                             </div>
                             <br>
                         <?php } */?>
-            <div class="container-fluid">
-                <div class="row alert alert-success fade in d-n" id="ubicacion_dinamica" >
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                    <h4>Ubicación</h4>
-                    <p id="str_ubicacion"></p>
-
-                </div>
+            <div class="container">
+                
                 
                 <div class="col-md-12">
                      <div class="row clearfix">
                         <div class="col-md-12">
-                            <br>
-                            
-                            <div class="row">
-                                <a href="#modal-agregar-cat" class="btn btn-success" role="button" data-toggle="modal" >
-                                    <span class="glyphicon glyphicon-plus"></span> Asignar Proyecto
-                                </a>
+                          
+                            <div class="row alert alert-success fade in d-n" id="ubicacion_dinamica" >
+                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                                <h4>Ubicación</h4>
+                                <p id="str_ubicacion"></p>
+
                             </div>
                             
+                            <a href="#modal-agregar-cat" class="btn btn-success" role="button" data-toggle="modal" >
+                                <span class="glyphicon glyphicon-plus"></span> Asignar Proyecto
+                            </a>
+                            
+                            
 
+                           
                             <div id="filtro-tabla"></div>
-
-                           <div id="tabla-principal">
-                                <table class="table table-responsive table-striped table-hover table-bordered" id="t_listado">
+                            <div id="tabla-principal">
+                                <table class="table table-responsive table-striped table-hover table-bordered display" id="t_listado">
                                     <thead>
                                         <tr>
                                             
@@ -469,11 +471,11 @@
                                             <th class="col-md-2">
                                                 Contrato
                                             </th>
-                                            <th class="col-md-2">
+                                            <th class="col-md-4">
                                                 Obra
                                             </th>                               
                                             <th class="col-md-2">
-                                                Carpeta
+                                                Detalles
                                             </th>
 
                                             <th class="col-md-1">
@@ -528,9 +530,9 @@
                                                             <?= $rProyectos->Obra ?>
                                                         </td>                               
                                                         <td>
-                                                            <?php echo $rProyectos->carpeta ?>
+                                                            <?php echo "Carpeta : $rProyectos->carpeta" ?>
                                                             </br>
-                                                            <?php echo $rProyectos->cm ?>
+                                                            <?php echo "$rProyectos->cm  cm "?>
                                                         </td>
 
                                                         <td>

@@ -84,7 +84,7 @@ class Rel_archivo_documento_model extends CI_Model {
         $data = array(
             'eliminacion_logica' => 1,
         );
-        $this->log_save(array('Tabla' => 'saaRel_Archivo_Documento(eliminacion_por Archivo id = idArchivo)', 'Data' => $data, 'id' => $id));
+        //$this->log_save(array('Tabla' => 'saaRel_Archivo_Documento(eliminacion_por Archivo id = idArchivo)', 'Data' => $data, 'id' => $idArchivo));
         
         
         $this->db->update('saaRel_Archivo_Documento', $data, array('idArchivo' => $idArchivo));
@@ -139,6 +139,12 @@ class Rel_archivo_documento_model extends CI_Model {
         return $query;
     }
     
+    public function traer_revisado($id) {
+        $sql = 'SELECT revisado  FROM saaRel_Archivo_Documento WHERE id = ?';
+        $query = $this->db->query($sql, array($id));
+        return $query;
+    }
+    
     
     public function datos_relacion_archivo_documento_ubicacion_fisica($Ubicacion_fisica) {
         $sql = 'SELECT id FROM saaRel_Archivo_Documento WHERE Ubicacion_fisica = ?';
@@ -149,13 +155,15 @@ class Rel_archivo_documento_model extends CI_Model {
     
    
     public function listado_registros_revisados_por_sub_tipo_proceso($idArchivo,$idSubTipoProceso) {
-        $sql = 'SELECT id FROM saaRel_Archivo_Documento WHERE idArchivo=? and idSubTipoProceso = ? and revisado=1';
+        $sql = 'SELECT id FROM plantilla_documento
+                WHERE idArchivo=? AND idSubTipoProceso = ? AND revisado=1';
         $query = $this->db->query($sql, array($idArchivo,$idSubTipoProceso));
         return $query;
     }
     
     public function listado_registros_revisados_por_tipo_proceso($idArchivo,$idTipoProceso) {
-        $sql = 'SELECT id FROM saaRel_Archivo_Documento WHERE idArchivo=? and  idTipoProceso = ? and revisado=1';
+        $sql = 'SELECT id FROM plantilla_documento
+                WHERE idArchivo=? AND idTipoProceso = ? AND revisado=1';
         $query = $this->db->query($sql, array($idArchivo,$idTipoProceso));
         return $query;
     }
@@ -370,16 +378,13 @@ class Rel_archivo_documento_model extends CI_Model {
     
     public function datos_relacion_archivo_documento_update_por_archivo($data, $idArchivo) {
         
-       $this->log_save(array('Tabla' => 'saaRel_Archivo_Documento(update_por Archivo id = idArchivo)', 'Data' => $data, 'id' => $id));
+       //$this->log_save(array('Tabla' => 'saaRel_Archivo_Documento(update_por Archivo id = idArchivo)', 'Data' => $data, 'id' => $id));
         
-        //$this->db->where('id', $id);
-        //$this->db->update('saatipoproceso', $data);
+       
         $this->db->update('saaRel_Archivo_Documento', $data, array('idArchivo' => $idArchivo));
         $e = $this->db->_error_message();
         $aff = $this->db->affected_rows();
         $last_query = $this->db->last_query();
-//        $registro = $this->db->insert_id();
-        //$this->db->db_debug = $oldv; 
 
         if ($aff < 1) {
             if (empty($e)) {
@@ -390,7 +395,8 @@ class Rel_archivo_documento_model extends CI_Model {
             //echo 'Error';
             return array("retorno" => "-1", "error" => $e);
         } else {
-            return array("retorno" => "1", "registro" => $id);
+            $mensaje = "Exito";
+            return array("retorno" => "1", "registro" => $mensaje);
             //echo 'bien';
         }
         
@@ -403,24 +409,33 @@ class Rel_archivo_documento_model extends CI_Model {
         
         $data = array (
             'idArchivo' => $idArchivo,
-             'idDireccion_responsable' => $idDireccion_responsable, 
+            'idDireccion_responsable' => $idDireccion_responsable, 
             'Estatus'=>10
         );
         
-        $this->log_save(array('Tabla' => 'saaRel_Archivo_Documento', 'Data' => $data, 'id' => $id));
+        //$this->log_save(array('Tabla' => 'saaRel_Archivo_Documento', 'Data' => $data, 'idArchivo' => $idArchivo));
         $this->db->update('saaRel_Archivo_Documento', $data, array('idArchivo' => $idArchivo, 'idDireccion_responsable' => $idDireccion_responsable, 'Estatus'=>10));
     }
             
-    function comprobar_estado_trabajo($idArchivo,$id){
-       $sql = 'SELECT  DISTINCT idUsuario_Trabajando 
+    function comprobar_estado_trabajo($idRAD){
+       $sql = 'SELECT  DISTINCT idUsuario_Trabajando , idTipoProceso , idArchivo
             FROM `saaRel_Archivo_Documento` 
-            WHERE idArchivo = ? AND idTipoProceso = ?';
-        $query = $this->db->query($sql, array($idArchivo,$id));
+            WHERE id = ?';
+        $query = $this->db->query($sql, array($idRAD));
         return $query;
        
     }
+    
+    function estado_bloque($idTipoProceso, $idArchivo){
+       $sql = 'SELECT  DISTINCT idUsuario_Trabajando 
+            FROM `saaRel_Archivo_Documento` 
+            WHERE idTipoProceso = ? AND idArchivo = ?';
+        $query = $this->db->query($sql, array($idTipoProceso, $idArchivo));
+        return $query->row_array();
+       
+    }
 
- 
+    
     
     public function datos_relacion_archivo_documento_update_por_proceso($data, $idArchivo,$idProceso) {
         
@@ -493,6 +508,23 @@ class Rel_archivo_documento_model extends CI_Model {
             return 1;
         
     }
+    
+    public function cambiar_estatus_ot($idArchivo, $estatus) {
+        
+        
+        
+        $this->db->update('saaRel_Archivo_Documento', array('Estatus' => $estatus), array('idArchivo' => $idArchivo));
+            
+            $data=array(
+                'idArchivo'=>$idArchivo,
+                'Estatus'=>$estatus,
+                'idUsuario'=>  $this->session->userdata('id'),
+                'Fecha'=>date('Y-m-d H:i:s')
+            );
+            $this->historico($data);
+            return 1;
+        
+    }
 
     public function cambiar_estatus_rechazar($idArchivo,$idTipoProceso, $estatus,$motivo) {
             
@@ -511,7 +543,11 @@ class Rel_archivo_documento_model extends CI_Model {
         
     }
     
-    
+    public function trabajar_bloque($data, $idArchivo, $idTipoProceso){
+        $this->db->update('saaRel_Archivo_Documento', $data, array('idArchivo' => $idArchivo,'idTipoProceso' => $idTipoProceso));
+        return $this->db->affected_rows();
+    }
+
     public function agregar_observaciones_bloque($idArchivo,$idTipoProceso, $motivo, $idSubTipoProceso, $idDocumento) {
           $data=array(
                 'idArchivo'=>$idArchivo,

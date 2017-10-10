@@ -33,7 +33,9 @@
         <script type="text/javascript" src="<?php echo site_url(); ?>js/datatables.js"></script>
         <script type="text/javascript" src="<?php echo site_url(); ?>js/jquery.datatable.ajaxreload.js"></script>
         <script type="text/javascript" src="<?php echo site_url(); ?>js/jquery.datatable.extraorder.js"></script> 
-        <script type="text/javascript" src="<?php echo site_url(); ?>js/scripts.js"></script>        
+        <script type="text/javascript" src="<?php echo site_url(); ?>js/scripts.js"></script>   
+         
+        
 
         
         <script type="text/javascript" src="<?php echo site_url(); ?>js/select2/select2.min.js"></script> 
@@ -52,12 +54,51 @@
                 line-height: 1.5;
                 border-radius: 3px;
             }
-            .card{
-                padding-top: 30px;
-                
-                border-radius: 5px;
+            .title{
+                padding: 0 0 20px 0;
             }
-            
+            .m-b{
+                margin-bottom: 20px;
+            }
+            .alert-info {
+                background-color: #c1d8e4;
+                border-color: #9ccad4;
+                color: #0d4663;
+            }
+            .text-small{
+                font-size: 12px;
+                line-height: 14px;
+            }
+            .border-div{
+                border-bottom: 2px solid #0d4663;
+            }
+            .text-uppercase{
+                text-transform: uppercase;
+            }
+            .panel-primary {
+                border-color: #428bca;
+            }
+            .panel-primary>.panel-heading {
+                color: #fff;
+                background-color: #428bca;
+                border-color: #428bca;
+            }
+            .form-group {
+                margin-bottom: 10px;
+                
+            }
+            .panel-success>.panel-heading {
+                color: #ffffff;
+                background-color: #3e7d3e;
+                border-color: #0f1f0f;
+            }
+            .panel-success>.panel-body{
+                background: rgba(63, 123, 64, 0.16);
+            }
+            .panel-success {
+                border-color:  #3e7d3e;
+            }
+
         </style>
         
         <script>
@@ -68,6 +109,101 @@
                 $('.select2').select2({
                     width: '100%'
                 });
+                
+                
+                var t = $('#t_concentracion').DataTable({
+                    'oLanguage': {
+                        'sProcessing': '<img src=\"./images/ajax-loader.gif\"/> Procesando...',
+                        'sLengthMenu': 'Mostrar _MENU_ archivos',
+                        'sZeroRecords': 'Buscando Archivos...',
+                        'sInfo': 'Mostrando desde _START_ hasta _END_ de _TOTAL_ archivos',
+                        'sInfoEmpty': 'Mostrando desde 0 hasta 0 de 0 archivos',
+                        'sInfoFiltered': '(filtrado de _MAX_ archivos en total)',
+                        'sInfoPostFix': '',
+                        'sSearch': 'Buscar:',
+                        'sUrl': '',
+                        'oPaginate': {
+                            'sFirst': '&nbsp;Primero&nbsp;',
+                            'sPrevious': '&nbsp;Anterior&nbsp;',
+                            'sNext': '&nbsp;Siguiente&nbsp;',
+                            'sLast': '&nbsp;&Uacute;ltimo&nbsp;'
+                        }
+                    },
+                });
+            
+                $('#addRow').on( 'click', function () {
+                
+                   var data = $("#form-ubicaciones").serialize();
+                   alert("datos serializados " +data)
+                   $.post( "test.php", { name: "John", time: "2pm" })
+                    .done(function( data ) {
+                      alert( "Data Loaded: " + data );
+                    });
+                    
+                    
+                    t.row.add( [
+                        '.1',
+                        '.2',
+                        '.3',
+                        '.4',
+                        '.5',
+                        '.1',
+                        '.2',
+                        '.3',
+                        '.4'
+                    ] ).draw( false );
+
+                    
+                } );
+                
+                $("#form-ubicaciones").submit(function(){
+                    var cadena = $(this).serialize();
+                    alert(cadena);
+                    
+                    $.post( "<?php echo site_url("concentracion/asignar_ubicacion"); ?>",
+                        { 
+                            idArchivo:      $("#orden_trabajo").val(),
+                            fojas_utiles:   $("#fojas_utiles").val(),
+                            legajos:        $("#legajos").val(),
+                            Bloques:        $("#Bloques").val(),
+                            No_caja:        $("#No_caja").val(),
+                            Folio_Inicial:  $("#Folio_Inicial").val(),
+                            Folio_Final:    $("#Folio_Final").val(),
+                            No_Hojas:       $("#No_Hojas").val(),
+                            fecha_ingreso:  $("#fecha_ingreso").val(),
+                            identificador:  $("#identificador").val(),
+                        
+                        }, 
+                        function( data ) {
+                    
+                            if (data.cierre_expediente != ""){
+                                $("#cierre_expediente").val( data.fecha_cierre ); // fecha cierre
+                                $("#cierre_expediente").attr("disabled", "true");
+                            }
+
+                            if (data.fecha_ingreso != ""){
+                                $("#fecha_ingreso").val( data.fecha_ingreso);
+                                $("#fecha_ingreso").attr("disabled", "true");
+                            }
+
+
+                            if (data.identificador != ""){
+                                $("#identificador").attr("disabled", "true");
+                                $("#identificador").val( data.identificador ); 
+                            } 
+                        }, "json");
+                        
+                    });
+                
+                $('#orden_trabajo').on( 'change', function () {
+                   
+                    //alert( $('#orden_trabajo').val())
+                    traer_detalles()
+
+                    
+                } );
+
+
                 
                 
 
@@ -200,10 +336,34 @@
                 });
                
             }
+            //////////////////////
             
+            function traer_detalles(){
+                var ot = $("#orden_trabajo").val();
+                
+                
+                
+                $.post( "<?php echo site_url("concentracion/detalles_archivo"); ?>",{ ot: ot}, function( data ) {
+                    //console.log( data.fecha_ingreso ); // fecha ingreso
+                    if (data.cierre_expediente != ""){
+                        $("#cierre_expediente").val( data.fecha_cierre ); // fecha cierre
+                        $("#cierre_expediente").attr("disabled", "true");
+                    }
+                    
+                    if (data.fecha_ingreso != ""){
+                        $("#fecha_ingreso").val( data.fecha_ingreso);
+                        $("#fecha_ingreso").attr("disabled", "true");
+                    }
+                    
+                    
+                    if (data.identificador != ""){
+                        $("#identificador").attr("disabled", "true");
+                        $("#identificador").val( data.identificador ); 
+                    } 
+                }, "json");
+                
             
-            $('#select2-chosen-1').change(
-                )
+            }
             
            
            
@@ -219,7 +379,7 @@
         <div class="container-fluid">
             <!-- Menu Superior -->
              <?php if (isset($aWidgets["widget_menu"])) echo $aWidgets["widget_menu"]; ?> 
-                <div class="container-fluid">
+                <div class="container-fluid card">
                     <div class="row clearfix">                
                         <div class="col-md-12 column">
                             <ol class="breadcrumb">
@@ -231,127 +391,110 @@
                     </div>
                 </div>
                     <h3>
-                        <center>Concentración</center>
+                        <center class="title text-uppercase">Concentración</center>
                     </h3>
 
-                        <?php /* if ($error == 2) { ?>
-                            <br>
-                            <div class="alert alert-dismissable alert-danger">
-                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                                <h4>
-                                    Alerta!
-                                </h4> <strong>Error de Carga </strong> <?php echo $this->session->userdata("error_txt"); ?>
-                            </div>
-                            <br>
-                        <?php } ?>
-                        <?php if ($error == 3) { ?>
-                            <br>
-                            <div class="alert alert-dismissable alert-danger">
-                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                                <h4>
-                                    Alerta!
-                                </h4> <strong>Error de asignacion </strong> <?php echo $this->session->userdata("error_txt"); ?>
-                            </div>
-                            <br>
-                        <?php } ?>
-                        <?php if ($error == 4) { ?>
-                            <br>
-                            <div class="alert alert-dismissable alert-danger">
-                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                                <h4>
-                                    Exito!
-                                </h4> <strong>Registro Correcto de la Secretaria </strong> <?php echo $this->session->userdata("error_txt"); ?>
-                            </div>
-                            <br>
-                        <?php } ?>
-                        <?php if ($error == 5) { ?>
-                            <br>
-                            <div class="alert alert-dismissable alert-danger">
-                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                                <h4>
-                                    Error!
-                                </h4> <strong>Error de Registro </strong> <?php echo $this->session->userdata("error_txt"); ?>
-                            </div>
-                            <br>
-                        <?php } ?>
-                        <?php if ($error == -2) { ?>
-                            <br>
-                            <div class="alert alert-dismissable alert-danger">
-                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                                <h4>
-                                    Alerta!
-                                </h4> <strong>El Documento con ese Folio de Secretaria ya Fue Registrado el dia de hoy </strong> <?php echo $this->session->userdata("error_txt"); ?>
-                            </div>
-                            <br>
-                        <?php } */?>
-            <div class="container-fluid">
+                       
+            <div class="col-md-10 col-md-offset-1">
               
-                <div class="col-md-6 card">
+                <div class="col-md-4">
                     
-                        
-                
-                <div class="panel-group" id="accordion">
-                    <div class="panel panel-default">
+                    <div class="panel panel-success">
                         <div class="panel-heading">
-                          <h4 class="panel-title">
-                            <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
-                              Datos para Ingreso
-                            </a>
-                          </h4>
+                            <h5 class="text-center text-uppercase">Formulario de Ingreso</h5>
+                            
                         </div>
-                        <div id="collapseOne" class="panel-collapse collapse in">
-                            <div class="panel-body">
-                                <form role="form"  method="post" accept-charset="utf-8" action="<?php echo site_url("proyectos/nuevo"); ?>" class="form-horizontal"  enctype="multipart/form-data" >
+                        <div class="panel-body">
+                             <form role="form" id="form-ubicaciones" method="post" accept-charset="utf-8" action="" class="form-horizontal"  enctype="multipart/form-data" >
 
-                                    <div class="col-md-12">
+                                    
 
                                         <div class="form-group">
-                                                <label for="orden_trabajo" class="col-sm-2 control-label">OT:</label>
-                                                <div class="col-sm-10">
-                                                    <input type="hidden" id="orden_trabajo" name="orden_trabajo" class="form-control" value="" required="" />
+                                                <label for="orden_trabajo" class="col-sm-3 control-label">OT:</label>
+                                                <div class="col-sm-8">
+                                                    <input type="hidden" id="orden_trabajo" name="orden_trabajo"  class="form-control" value="" required="" />
                                                 </div>
                                         </div>
 
 
                                         <div class="form-group">
-                                                <label for="fojas_utiles" class="col-sm-2 control-label">No de Fojas útiles:</label>
-                                                <div class="col-sm-10">
-                                                    <input type="number" min="1" id="fojas_utiles" name="fojas_utiles" class="form-control" value="" required="" />
+                                                <label for="fojas_utiles" class="col-sm-3 control-label">Fojas útiles:</label>
+                                                <div class="col-sm-8">
+                                                    <input type="number" min="1" id="fojas_utiles" name="fojas_utiles" class="form-control" value="" placeholder="No de Fojas útiles" required="" />
                                                 </div>
                                         </div>
 
                                         <div class="form-group">
-                                                <label for="legajos" class="col-sm-2 control-label">Legajos:</label>
-                                                <div class="col-sm-10">
-                                                    <input type="number" min="1" id="legajos" name="legajos" class="form-control" value="" required="" />
+                                                <label for="legajos" class="col-sm-3 control-label">Legajos:</label>
+                                                <div class="col-sm-8">
+                                                    <input type="number" min="1" id="legajos" name="legajos" class="form-control" placeholder="Legajos" value="" required="" />
                                                 </div>
                                         </div>
 
                                         <hr>
-                                        <div class="form-group">
-                                                <label for="fecha_ingreso" class="col-sm-2 control-label">Fecha Ingreso (CID):</label>
-                                                <div class="col-sm-10">
-                                                    <input type="number" min="1" id="fecha_ingreso" name="fecha_ingreso" class="form-control" value="" required="" />
+                                         <div class="form-group">
+                                                <label for="fecha_ingreso" class="col-sm-3 control-label">Bloques:</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text"  id="Bloques" name="Bloques" class="form-control" placeholder="Bloques" value="" required="" />
                                                 </div>
                                         </div>
 
                                         <div class="form-group">
-                                                <label for="identificador" class="col-sm-2 control-label">Identificador:</label>
-                                                <div class="col-sm-10">
-                                                    <input type="text" id="identificador" name="identificador" class="form-control" value="" required="" />
+                                                <label for="identificador" class="col-sm-3 control-label">No caja:</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" id="No_caja" name="No_caja" class="form-control" placeholder="No caja Ej. 1/2" value="" required="" />
                                                 </div>
                                         </div>
 
                                         <div class="form-group">
-                                                <label for="cierre_expediente" class="col-sm-2 control-label">Cierre Expediente:</label>
-                                                <div class="col-sm-10">
-                                                    <input type="text" id="cierre_expediente" name="cierre_expediente" class="form-control" value="" required="" />
+                                                <label for="cierre_expediente" class="col-sm-3 control-label">Folio Inicial:</label>
+                                                <div class="col-sm-8">
+                                                    <input type="number" id="Folio_Inicial" name="Folio_Inicial" class="form-control" placeholder="Folio Inicial" value="" required="" />
                                                 </div>
                                         </div>
                                         
                                         <div class="form-group">
-                                            <div class="col-sm-offset-2 col-sm-10">
-                                                <button type="button" class="btn btn-success" onclick="asignar_ubicacion()">Asignar Ubicación</button>
+                                                <label for="cierre_expediente" class="col-sm-3 control-label">Folio Final:</label>
+                                                <div class="col-sm-8">
+                                                    <input type="number" id="Folio_Final" name="Folio_Final" class="form-control" placeholder="Folio Final" value="" required="" />
+                                                </div>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                                <label for="cierre_expediente" class="col-sm-3 control-label">No Hojas:</label>
+                                                <div class="col-sm-8">
+                                                    <input type="number" id="No_Hojas" name="No_Hojas" class="form-control" placeholder="No Hojas" value="" required="" />
+                                                </div>
+                                        </div>
+                                        
+                                        
+                                        <hr>
+                                        <div class="form-group">
+                                                <label for="fecha_ingreso" class="col-sm-3 control-label">Ingreso (CID):</label>
+                                                <div class="col-sm-8">
+                                                    <input type="date"  id="fecha_ingreso" name="fecha_ingreso" class="form-control" placeholder="Fecha Ingreso (CID)" value="" required="" />
+                                                </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                                <label for="identificador" class="col-sm-3 control-label">Identificador:</label>
+                                                <div class="col-sm-8">
+                                                    <input type="text" id="identificador" name="identificador" class="form-control" placeholder="Identificador" value="" required="" />
+                                                </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                                <label for="cierre_expediente" class="col-sm-3 control-label">Cierre Expediente:</label>
+                                                <div class="col-sm-8">
+                                                    <input type="date" id="cierre_expediente" name="cierre_expediente" class="form-control" placeholder="Cierre Expediente" value="" required="" />
+                                                </div>
+                                        </div>
+                                       
+                                        
+                                        
+                                        <div class="form-group">
+                                            <div class="col-sm-offset-3 col-sm-8">
+                                                <button type="submit" class="btn btn-success" >Asignar Ubicación</button>
                                             </div>
                                         </div>
 
@@ -361,112 +504,68 @@
                                             <p id="str_ubicacion"></p>
 
                                         </div>
-                                    </div>
+                                  
                                 </form>
-                            </div>
                         </div>
-                    </div>
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                          <h4 class="panel-title">
-                            <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
-                              Información General y Clasificación de Obra
-                            </a>
-                          </h4>
-                        </div>
-                      <div id="collapseTwo" class="panel-collapse collapse">
-                            <div class="panel-body">
-                                <form role="form"  method="post" accept-charset="utf-8" action="" class="form-horizontal"  enctype="multipart/form-data" >
-                                    <div class="form-group">
-                                            <label for="area" class="col-sm-2 control-label">Área o Unidad Adm:</label>
-                                            <div class="col-sm-10">
-                                                <input type="number" min="1" id="area" name="area" class="form-control" value="" required="" />
-                                            </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                            <label for="fondo" class="col-sm-2 control-label">Fondo:</label>
-                                            <div class="col-sm-10">
-                                                <input type="text" id="fondo" name="fondo" class="form-control" value="" required="" />
-                                            </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                            <label for="seccion" class="col-sm-2 control-label">Seccion:</label>
-                                            <div class="col-sm-10">
-                                                <input type="text" id="seccion" name="seccion" class="form-control" value="" required="" />
-                                            </div>
-                                    </div>
-                                    <div class="form-group">
-                                            <label for="serie" class="col-sm-2 control-label">Serie:</label>
-                                            <div class="col-sm-10">
-                                                <input type="text" id="serie" name="serie" class="form-control" value="" required="" />
-                                            </div>
-                                    </div>
-                                    <div class="form-group">
-                                            <label for="subserie" class="col-sm-2 control-label">Subserie:</label>
-                                            <div class="col-sm-10">
-                                                <input type="text" id="subserie" name="subserie" class="form-control" value="" required="" />
-                                            </div>
-                                    </div>
-                                    <div class="form-group">
-                                            <label for="subsubserie" class="col-sm-2 control-label">Sub subserie:</label>
-                                            <div class="col-sm-10">
-                                                <input type="text" id="subsubserie" name="subsubserie" class="form-control" value="" required="" />
-                                            </div>
-                                    </div>
-                                    <div class="form-group">
-                                            <label for="no_expediente" class="col-sm-2 control-label">No Expediente:</label>
-                                            <div class="col-sm-10">
-                                                <input type="text" id="no_expediente" name="no_expediente" class="form-control" value="" required="" />
-                                            </div>
-                                    </div>
-                                    <hr>
-                                    <div class="form-group">
-                                            <label for="fecha_apertura" class="col-sm-2 control-label">Fecha Apertura:</label>
-                                            <div class="col-sm-10">
-                                                <input type="text" id="fecha_apertura" name="fecha_apertura" class="form-control" value="" required="" />
-                                            </div>
-                                    </div>
-                                    <div class="form-group">
-                                            <label for="asunto" class="col-sm-2 control-label">Asunto:</label>
-                                            <div class="col-sm-10">
-                                                <input type="text" id="asunto" name="asunto" class="form-control" value="" required="" />
-                                            </div>
-                                    </div>
-                                    <div class="form-group">
-                                            <label for="valores" class="col-sm-2 control-label">Valores Documentales:</label>
-                                            <div class="col-sm-10">
-                                                <input type="text" id="valores" name="valores" class="form-control" value="" required="" />
-                                            </div>
-                                    </div>
-                                    <div class="form-group">
-                                            <label for="vigencia" class="col-sm-2 control-label">Vigencia Documental:</label>
-                                            <div class="col-sm-10">
-                                                <input type="text" id="vigencia" name="vigencia" class="form-control" value="" required="" />
-                                            </div>
-                                    </div>
-                                    <div class="form-group">
-                                            <label for="leyenda_clasificacion" class="col-sm-2 control-label">Leyenda de Clasificación:</label>
-                                            <div class="col-sm-10">
-                                                <input type="text" id="leyenda_clasificacion" name="leyenda_clasificacion" class="form-control" value="" required="" />
-                                            </div>
-                                    </div>
-                                    
-                                </form>
-                            </div>
-                          </div>
-                    </div>
+                   </div>
                     
-                  </div>
+                    
+                   
                 
                 
                 </div>
                 
-                <div class="col-sm-6">
-                    <div class="thumbnail">
-                        
-                    </div>
+                <div class="col-md-8">
+                    <div class="panel panel-default">
+                         <div class="panel-heading">
+                            <h3 class="">Ubicaciones</h3>
+                            
+                        </div>
+                        <div class="panel-body">
+                            <table class="table table-condensed table-bordered table-hover table-responsive"  id="t_concentracion">
+                               
+                                <thead>
+                                    <tr>
+                                        <td>Posición</td>
+                                        <td>OT</td>
+                                        <td>Identificador</td>
+                                        <td>Bloque</td>
+                                        <td>No de Caja</td>
+                                        <td>Folio Inicial</td>
+                                        <td>Folio Final</td>
+                                        <td>No de Hojas</td>
+                                        <td>Detalles</td>
+                                    </tr>
+                                </thead>
+                               
+                                <tbody>
+                                    <tr>
+                                        <td>12000</td>
+                                        <td>12000</td>
+                                        <td>15000</td>
+                                        <td>Enero</td>
+                                        <td>12000</td>
+                                        <td>15000</td>
+                                        <td>Enero</td>
+                                        <td>12000</td>
+                                        <td>Detalles</td>
+                                    </tr>
+                                    <tr>
+                                        
+                                        <td>13000</td>
+                                        <td>9000</td>
+                                        <td>13000</td>
+                                        <td>9000</td>
+                                        <td>13000</td>
+                                        <td>9000</td>
+                                        <td>13000</td>
+                                        <td>9000</td>
+                                        <td>Detalles</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                   </div>
                 </div>
                 
             

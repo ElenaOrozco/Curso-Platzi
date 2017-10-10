@@ -449,6 +449,7 @@
                        
                            
         }
+        //*
         function uf_recibir_tipo_documento(idRel_Archivo_Documento, idArchivo, preregistro) {
                         
                         //alert($("#tipo_documento"+idRel_Archivo_Documento).val())
@@ -485,7 +486,7 @@
                            success: function(data) {
                              //$('.center').html(data); 
                                 //alert('Data ' +data)
-                                
+                                $("#tipo_documento"+idRel_Archivo_Documento).css("border-color", "green");
                                 $('#numero_documentos_proceso_preregistrados'+data["idTipoProceso"]).css("display", "none")
                                 
                                 
@@ -3408,7 +3409,7 @@
                         
                         
 
-                        <div class="col-sm-3 m-b-separacion m-t">
+                        <div class="col-sm-5 m-b-separacion m-t">
 
                         
                                  
@@ -3447,7 +3448,7 @@
                                   <!-- $idDireccion_responsable == $rPreregistros->idDireccion_responsable -->
                                   <?php $visualizo = 1; ?>
 
-                                    <div class="col-sm-12 m-b-separacion">
+                                    <div class="col-sm-8 m-b-separacion">
                                 
                                       <!--  C/registros -->
                                     
@@ -3587,7 +3588,9 @@
 
                                       </div> <!--/row tipo doc y num hojas -->
 
-                                      <div class="col-sm-12">
+                                      
+                                    </div> <!--col-sm-12 mb-separacion-->
+                                    <div class="col-sm-4">
                                         <a href="#observaciones_bloque" id="btn-ver-obs"  data-toggle="modal" title="Ver Observaciones" class="btn btn-default m-t" data-target="#observaciones_bloque" title="Observaciones" role="button" onclick="ver_observaciones_documento(<?php echo $idArchivo; ?>,<?php echo $rRow->id; ?>,<?php echo $rRowSubProcesos->id ?>,<?php echo $rRowDocumentos->idDoc ?> ,<?= $preregistro ?>)">
                                                 <span class="glyphicon glyphicon-search"></span>
                                         </a>
@@ -3597,7 +3600,6 @@
 
                                            
                                       </div>
-                                    </div> <!--col-sm-12 mb-separacion-->
 
                                 <?php endif; ?>
                                  
@@ -3614,7 +3616,7 @@
                                   <?php ($Estatus == 10) ? $disabled_tipo_doc = "" : $disabled_tipo_doc = "disabled='disabled'" ;?>
                                   
 
-                                    <div class="col-sm-12 m-b-separacion">
+                                    <div class="col-sm-8 m-b-separacion">
                                 
                                       <!--  C/registros Permiso: recibe Estatus <?= $Estatus ?>-->
                                     
@@ -3739,7 +3741,12 @@
 
                                       </div> <!--/row tipo doc y num hojas -->
 
-                                      <div class="col-sm-12">
+                                      
+                                      <div class="col-sm-12 m-t">
+                                          <label><?= $addw_catDireccion[$rPreregistros->idDireccion_responsable] ?></label>
+                                      </div>
+                                    </div> <!--col-sm-12 mb-separacion-->
+                                    <div class="col-sm-4">
                                         <a href="#observaciones_bloque" id="btn-ver-obs"  data-toggle="modal" title="Ver Observaciones" class="btn btn-default m-t" data-target="#observaciones_bloque" title="Observaciones" role="button" onclick="ver_observaciones_documento(<?php echo $idArchivo; ?>,<?php echo $rRow->id; ?>,<?php echo $rRowSubProcesos->id ?>,<?php echo $rRowDocumentos->idDoc ?>, <?= $preregistro ?>)">
                                                 <span class="glyphicon glyphicon-search"></span>
                                         </a>
@@ -3749,10 +3756,6 @@
 
                                            
                                       </div>
-                                      <div class="col-sm-12 m-t">
-                                          <label><?= $addw_catDireccion[$rPreregistros->idDireccion_responsable] ?></label>
-                                      </div>
-                                    </div> <!--col-sm-12 mb-separacion-->
 
                                 <?php endif; ?>
 
@@ -3760,7 +3763,7 @@
                                   <!-- Reviso == 1 && $rPreregistros->recibido_cid == 1 -->
                                   <?php $visualizo = 1 ?>
 
-                                  <div class="col-sm-12 m-b-separacion">
+                                  <div class="col-sm-8 m-b-separacion">
                                 
                                       <!--  C/registros -->
                                     
@@ -3885,7 +3888,12 @@
 
                                       </div> <!--/row tipo doc y num hojas -->
 
-                                      <div class="col-sm-12">
+                                      
+                                      <div class="col-sm-12 m-t">
+                                          <label><?= $addw_catDireccion[$rPreregistros->idDireccion_responsable] ?></label>
+                                      </div>
+                                  </div> <!--col-sm-12 mb-separacion-->
+                                  <div class="col-sm-4">
                                         <a href="#observaciones_bloque" id="btn-ver-obs"  data-toggle="modal" title="Ver Observaciones" class="btn btn-default m-t" data-target="#observaciones_bloque" title="Observaciones" role="button" onclick="ver_observaciones_documento(<?php echo $idArchivo; ?>,<?php echo $rRow->id; ?>,<?php echo $rRowSubProcesos->id ?>,<?php echo $rRowDocumentos->idDoc ?>, <?= $preregistro ?>)">
                                                 <span class="glyphicon glyphicon-search"></span>
                                         </a>
@@ -3894,11 +3902,7 @@
                                                     </a>
 
                                            
-                                      </div>
-                                      <div class="col-sm-12 m-t">
-                                          <label><?= $addw_catDireccion[$rPreregistros->idDireccion_responsable] ?></label>
-                                      </div>
-                                  </div> <!--col-sm-12 mb-separacion-->
+                                  </div>
                                   
                                 <?php endif; ?>
 
@@ -3934,7 +3938,7 @@
                           
                           
                                 <?php $visualizo=1; ?>                                  
-                                  <div class="col-sm-12 m-b-separacion">
+                                  <div class="col-sm-8 m-b-separacion">
                                 
                                       <!--  C/registros -->
                                     
@@ -4059,7 +4063,9 @@
 
                                       </div> <!--/row tipo doc y num hojas -->
 
-                                      <div class="col-sm-12">
+                                      
+                                </div> <!--col-sm-12 mb-separacion-->
+                                <div class="col-sm-12">
                                         <a href="#observaciones_bloque" id="btn-ver-obs"  data-toggle="modal" title="Ver Observaciones" class="btn btn-default m-t" data-target="#observaciones_bloque" title="Observaciones" role="button" onclick="ver_observaciones_documento(<?php echo $idArchivo; ?>,<?php echo $rRow->id; ?>,<?php echo $rRowSubProcesos->id ?>,<?php echo $rRowDocumentos->idDoc ?>, <?= $preregistro ?>)">
                                                 <span class="glyphicon glyphicon-search"></span>
                                         </a>
@@ -4068,8 +4074,7 @@
                                                     </a>
 
                                            
-                                      </div>
-                                </div> <!--col-sm-12 mb-separacion-->
+                                </div>
                           <?php endif; ?>
                         <?php endif; ?> 
                                  
@@ -4080,7 +4085,7 @@
                           
                                 
                                 <!--  Vacia -->
-                            <div class="col-sm-12 m-b-separacion">  
+                            <div class="col-sm-8 m-b-separacion">  
                                 <div class="row"> 
                                
                                   <div class="col-sm-8">
@@ -4164,7 +4169,9 @@
 
                                 </div> <!--/row tipo doc y num hojas -->
 
-                                <div class="col-sm-12">
+                                
+                            </div> <!--col-sm-12 mb-separacion-->
+                            <div class="col-sm-4">
                                   <a href="#observaciones_bloque" id="btn-ver-obs"  data-toggle="modal" title="Ver Observaciones" class="btn btn-default m-t" data-target="#observaciones_bloque" title="Observaciones" role="button" onclick="ver_observaciones_documento(<?php echo $idArchivo; ?>,<?php echo $rRow->id; ?>,<?php echo $rRowSubProcesos->id ?>,<?php echo $rRowDocumentos->idDoc ?>, <?= $preregistro ?>)">
                                           <span class="glyphicon glyphicon-search"></span>
                                   </a>
@@ -4174,7 +4181,6 @@
 
                                      
                                 </div>
-                            </div> <!--col-sm-12 mb-separacion-->
                                 
 
                         <?php endif; ?>  
@@ -4198,28 +4204,10 @@
                          
                           <div class="panel-heading"> 
                                <a class="panel-title" data-toggle="collapse" data-parent="#panel-documentos-<?php echo $rRowDocumentos->id;  ?>" href="#panel-element-documentos-<?php echo $rRowDocumentos->id;  ?>">
-                                  
-                                  <table>
-                                      <tr> <!-- #MAOC Documentos-->
-                                          <td width="1000" >
-                                              <div style="display:flex; justify-content: space-between">
-                                                  
-                                                      <div>
-                                                          <?php echo $rRowDocumentos->Nombre;  ?>
-                                                      </div>
-                                                      
-                                                      
-                                                  
-                                              </div>
-                                          
-                                          </td>  
-                                          
-                                           
-                                          
-                                      </tr> 
-                                  </table>
-                                  
-                              </a> 
+                                    <?php echo $rRowDocumentos->Nombre;  ?>
+                                 
+                                </a> 
+                              <div> <?php echo $addw_direciones[$rRowDocumentos->idDireccion_responsable];  ?> </div>
                           </div>
                            
                           
@@ -4724,12 +4712,7 @@
                       </div>
                     
                     </div>
-                        <div class="col-sm-2" >
-                            <!---Direccion responsable <?= $rRowDocumentos->idDireccion_responsable ?> <?= $rRowDocumentos->id ?> -->
-                            <div>
-                                <?php echo $addw_direciones[$rRowDocumentos->idDireccion_responsable];  ?>
-                            </div>
-                        </div>
+                        
                     </div> 
                         
                   

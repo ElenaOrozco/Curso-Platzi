@@ -237,13 +237,13 @@
                             </tr>
                     <?php
                             if($hay_estimaciones > 0){
-                                echo 'Hay estimaciones';
+                                echo 'Hay estimaciones >0 ';
                                 if( $rStatus->Nombre == "11.1 ESTIMACIONES") {
                                     echo 'Nombre';
                                     
                                         
                                      if ($estimaciones_archivo->num_rows() > 0){
-                                        echo 'Rows'. $estimaciones_archivo->num_rows();
+                                        echo 'Rows vista'. $estimaciones_archivo->num_rows();
 
                                         foreach ($estimaciones_archivo->result() as $estimaciones_a){
                                            echo 'Entra';
