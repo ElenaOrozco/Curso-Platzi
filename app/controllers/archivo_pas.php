@@ -13,10 +13,14 @@ class Archivo extends MY_Controller {
         $this->load->library('ferfunc');
         //$this->load->helper('form');
     }
+    
+    
+    
+    
 
     public function index() {
         
-        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Archivo","P")==false){
+        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Listado de Obras","P")==false ){
             header("Location:" . site_url('principal'));
         }
         
@@ -85,7 +89,11 @@ class Archivo extends MY_Controller {
         //this->load->view('v_listado.php', $data);
         
         
+            
+        
             $this->load->view('v_pant_archivo.php', $data);
+       
+            
         
         
         
@@ -98,7 +106,7 @@ class Archivo extends MY_Controller {
     
      public function captura() {
         
-        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Archivo","P")==false){
+        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Estado de Obras","P")==false ){
             header("Location:" . site_url('principal'));
         }
         
@@ -132,6 +140,7 @@ class Archivo extends MY_Controller {
         $data["Validar"]=$this->session->userdata('Validar');
         $data["digitalizar"]=$this->session->userdata('digitalizar');
         $data["Editar"]=$this->session->userdata('Editar');
+        
 
         $data["integracion"]=$this->session->userdata('integracion');
         $data["preregistro"]=$this->session->userdata('preregistro');
@@ -145,8 +154,7 @@ class Archivo extends MY_Controller {
         $data["qGrupos"] = $this->datos_model->get_grupos(); //Grupos obra- idBloqueObra
         $data["qUbicacionesFisicas"]=$this->ubicacion_fisica_model->listado_ubicacion_ordenada_por_columna();
         $data["qDirecciones"]=$this->datos_model->get_Direcciones_SIOP();
-        
-        
+       
       
                         
                         
@@ -175,7 +183,207 @@ class Archivo extends MY_Controller {
         
     }
     
-    public function historico_archivo($idArchivo){
+  
+    public function fetch_archivos(){  
+           $this->load->model('archivo_model');  
+           $fetch_data = $this->archivo_model->make_datatables();  
+           
+           $data = array();  
+           foreach($fetch_data as $row)  
+           {  
+                $sub_array = array();  
+                $sub_array[] = ' <a href="'. site_url('archivo/cambios/' .$row->id) .'"   class="btn btn-xs btn-success"><span class="glyphicon glyphicon-pencil"></span></a>';  
+                $sub_array[] = $row->OrdenTrabajo ;  
+                $sub_array[] = $row->Contrato;  
+                $sub_array[] = $row->Obra ;  
+                $sub_array[] = $row->Descripcion;  
+                $sub_array[] = $row->Normatividad ;  
+                if(isset($Modalidades[$row->idModalidad])){
+                    $sub_array[] =  $Modalidades[$row->idModalidad];
+                } else {
+                    $sub_array[] = "";
+                }
+ 
+                $sub_array[] = $row->idEjercicio;  
+                $sub_array[] = $row->EstatusObra ;  
+                $sub_array[] = $row->Direccion;  
+                $sub_array[] = $row->Supervisor;  
+                $sub_array[] = $row->FechaInicio;   
+                $sub_array[] = $row->ImporteContratado;  
+                $sub_array[] = $row->EjercidoSiop ;  
+ 
+                if ($row->Finiquitada == 0) {
+                    $sub_array[] = 'No';
+                } else {
+                    $sub_array[] = 'Si';
+                }    
+                $sub_array[] = $row->Contratista ;  
+                $sub_array[] = '<a href="#" class="btn btn-warning btn-xs" title=""  data-toggle="modal" data-target="#modal-historico-archivo" role="button" onclick="ver_historico_archivo('. $row->id .')"><span class="glyphicon glyphicon-search"></span></a>&nbsp;';
+ 
+ 
+ 
+     
+                $data[] = $sub_array;  
+           }  
+           $output = array(  
+                "draw"                =>     intval($_POST["draw"]),  
+                "recordsTotal"        =>     $this->archivo_model->get_all_data(),  
+                "recordsFiltered"     =>     $this->archivo_model->get_filtered_data(),  
+                "data"                =>     $data 
+           );  
+           echo json_encode($output);  
+      }  
+      
+    public function ot_json() {
+        $term = $this->input->post("term");
+        $id = $this->input->post("id");
+        $condicion = $this->input->post("condicion");
+        $this->load->model('datos_model');
+       
+        $aRemitente = $this->datos_model->ot_json($term,$id, $condicion);
+        
+        //print_r($aRemitente);
+        
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Content-type: application/json');
+        echo json_encode($aRemitente, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+    }
+    
+    
+    public function listado_tx(){
+        $this->load->model('datos_model');
+        $tabla ="";
+        
+        //Filtro por grupos
+        $qFiltro = $this->datos_model->listado_tx();
+           
+        
+        /*if (isset($qFiltro)) {
+                                    if ($qFiltro->num_rows() > 0) {
+                                       
+                                        foreach ($qFiltro->result() as $rFiltro) {
+                                            echo $rFiltro->OrdenTrabajo;
+                                        }
+                                    }
+        }
+        exit();*/
+        
+        $tabla.='
+         
+           
+          <table class="table table-responsive table-striped table-hover table-bordered" id="t_tx">
+                            <thead>
+                            <tr>
+                                <th class="col-md-1">
+                                    Acción
+                                </th>
+                                <th>
+                                    Orden de Trabajo
+                                </th>
+                                <th>
+                                    Contrato
+                                </th>
+                                <th>
+                                    Obra
+                                </th>                               
+                                <th>
+                                    Descripcion
+                                </th>
+                               
+                                  <th >
+                                    Normatividad
+                                </th> 
+                                  <th >
+                                    Modalidad
+                                </th> 
+                                <th >
+                                    Ejercicio
+                                </th> 
+                                <th >
+                                    Estatus Obra
+                                </th>
+                                
+                                <th >
+                                    Direccion Ejecutora
+                                </th>
+                                <th >
+                                    Supervisor
+                                </th>
+                                <th >
+                                    Inicio Contrato
+                                </th>
+                                <th >
+                                    Monto Contratado
+                                </th>
+                                <th >
+                                    Monto Ejercido por SIOP
+                                </th>
+                                <th >
+                                    Finiquitada
+                                </th>
+                                <th>
+                                    Estatus FIDO
+                                </th>
+                               
+                            </tr>
+                        </thead>
+                        <tbody>
+         ';
+         
+         
+                                if (isset($qFiltro)) {
+                                    if ($qFiltro->num_rows() > 0) {
+                                        $i = 0;
+                                        foreach ($qFiltro->result() as $rFiltro) {
+                                            if ( $rFiltro->Finiquitada == 0){
+                                                $finiquitada = 'NO';
+                                            }else {
+                                                $finiquitada = 'SI';
+                                            }
+                                           $tabla.= "<tr>";
+                                                $tabla.=  "<td>" ;
+                                                
+                                                $tabla.= "<a href='". site_url('archivo/cambios/' . $rFiltro->id) ."' class='btn btn-xs btn-success'><span class='glyphicon glyphicon-pencil'></span></a></td>";
+                                                $tabla.=  "<td>" . $rFiltro->OrdenTrabajo . "</td>";
+
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Contrato . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Obra . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Descripcion . "</td>";
+                                               
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Normatividad . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->idModalidad . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->idEjercicio . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->EstatusObra . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Direccion . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Supervisor . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->FechaInicio . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->ImporteContratado . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->EjercidoSiop . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $finiquitada. "</td>";
+                                                $tabla.= "<td class='sinwarp'> <a href='#' class='btn btn-warning btn-xs' title=''  data-toggle='modal' data-target='#modal-historico-archivo' role='button' onclick='ver_historico_archivo(" . $rFiltro->id  .")'><span class='glyphicon glyphicon-search'></span></a>&nbsp;</td>";
+                                           
+                                               //$tabla.= "<td class='sinwarp'>" .$rProcesos->Estatus. "</td>";
+                                           $tabla.= "</tr>";
+                                            
+                                        }
+                                    }
+                                }
+        
+                                
+        $tabla.=' </tbody>
+                        </table> ';                        
+                                
+        $data=array();
+        $data["tabla"]=$tabla;
+                                
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Content-type: application/json');
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);  
+    }
+
+        public function historico_archivo($idArchivo){
         $this->load->model('datos_model');
         $this->load->model('rel_archivo_documento_model');
         $this->load->model('procesos_model');
@@ -356,8 +564,9 @@ class Archivo extends MY_Controller {
             $data["aArchivo"] = $this->datos_model->datos_Archivo($id_archivo)->row_array();
             //
             $data["aUsuarios"] = $this->datos_model->get_usuarios();
-            $data["qProcesos"] = $this->datos_model->get_procesos();
-            $data["NoProcesos_archivo"] = $this->datos_model->get_procesos_archivo( $id_archivo)->num_rows();
+            //$data["qProcesos"] = $this->datos_model->get_procesos();
+            $data["qProcesos"] = $this->datos_model->procesos_de_archivo($id_archivo);
+            $data["NoProcesos_archivo"] = $this->datos_model->get_procesos_archivo($id_archivo)->num_rows();
             $data["NoProcesos_archivo_integracion"] = $this->datos_model->get_procesos_archivo_integracion( $id_archivo)->num_rows();
             $data["qBloques"] = $this->datos_model->get_bloques();
             $data["Ejercicios"] = $this->datos_model->get_Ejercicio_select();
@@ -399,14 +608,19 @@ class Archivo extends MY_Controller {
             
             $this->load->model("direcciones_model");
             $data["addw_direciones"] = $this->direcciones_model->addw_direccion();
-             $data["addw_catDireccion"] = $this->direcciones_model->addw_catDireccion();
+            $data["addw_catDireccion"] = $this->direcciones_model->addw_catDireccion();
             
             $this->load->model("estimaciones_model");
 
-            
-            
+            $this->load->view('v_pant_preregistro', $data);
+            /* if( $data["preregistro"]== 1 ){
+                //$data["qCarga"] = $this->datos_model->get_procesos();
+                $this->load->view('v_pant_preregistro', $data);
+                 //$this->load->view('v_reporte_form_2.php', $data);
+            } else {
             //$this->load->view('v_reporte_form.php', $data);
             $this->load->view('v_reporte_form_2.php', $data);
+            }*/
             
         }else{
             
@@ -423,6 +637,31 @@ class Archivo extends MY_Controller {
         }
     }
     
+    public function cargar_plantilla ($idArchivo){
+        
+       
+        $resultado = array (
+            "procesos" =>  $this->datos_model->procesos_de_archivo($idArchivo),
+            "array_subprocesos" =>  $this->datos_model->procesos_de_archivo($idArchivo),
+            "plantilla" => $this->datos_model->procesos_de_archivo($idArchivo),
+        );
+        
+    }
+    
+    public function cargar_documentos($idArchivo, $idproceso, $idsubproceso){
+        $this->load->model("datos_model");
+        $documentos = $this->datos_model->cargar_documentos($idArchivo, $idproceso, $idsubproceso);
+        if (isset($documentos)){
+            if ($documentos->num_rows() > 0){
+                foreach ($documentos->result() as $rRow){
+                   require('site_url("archivo/cargar_documentos"); ?>row_documentos.php');
+                }
+            }
+        }
+        
+        
+    }
+
     public function preregistrar($id_archivo = null, $idDireccion, $idProceso = 1, $idSubProceso = 1, $idDocumento = 1, $Numero_Estimacion = "") {
         
         if ($id_archivo != 0) {
@@ -472,6 +711,7 @@ class Archivo extends MY_Controller {
             
             $data["integracion"]=$this->session->userdata('integracion');
             $data["preregistro"]=$this->session->userdata('preregistro');
+            //direccion que entregó los documentos
             $data["idDireccion_responsable"]=$idDireccion;
             //echo 'id ' .$idDireccion;
             //exit();
@@ -512,7 +752,7 @@ class Archivo extends MY_Controller {
     }
     
     
-    public function actualizar_plantilla($idArchivo){
+    public function ver_plantilla($idArchivo){
        $this->load->model('rel_archivo_documento_model');
        
        $qDocumentosRecibidos = $this->rel_archivo_documento_model->documentos_recibidos($idArchivo);
@@ -588,7 +828,81 @@ class Archivo extends MY_Controller {
        }
     }
     
+    public function edit_est_revisado($idEstimacion) {
+        $this->load->model('estimaciones_model');
+        
+        $data=array();
+        if ($this->input->post("revisado") == 1){
+            $data["revisado"] = 1;
+            $data["idUsuario_revisado"]=  $this->session->userdata('id');
+        }else {
+            $data["revisado"] = 0;
+            $data["idUsuario_revisado"]=  0;
+            
+        }
+        
+        $this->estimaciones_model->datos_estimaciones_update($data,$idEstimacion);
+        
+    }
+        
     public function edit_est_recibio($idEstimacion) {
+        $this->load->model('estimaciones_model');
+        
+        $data=array();
+        if ($this->input->post("recibido") == 1){
+            $data["recibido"] = 1;
+        }else {
+            $data["recibido"] = 0;
+            
+            
+        }
+        $data["idUsuario_recibio"]=  $this->session->userdata('id');
+        $this->estimaciones_model->datos_estimaciones_update($data,$idEstimacion);
+        
+        /*if ($this->input->post("recibido") == 1){
+            $data["copia"]= 1;
+            $data["original_recibido"]= 0;
+            $data["no_aplica"]= 0;
+            $data["eliminacion_logica"]= 0;
+        }
+        
+        if ($this->input->post("recibido") == 2){
+            $data["original_recibido"]= 1;
+            $data["copia"]= 0;
+            $data["no_aplica"]= 0;
+            $data["eliminacion_logica"]= 0;
+        }
+        if ($this->input->post("recibido") == 3){
+            $data["no_aplica"]= 1;
+            $data["copia"]= 0;
+            $data["original_recibido"]= 0;
+            $data["noHojas"]= 0;
+            $data["eliminacion_logica"]= 0;
+        }
+        if ($this->input->post("recibido") ==0){
+            $data["original_recibido"]= 0;
+            $data["copia"]= 0;
+            $data["no_aplica"]= 0;
+            $data["noHojas"]= 0;
+            $data["eliminacion_logica"]= 1;
+
+        }
+        
+        
+        
+        $data["idUsuario"]=  $this->session->userdata('id');
+        //$data["idDireccion_responsable"]=  $this->session->userdata('idDireccion_responsable');
+        
+        
+        $this->estimaciones_model->datos_estimaciones_update($data,$idEstimacion);
+        
+        */
+        
+
+    }
+    
+    
+    public function edit_estimacion_preregistro($idEstimacion, $direccion) {
         $this->load->model('estimaciones_model');
         
         $data=array();
@@ -622,8 +936,8 @@ class Archivo extends MY_Controller {
         
         
         
-        $data["idUsuario_recibio"]=  $this->session->userdata('id');
-        $data["idDireccion_responsable"]=  $this->session->userdata('idDireccion_responsable');
+        $data["idUsuario"]=  $this->session->userdata('id');
+        //$data["idDireccion_responsable"]=  $direccion;
         
         
         $this->estimaciones_model->datos_estimaciones_update($data,$idEstimacion);
@@ -632,6 +946,50 @@ class Archivo extends MY_Controller {
         
 
     }
+    
+    public function preregistrar_documento_estimacion($id){
+        $this->load->model('estimaciones_model');
+        
+        $data=array();
+        
+        
+        if ($this->input->post("recibido") == 1){
+            $data["copia"]= 1;
+            $data["original_recibido"]= 0;
+            $data["no_aplica"]= 0;
+        }
+        
+        if ($this->input->post("recibido") == 2){
+            $data["original_recibido"]= 1;
+            $data["copia"]= 0;
+            $data["no_aplica"]= 0;
+        }
+        if ($this->input->post("recibido") == 3){
+            $data["no_aplica"]= 1;
+            $data["copia"]= 0;
+            $data["original_recibido"]= 0;
+            $data["noHojas"]= 0;
+        }
+        if ($this->input->post("recibido") ==0){
+            $data["original_recibido"]= 0;
+            $data["copia"]= 0;
+            $data["no_aplica"]= 0;
+            $data["noHojas"]= 0;
+            $data["eliminacion_logica"]= 1;
+
+        }
+        
+        
+        
+        $data["idUsuario"]=  $this->session->userdata('id');
+        $data["idDireccion_responsable"]=   $this->session->userdata('idDireccion_responsable');
+        
+        
+        $retorno = $this->estimaciones_model->datos_estimaciones_update($data,$id);
+        echo $retorno['retorno'];
+        
+    }
+
 
     public function edit_recibio($idRelDoc_Archivo) {
         $this->load->model('rel_archivo_documento_model');
@@ -700,58 +1058,17 @@ class Archivo extends MY_Controller {
         
     }
     
-     public function edit_preregistrados($idRelDoc_Archivo, $idArchivo) {
+     public function cid_preregistra($idRelDoc_Archivo, $idArchivo, $idDireccion) {
         $this->load->model('rel_archivo_documento_model');
         $this->load->model('rel_archivo_preregistro_model');
         
-        $data=array();
-        $data["idUsuario_recibio"]=  $this->session->userdata('id');
-        $data["idDireccion_responsable"] =$this->session->userdata('idDireccion_responsable');
-        
-        //echo $this->input->post("recibido");
-        //exit();
-        
-        if ($this->input->post("preregistrado") == 1){
-            $data["copia"]= 1;
-            $data["original_recibido"]= 0;
-            $data["no_aplica"]= 0;
-            
-        }
-        
-        if ($this->input->post("preregistrado") == 2){
-            $data["original_recibido"]= 1;
-            $data["copia"]= 0;
-            $data["no_aplica"]= 0;
-            
-        }
-        if ($this->input->post("preregistrado") ==0){
-            $data["original_recibido"]= 0;
-            $data["copia"]= 0;
-            $data["idUsuario_recibio"]=  0;
-            $data["idDireccion_responsable"] =0;
-            $data["noHojas"]=0;
-            $data["no_aplica"]= 0;
-        }
-        
-        if ($this->input->post("preregistrado") ==3){
-            $data["original_recibido"]= 0;
-            $data["copia"]= 0;
-            $data["no_aplica"]= 1;
-            //$data["idDireccion_responsable"] =0;
-            $data["noHojas"]=0;
-        }
-        if ($this->input->post("preregistrado") == 4){
-            $data["copia"]= 2;
-            $data["original_recibido"]= 0;
-            $data["no_aplica"]= 0;
-            
-        }
         
         
         
-        $str_existe_preregistro = $this->existe_preregistro($idRelDoc_Archivo, $this->session->userdata('idDireccion_responsable'));
         
-        if($str_existe_preregistro > 0 )  {
+        $str_existe_preregistro = $this->existe_preregistro($idRelDoc_Archivo, $idDireccion);
+        
+        if($str_existe_preregistro->num_rows() > 0 )  {
             $datos=array();
             $datos['tipo_documento']= $this->input->post("preregistrado");
             if ($this->input->post("preregistrado") == 3){
@@ -764,13 +1081,17 @@ class Archivo extends MY_Controller {
             }else {
                 $datos['eliminacion_logica']= 0;
             }
-            $idDireccion_responsable = $this->session->userdata('idDireccion_responsable');
-            $this->rel_archivo_preregistro_model->datos_relacion_archivo_preregistro_update($datos, $idDireccion_responsable, $idRelDoc_Archivo);
+            $datos['fecha_ingreso']=date('Y-m-d H:i:s');
+            $idDireccion_responsable = $idDireccion;
+            $this->rel_archivo_preregistro_model->datos_relacion_archivo_preregistro_update($datos, $idDireccion, $idRelDoc_Archivo);
         }  else {
             $datos=array();
             $datos['id_Rel_Archivo_Documento']= $idRelDoc_Archivo;
-            $datos['idDireccion_responsable']= $data["idDireccion_responsable"];
+            $datos['idDireccion_responsable']= $idDireccion;
             $datos['idUsuario_preregistra']=$this->session->userdata('id');
+            $datos['idUsuario_acepta']=$this->session->userdata('id');
+            $datos['preregistro_aceptado']=1;
+            $datos['fecha_ingreso']=date('Y-m-d H:i:s');
             
             $datos['tipo_documento']= $this->input->post("preregistrado");
             $datos["idArchivo"] =$idArchivo;
@@ -795,9 +1116,9 @@ class Archivo extends MY_Controller {
         
         $aRegistro=$this->rel_archivo_documento_model->datos_relacion_archivo_documento($idRelDoc_Archivo)->row_array();
         
-        $qSubTipoProceso_preregistro=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_sub_tipo_proceso_preregistro($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"],  $data["idDireccion_responsable"]);
+        $qSubTipoProceso_preregistro=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_sub_tipo_proceso_preregistro($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"],  $idDireccion);
         
-        $qTipoProceso_preregistro=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_tipo_proceso_preregistro($aRegistro["idArchivo"],$aRegistro["idTipoProceso"],  $data["idDireccion_responsable"]);
+        $qTipoProceso_preregistro=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_tipo_proceso_preregistro($aRegistro["idArchivo"],$aRegistro["idTipoProceso"],  $idDireccion);
         
         $qSubTipoProceso_recibido=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_sub_tipo_proceso($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"]);
         
@@ -824,7 +1145,155 @@ class Archivo extends MY_Controller {
         $data["strTipoProceso_cid"]="Entregados " . $qTipoProceso_recibido->num_rows() . " de " . $qTipoProceso->num_rows();
         $data["strSubTipoProceso_cid"]="Entregados " . $qSubTipoProceso_recibido->num_rows() . " de " . $qSubTipoProceso->num_rows();
         
-        $data["str_existe_preregistro"] = $str_existe_preregistro;
+        $data["str_existe_preregistro"] = $str_existe_preregistro->num_rows();
+        
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Content-type: application/json');
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+
+        
+    }
+
+
+   
+    
+    //*
+    public function edit_preregistrados($idRelDoc_Archivo, $idArchivo) {
+        $this->load->model('rel_archivo_documento_model');
+        $this->load->model('rel_archivo_preregistro_model');
+        $fecha =  date('Y-m-d H:i:s');
+        $datos=array();
+        //$datos['fecha_ingreso']=date('Y-m-d H:i:s');
+        
+        //Si no es de preregistro
+        if ($this->session->userdata('preregistro') == 0){
+            $str_existe_preregistro = $this->hay_preregistro($idRelDoc_Archivo);
+
+            if($str_existe_preregistro > 0 )  {
+                
+                $datos['tipo_documento']= $this->input->post("preregistrado");
+                $datos['idUsuario_preregistra']=$this->session->userdata('id');
+                if ($this->input->post("preregistrado") == 3){
+                    $datos['noHojas']= 0;
+                }
+                if ($this->input->post("preregistrado") == 0){
+                    $datos['noHojas']= 0;
+                    $datos['eliminacion_logica']= 1;
+
+                }else {
+                    $datos['eliminacion_logica']= 0;
+                }
+                
+                
+                $this->rel_archivo_preregistro_model->datos_preregistro_update_por_relacion($datos, $idRelDoc_Archivo);
+            }  else {
+                
+                $datos['id_Rel_Archivo_Documento']= $idRelDoc_Archivo;
+                $datos['idDireccion_responsable']= $this->session->userdata("idDireccion_responsable");
+                $datos['idUsuario_preregistra']=$this->session->userdata('id');
+
+                $datos['tipo_documento']= $this->input->post("preregistrado");
+                $datos["idArchivo"] =$idArchivo;
+                $this->rel_archivo_preregistro_model->datos_relacion_archivo_preregistro_insert($datos);
+            }
+            
+        } else {
+        
+            $str_existe_preregistro = $this->existe_preregistro($idRelDoc_Archivo, $this->session->userdata('idDireccion_responsable'));
+            
+            if($str_existe_preregistro->num_rows() > 0 )  {
+                
+                /*
+                $datos['tipo_documento']= $this->input->post("preregistrado");
+                
+                $datos['fecha_preregistro'] = $fecha;
+                
+                if ($this->input->post("preregistrado") == 3){
+                    $datos['noHojas']= 0;
+                }
+                if ($this->input->post("preregistrado") == 0){
+                    $datos['noHojas']= 0;
+                    $datos['eliminacion_logica']= 1;
+
+                }else {
+                    
+                    $datos['eliminacion_logica']= 0;
+                }
+                
+                $row = $str_existe_preregistro->row_array();
+
+                if (isset($row))
+                {
+                    $id= $row['id'];
+                        
+                }
+               
+               
+                $idDireccion_responsable = $this->session->userdata('idDireccion_responsable');
+               
+                
+                $this->rel_archivo_preregistro_model->update_registro($datos, $id);*/
+            }  else {
+                
+                $datos['id_Rel_Archivo_Documento']= $idRelDoc_Archivo;
+                $datos['idDireccion_responsable']= $this->session->userdata('idDireccion_responsable');
+                $datos['idUsuario_preregistra']=$this->session->userdata('id');
+                $datos['fecha_preregistro'] = $fecha;
+                $datos['tipo_documento']= $this->input->post("preregistrado");
+                $datos["idArchivo"] =$idArchivo;
+                
+                /*echo $str_existe_preregistro->num_rows();
+                print_r($datos);
+                //exit(); */
+                
+                $this->rel_archivo_preregistro_model->datos_relacion_archivo_preregistro_insert($datos);
+            }
+       
+        
+        
+        
+        }
+        
+        
+        
+        
+        $aRegistro=$this->rel_archivo_documento_model->datos_relacion_archivo_documento($idRelDoc_Archivo)->row_array();
+        
+        $idDireccion_responsable = $this->session->userdata('idDireccion_responsable');
+        
+        $qSubTipoProceso_preregistro=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_sub_tipo_proceso_preregistro($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"],  $idDireccion_responsable);
+        
+        $qTipoProceso_preregistro=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_tipo_proceso_preregistro($aRegistro["idArchivo"],$aRegistro["idTipoProceso"],  $idDireccion_responsable);
+        
+        
+        $qSubTipoProceso_recibido=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_sub_tipo_proceso($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"]);
+        
+        $qTipoProceso_recibido=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_tipo_proceso($aRegistro["idArchivo"],$aRegistro["idTipoProceso"]);
+        
+        
+        $qSubTipoProceso=$this->rel_archivo_documento_model->listado_registros_recibido_por_sub_tipo_proceso_total($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"]);
+        
+        $qTipoProceso=$this->rel_archivo_documento_model->listado_registros_recibido_por_tipo_proceso_total($aRegistro["idArchivo"],$aRegistro["idTipoProceso"]);
+        //$str_existe_preregistro ='OK';
+        
+        $data=array();
+        $data["NumSubTipoProceso_recibidos"]=$qSubTipoProceso_recibido->num_rows();
+        $data["NumTipoProceso_recibidos"]=$qTipoProceso_recibido->num_rows();
+        $data["NumSubTipoProceso_preregistrados"]=$qSubTipoProceso_preregistro->num_rows();
+        $data["NumTipoProceso_preregistados"]=$qTipoProceso_preregistro->num_rows();
+        $data["idTipoProceso"]=$aRegistro["idTipoProceso"];
+        $data["idSubTipoProceso"]=$aRegistro["idSubTipoProceso"];
+        $data["fecha"]=$fecha;
+        
+        
+        $data["strTipoProceso_preregistrados"]="Preregistrados " . $qTipoProceso_preregistro->num_rows() . " de " . $qTipoProceso->num_rows();
+        $data["strSubTipoProceso_preregistrados"]="Preregistrados " . $qSubTipoProceso_preregistro->num_rows() . " de " . $qSubTipoProceso->num_rows();
+        
+        $data["strTipoProceso_cid"]="Entregados " . $qTipoProceso_recibido->num_rows() . " de " . $qTipoProceso->num_rows();
+        $data["strSubTipoProceso_cid"]="Entregados " . $qSubTipoProceso_recibido->num_rows() . " de " . $qSubTipoProceso->num_rows();
+        
+        //$data["str_existe_preregistro"] = $str_existe_preregistro->num_rows();
         
         header('Cache-Control: no-cache, must-revalidate');
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
@@ -834,7 +1303,78 @@ class Archivo extends MY_Controller {
         
     }
     
-    
+    public function modificar_tipo_documento($idRelDoc_Archivo, $idArchivo,  $idRAP){
+        $this->load->model('rel_archivo_documento_model');
+        $this->load->model('rel_archivo_preregistro_model');
+        
+        $datos=array();
+        
+        
+       
+        $fecha =  date('Y-m-d H:i:s'); 
+        $datos['fecha_preregistro']= $fecha;
+        $datos['tipo_documento']= $this->input->post("preregistrado");
+        
+        if ($this->input->post("preregistrado") == 3){
+            $datos['noHojas']= 0;
+        }
+        if ($this->input->post("preregistrado") == 0){
+            $datos['noHojas']= 0;
+            $datos['eliminacion_logica']= 1;
+
+        }else {
+            $datos['eliminacion_logica']= 0;
+        }
+
+
+        $this->rel_archivo_preregistro_model->update_registro($datos, $idRAP);
+        
+            
+       
+        
+        $aRegistro=$this->rel_archivo_documento_model->datos_relacion_archivo_documento($idRelDoc_Archivo)->row_array();
+        
+        $idDireccion_responsable = $this->session->userdata('idDireccion_responsable');
+        
+        $qSubTipoProceso_preregistro=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_sub_tipo_proceso_preregistro($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"],  $idDireccion_responsable);
+        
+        $qTipoProceso_preregistro=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_tipo_proceso_preregistro($aRegistro["idArchivo"],$aRegistro["idTipoProceso"],  $idDireccion_responsable);
+        
+        
+        $qSubTipoProceso_recibido=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_sub_tipo_proceso($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"]);
+        
+        $qTipoProceso_recibido=$this->rel_archivo_documento_model->listado_registros_preregistrados_por_tipo_proceso($aRegistro["idArchivo"],$aRegistro["idTipoProceso"]);
+        
+        
+        $qSubTipoProceso=$this->rel_archivo_documento_model->listado_registros_recibido_por_sub_tipo_proceso_total($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"]);
+        
+        $qTipoProceso=$this->rel_archivo_documento_model->listado_registros_recibido_por_tipo_proceso_total($aRegistro["idArchivo"],$aRegistro["idTipoProceso"]);
+        //$str_existe_preregistro ='OK';
+        
+        $data=array();
+        $data["NumSubTipoProceso_recibidos"]=$qSubTipoProceso_recibido->num_rows();
+        $data["NumTipoProceso_recibidos"]=$qTipoProceso_recibido->num_rows();
+        $data["NumSubTipoProceso_preregistrados"]=$qSubTipoProceso_preregistro->num_rows();
+        $data["NumTipoProceso_preregistados"]=$qTipoProceso_preregistro->num_rows();
+        $data["idTipoProceso"]=$aRegistro["idTipoProceso"];
+        $data["idSubTipoProceso"]=$aRegistro["idSubTipoProceso"];
+        
+        
+        $data["strTipoProceso_preregistrados"]="Preregistrados " . $qTipoProceso_preregistro->num_rows() . " de " . $qTipoProceso->num_rows();
+        $data["strSubTipoProceso_preregistrados"]="Preregistrados " . $qSubTipoProceso_preregistro->num_rows() . " de " . $qSubTipoProceso->num_rows();
+        
+        $data["strTipoProceso_cid"]="Entregados " . $qTipoProceso_recibido->num_rows() . " de " . $qTipoProceso->num_rows();
+        $data["strSubTipoProceso_cid"]="Entregados " . $qSubTipoProceso_recibido->num_rows() . " de " . $qSubTipoProceso->num_rows();
+        
+       
+        
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Content-type: application/json');
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+    }
+            
+            
     public function editar_documento_preregistro($id, $idRelDoc_Archivo, $idArchivo) {
         $this->load->model('rel_archivo_documento_model');
         $this->load->model('rel_archivo_preregistro_model');
@@ -901,16 +1441,17 @@ class Archivo extends MY_Controller {
     public function existe_preregistro($idRelDoc_Archivo, $direccion){
         $this->load->model('rel_archivo_preregistro_model');
         
-        
         $query= $this->rel_archivo_preregistro_model->get_relacion_archivo_preregistro($idRelDoc_Archivo, $direccion);
-        /*$row = $query->row_array ();
-         if (isset($row)) {
-            
-                return "Si exite";
-           
-         }else{
-             return "No ";
-         */
+        
+        return $query;
+    }
+    
+    
+    public function hay_preregistro($idRelDoc_Archivo){
+        $this->load->model('rel_archivo_preregistro_model');
+        
+        
+        $query= $this->rel_archivo_preregistro_model->get_relacion_archivo_preregistro_por_relacion($idRelDoc_Archivo);
         
         return $query->num_rows();
     }
@@ -937,10 +1478,63 @@ class Archivo extends MY_Controller {
             'noHojas' => $hojas,
             
             );
-        $this->rel_archivo_documento_model-> datos_relacion_archivo_documento_update($data, $idRelacion) ;
+        //$this->rel_archivo_documento_model-> datos_relacion_archivo_documento_update($data, $idRelacion) ;
+        
+        if ( $this->session->userdata('preregistro') == 0){
+            $estado = $this->rel_archivo_preregistro_model->datos_preregistro_update_por_relacion($data, $idRelacion);
+        } else {
+            $idDireccion_responsable = $this->session->userdata('idDireccion_responsable');
+            $estado = $this->rel_archivo_preregistro_model->datos_relacion_archivo_preregistro_update($data, $idDireccion_responsable, $idRelacion) ;
+        }
         
         
-        $idDireccion_responsable = $this->session->userdata('idDireccion_responsable');
+        $data=array();
+        $data["estado"]=$estado;
+        
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+        
+        
+        
+        
+    }
+    
+    
+    public function modificar_noHojas($idRelacion, $idArchivo, $hojas, $idRAP){
+        $this->load->model('rel_archivo_documento_model');
+        $this->load->model('rel_archivo_preregistro_model');
+        
+        $data=array(
+            'noHojas' => $hojas,
+            
+            );
+        
+       
+        $estado = $this->rel_archivo_preregistro_model->update_registro($data, $idRAP) ;
+        
+        
+        
+        
+        $data["estado"]=$estado;
+        
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+        
+        
+        
+        
+    }
+
+    public function cargar_noHojas_direccion($idRelacion, $idArchivo, $hojas, $direccion){
+        $this->load->model('rel_archivo_documento_model');
+        $this->load->model('rel_archivo_preregistro_model');
+        
+        $data=array(
+            'noHojas' => $hojas,
+            
+            );
+        //$this->rel_archivo_documento_model-> datos_relacion_archivo_documento_update($data, $idRelacion) ;
+        
+        
+        $idDireccion_responsable = $direccion;
         $this->rel_archivo_preregistro_model-> datos_relacion_archivo_preregistro_update($data, $idDireccion_responsable, $idRelacion) ;
         
         
@@ -996,7 +1590,7 @@ class Archivo extends MY_Controller {
 
     }
     
-    public function cargar_estimaciones($idRel, $idArchivo, $noEstimaciones, $reviso){
+    public function cargar_estimaciones($idRel, $idArchivo, $noEstimaciones){
        
         $this->load->model('subdocumentos_model');
         $this->load->model('estimaciones_model');
@@ -1042,11 +1636,33 @@ class Archivo extends MY_Controller {
         }
        // exit();
     }
+    
+    
 
 
-    public function ver_estimaciones_relacion($idArchivo, $idRel, $reviso){
+    public function ver_estimaciones_relacion($idArchivo, $idRel){
         $this->load->model('estimaciones_model');
         $this->load->model('subdocumentos_model');
+        
+        $preregistro = $this->session->userdata('preregistro');
+        $reviso = $this->session->userdata('reviso');
+        $idDireccion_responsable = $this->session->userdata('idDireccion_responsable');
+        $Direccion_responsable_documento = $this->buscar_responsable_documento($idRel)->row_array();
+        //json_encode($Direccion_responsable_documento);
+        $responsable = $Direccion_responsable_documento['idDireccion_responsable'];
+        
+        if ($responsable == 0){
+            $direccion = $this->buscar_ejecutora($idArchivo)->row_array();
+            $direccion = $direccion['Direccion'];
+            $responsable =  $this->buscar_id_ejecutora($direccion)->row_array();
+            $responsable = $responsable['id'];
+            
+            
+        }
+        //print_r($responsable);
+        
+        //exit();
+        
 
         $div_estimaciones = "";
         $addw_SubDocumentos= $this->subdocumentos_model->addw_subDocumentos();
@@ -1067,31 +1683,33 @@ class Archivo extends MY_Controller {
                 foreach ($estimaciones_existentes->result() as $estimaciones) { 
                     //$div_estimaciones .= "No est".$estimaciones->Numero_Estimacion."</br>";
             
-                     
                     
-                    $div_estimaciones .= '<div class="col-sm-12 m-t" style="margin-bottom:20px">';
-                    $div_estimaciones .=     '<div class="panel panel-default">';
-                    $div_estimaciones .=         '<div class="panel-heading">';
-                                                                    
-                    $div_estimaciones .=                '<a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse-'. $estimaciones->Numero_Estimacion.'" aria-expanded="true" aria-controls="collapse-'.$estimaciones->Numero_Estimacion .'">
-                                                                                
-                                                                <div class="display-flex">
+                    
+                    
+            $div_estimaciones .='<div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
 
-                                                                    EST. '. $estimaciones->Numero_Estimacion .'
-                                                                    <a class="btn btn-danger del_documento" id="eliminar_est" onclick="eliminar_estimacion('. $estimaciones->Numero_Estimacion . ','. $estimaciones->idRel_Archivo_Documento.','.$idArchivo.')" target="_self"><span class="glyphicon glyphicon-remove"></span> Eliminar Estimacion</a>
+                                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse-'. $estimaciones->Numero_Estimacion .'" aria-expanded="true" aria-controls="collapse-'. $estimaciones->Numero_Estimacion .'">
 
-                                                                </div>
+                                                <div class="d-f">
 
+                                                    EST. '. $estimaciones->Numero_Estimacion .'
+                                                    <a class="btn btn-danger del_documento" id="eliminar_est" onclick="eliminar_estimacion('. $estimaciones->Numero_Estimacion . ','. $estimaciones->idRel_Archivo_Documento .','.$idArchivo.')" target="_self"><span class="glyphicon glyphicon-remove"></span> Eliminar Estimacion</a>
 
-                                                        </a>
-                                                                
-                                                    </div>
-                                                    <div id="collapse-'.$estimaciones->Numero_Estimacion.'" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-'.$estimaciones->Numero_Estimacion .'">
-                                                        <div class="panel-body">';
-                                                                    
+                                                </div>
 
 
-                                                        if (isset($qEstimaciones)){ 
+                                            </a>
+
+                                        </div>
+                                        
+                                        <div id="collapse-'. $estimaciones->Numero_Estimacion  .'" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-'.$estimaciones->Numero_Estimacion  .'">
+                                            <div class="panel-body">';
+                                                
+
+
+                                                 if (isset($qEstimaciones)){ 
                                                             $i=0;
                                                             if ($qEstimaciones->num_rows() >0){
                                                                 //$div_estimaciones .= "numero de estimaciones ". $qEstimaciones->num_rows();
@@ -1154,131 +1772,86 @@ class Archivo extends MY_Controller {
                                                                             $value_estimaciones3 = 0;
                                                                         }
                                                                         
+                                                               
+   
+                                               $div_estimaciones .='<div class="row">
+                                                                        <div class="col-md-5">
+                                                                            <h5> EST. '. $rEstimaciones->Numero_Estimacion .' - ' .$addw_SubDocumentos[$rEstimaciones->idSubDocumento] .'</h5>
+
+                                                                        </div> 
                                                                         
-                                                            //$i++; 
-                                                            //
-                                                            //
-                                                                    //echo "Entro </br>";/* 
-                                                                    /*
-                                                                        $strchecked_revisado=""; 
-                                                                        $value_estimaciones= "";
-                                                                        $seleccion_estimaciones = "";
+                                                                        <div class="col-md-2">
+                                                                           
+   
+                                                                            <select class="form-control m-b" name="tipo_documento_est'.$rEstimaciones->id .'" id="tipo_documento_est'.$rEstimaciones->id .'" onchange="uf_recibir_tipo_estimacion('. $rEstimaciones->id .')" >
+                                                                                <option value="'.$value_estimaciones .'" id="select" name="select">'. $seleccion_estimaciones .'</option>
+
+                                                                                <option id="tipo_documento_est'.$rEstimaciones->id .'" name="tipo_documento_est'.$rEstimaciones->id .'" value="'.$value_estimaciones1 .'">'. $seleccion_estimaciones1 .'</option>
+                                                                                <option id="tipo_documento_est'.$rEstimaciones->id .'" name="tipo_documento_est'.$rEstimaciones->id .'" value="'.$value_estimaciones2 .'">'. $seleccion_estimaciones2 .'</option>
+                                                                                <option id="tipo_documento_est'.$rEstimaciones->id .'" name="tipo_documento_est'.$rEstimaciones->id .'" value="'.$value_estimaciones3 .'">'. $seleccion_estimaciones3 .'</option>
+                                                                             </select>
+   
+                                                                          
+                                                                        </div>
                                                                         
-                                                                        if($reviso ==0){
-                                                                             $disable_estimacion= "disabled='disabled";
-                                                                        } else{
-                                                                            $disable_estimacion='';
-                                                                        }
-                                                                       
-                                                                        if ($rEstimaciones->revisado==1){
-                                                                             $strchecked_revisado='checked="checked"';
-                                                                            }
- 
-                                                                        if ($rEstimaciones->original_recibido==0 && $rEstimaciones->copia==0 && $rEstimaciones->no_aplica==0){
-                                                                                $seleccion_estimaciones = "Selecciona una opción";
-                                                                                $value_estimaciones = 0;
-                                                                        }else if ($rEstimaciones->original_recibido==1){
-                                                                                $seleccion_estimaciones = "Original";
-                                                                                $value_estimaciones = 2;
-                                                                        }else if ($rEstimaciones->copia==1){
-                                                                                $seleccion_estimaciones = "Copia";
-                                                                                $value_estimaciones = 1;
-                                                                        }else if ($rEstimaciones->no_aplica==1){
-                                                                           $seleccion_estimaciones = "No aplica";
-                                                                           $value_estimaciones = 3;
-                                                                        }else {
-                                                                           $seleccion_estimaciones = "Selecciona";
-                                                                           $value_estimaciones = 0;
-                                                                        }
+                                                                        <div class="col-md-2">
+                                                                            <div class="">
+                                                                                <label class="sr-only" for="exampleInputEmail3">No. Hojas</label>
+                                                                                <input type="number" class="form-control" id="noHojas_est_'.$rEstimaciones->id .'" name="noHojas_est_'.$rEstimaciones->id .'" placeholder="No Hojas" value="" onchange="cargar_noHojas_estimaciones('.$rEstimaciones->id .')" min="0">
+                                                                            </div>
 
-                        /**/
-                                $div_estimaciones .=    '<div class="row m-b">
-                                                            <div class="col-md-5">';
-
-
-                                $div_estimaciones .=         '<div class="col-md-8">
-                                                                <select class="form-control m-b" name="tipo_documento_est' . $rEstimaciones->id .'" id="tipo_documento_est' . $rEstimaciones->id .'" onchange="uf_recibir_tipo_estimacion(' . $rEstimaciones->id .')" >
-                                                                                <option value="'. $value_estimaciones .'" id="select" name="select">'.$seleccion_estimaciones .'</option>
+                                                                        </div>
                                                                                 
-                                                                                <option id="tipo_documento_est' . $rEstimaciones->id .'" name="tipo_documento_est' . $rEstimaciones->id .'" value="'. $value_estimaciones1 .'">'.$seleccion_estimaciones1 .'</option>
-                                                                                <option id="tipo_documento_est' . $rEstimaciones->id .'" name="tipo_documento_est' . $rEstimaciones->id .'" value="'. $value_estimaciones2 .'">'.$seleccion_estimaciones2 .'</option>
-                                                                                <option id="tipo_documento_est' . $rEstimaciones->id .'" name="tipo_documento_est' . $rEstimaciones->id .'" value="'. $value_estimaciones3 .'">'.$seleccion_estimaciones3 .'</option>
-                                                                </select>';
-                                                                              
-                             
-                                $div_estimaciones .=            '<div class="m-b">
-                                                                                <div class="">
-                                                                                   <label class="sr-only" for="exampleInputEmail3">No. Hojas</label>
-                                                                                   <input type="number" class="form-control" id="noHojas_est_'.$rEstimaciones->id .'" name="noHojas_est_'.$rEstimaciones->id .' " placeholder="No Hojas" value="'.$rEstimaciones->noHojas .' " onchange="cargar_noHojas_estimaciones('.$rEstimaciones->id .' )" >
-                                                                                </div>
-                                                                                          
-                                                                </div>
-                                                                              
-                                                                 
-                                                                <div class="m-b" id="div_noHojas_est_'.$rEstimaciones->id .'" name="div_noHojas_est_'.$rEstimaciones->id .'">
-                                                                                  <b>No Hojas: </b> '. $rEstimaciones->noHojas .'
-                                                                              
-                                                                              </div>
-                                                                              
-                                                                              <div  class="m-b d-n" id="div_noHojas_est_aux_'.$rEstimaciones->id .'" name="div_noHojas_est_aux_'.$rEstimaciones->id .'">
-                                                                                  
-                                                                              
-                                                                </div>';
-                                $div_estimaciones .=        '</div>';
-
-                               $div_estimaciones .=        '<div class="col-md-4" >';
-                                $div_estimaciones .=             '<div class="checkbox-inline">';
-                                $div_estimaciones .=                '<label><input name="Est_revisado'. $rEstimaciones->id .'" type="checkbox"   id="Est_revisado'. $rEstimaciones->id .'"  onclick="uf_revisado_estimacion(this,'. $rEstimaciones->id .')"  '.  $strchecked_revisado . '  '. $disable_estimacion .'>Revisado</label>';
-                                $div_estimaciones .=            '</div>';
-
-                                $div_estimaciones .=        '</div> ';
-
-                                $div_estimaciones .=    '</div>';
-                                $div_estimaciones .=     '<div class="col-md-7">';
-                                $div_estimaciones .=        '<div class="panel panel-default">';
-                                $div_estimaciones .=            '<div class="panel-heading" role="tab" id="heading-'.$rEstimaciones->id .'">';
-                                $div_estimaciones .=              '<h4 class="panel-title">';
-                                $div_estimaciones .=                '<a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse-'.$rEstimaciones->id .'" aria-expanded="true" aria-controls="collapse-'.$rEstimaciones->id .'">';
-                                $div_estimaciones .=                    '<div style="display:flex; justify-content: space-between">';
-
-                                $div_estimaciones .=                        'EST. '. $rEstimaciones->Numero_Estimacion .' - ' .$addw_SubDocumentos[$rEstimaciones->idSubDocumento] .'';
+                                                                        <div class="col-md-2">
+                                                                            <a href="#observaciones_bloque" id="btn-ver-obs"  data-toggle="modal" title="Ver Observaciones" class="btn btn-default btn-sm" data-target="#observaciones_estimaciones" title="Observaciones" role="button" onclick="ver_observaciones_estimacion(' . $idArchivo .','.  $rEstimaciones->id .','.  $preregistro .')">
+                                                                                <span class="glyphicon glyphicon-search"></span>
+                                                                            </a>
+                                                                            <a href="#" id="btn-agregar-obs"  data-toggle="modal" title="Agregar observaciones" data-target="#observacion_estimacion" role="button" class="btn btn-warning btn-sm" onclick="uf_agregar_observaciones_estimacion('. $rEstimaciones->id .' , ' .$idDireccion_responsable .' , ' .$responsable  .')">
+                                                                                <span class="glyphicon glyphicon-list"></span>
+                                                                            </a>
 
 
-                                $div_estimaciones .=                    '</div>';
+                                                                        </div>';
+                                                                        
+                                                                        if($reviso ==1 ){
+                                                                            $disable_estimacion= "";
+                                                                        } else {
+                                                                            $disable_estimacion= "disabled = 'disabled'";
+                                                                        }
+                                                                        
+                                                $div_estimaciones .=    '<div class="col-md-1" >
+                                                                            <div class="checkbox-inline">
+                                                                                <label><input name="Est_revisado'. $rEstimaciones->id .'" type="checkbox"   id="Est_revisado'. $rEstimaciones->id .'"  onclick="uf_revisado_estimacion(this,'.$rEstimaciones->id .')"  '.$strchecked_revisado . ' ' . $disable_estimacion.'>Revisado</label>
+                                                                            </div>
 
-
-                                $div_estimaciones .=                '</a>';
-                                $div_estimaciones .=              '</h4>';
-                                $div_estimaciones .=            '</div>';
-                                $div_estimaciones .=            '<div id="collapse-'. $rEstimaciones->id .'" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-'.$rEstimaciones->id .'">';
-                                $div_estimaciones .=              '<div class="panel-body">';
-
-                                $div_estimaciones .=             '</div>';
-                                $div_estimaciones .=            '</div>'; //collapse
-                                $div_estimaciones .=        '</div>'; //panel default 
-                                $div_estimaciones .=    '</div>'; //col-7
-                                $div_estimaciones .= '</div>'; //row
-
-                                                            }
+                                                                        </div> 
+                                                                          
+                                                                        
+   
+                                                                    </div> <!--Fin row mb separacion-->
+                                                                    <hr>';
+                                                                      
                                                                     
-                                                                     
-                                                        }
-                                                    }
-
-                                                }
-                                    
-                                    //echo $div_estimaciones;
-                                    //exit();
-           
-            $div_estimaciones .=            '</div>'; //panel body
-            $div_estimaciones .=        '</div>'; //collapse
-            $div_estimaciones .=  '</div>
-                                </div>';
-                                            
-                                            
-                                            
+                                                                       
+                                                                       
+                                                                    
+                                                                                  }              
+                                                                              }
+                                                                          }
+                                                                                                   
+                                                                      } //if $qEstimaciones
+                                                                   
+                                                                  
+                                                                      
+                                   $div_estimaciones .=    '</div>   <!-- panel body-->
+                                                              </div> <!-- panel collapse-->
+                                                           
+                                                               
+                                                          </div>
+                                                      </div>';
+                                               
                                 
-                                                    }
+                                                    } //foreach
                                                 } 
                                             
                                             
@@ -1303,9 +1876,35 @@ class Archivo extends MY_Controller {
         
     }
     
+    public function buscar_responsable_documento($idRel){
+        $this->load->model('datos_model');
+        return $this->datos_model->buscar_responsable_documento($idRel);
+    }
+    
+    public function buscar_ejecutora($idArchivo){
+        $this->load->model('datos_model');
+        return $this->datos_model->buscar_ejecutora($idArchivo);
+    }
+    
+    public function buscar_id_ejecutora($direccion){
+        $this->load->model('datos_model');
+        return $this->datos_model->buscar_id_ejecutora($direccion);
+    }
+
     public function eliminar_estimacion($no_estimacion, $relacion){
+        $msj = "";
         $this->load->model('estimaciones_model');
-        $this->estimaciones_model->eliminar_estimacion($relacion, $no_estimacion);
+        
+        $no_documentos = $this->estimaciones_model->get_no_documentos($relacion, $no_estimacion);
+        
+        if ($no_documentos > 0){
+            $msj = 0;
+        } else {
+            $this->estimaciones_model->eliminar_estimacion($relacion, $no_estimacion);
+            $msj = 1;
+        }
+        
+        echo $msj;
         
         
     }
@@ -1404,7 +2003,9 @@ class Archivo extends MY_Controller {
     
     
     public function edit_revisado($id ,$idRelDoc_Archivo) {
+        $this->load->model('datos_model');
         $this->load->model('rel_archivo_documento_model');
+        $this->load->model('rel_archivo_preregistro_model');
         
         $data=array();
         
@@ -1412,46 +2013,80 @@ class Archivo extends MY_Controller {
         $data["revisado"]= $this->input->post("revisado");
         $data["idUsuario_revisado"]=  $this->session->userdata('id');
         if ($data["revisado"]==0){
-           $data["id_preregistro"]=0; 
+           $data["revisado"]=0; 
         }else{
-        $data["id_preregistro"]=  $id;
+        $data["revisado"]=  1;
+        
         }
         
-        $this->rel_archivo_documento_model->datos_relacion_archivo_documento_update($data,$idRelDoc_Archivo);
+        if ( $data["revisado"]==  1){
+            $qRevisado = $this->rel_archivo_documento_model->traer_revisado($idRelDoc_Archivo);
+
+            if ($qRevisado->num_rows() > 0){
+                foreach ($qRevisado->result() as $rRevisado){
+                    $revisado = $rRevisado->revisado ;
+                }
+            }
+        } else{
+            $revisado ="";
+        }
+      
         
-        $aRegistro=$this->rel_archivo_documento_model->datos_relacion_archivo_documento($idRelDoc_Archivo)->row_array();
         
-        
-        $qSubTipoProceso_revisados=$this->rel_archivo_documento_model->listado_registros_revisados_por_sub_tipo_proceso($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"]);
-        
-        $qTipoProceso_revisados=$this->rel_archivo_documento_model->listado_registros_revisados_por_tipo_proceso($aRegistro["idArchivo"],$aRegistro["idTipoProceso"]);
-        
-        
-        $qSubTipoProceso=$this->rel_archivo_documento_model->listado_registros_revisados_por_sub_tipo_proceso_total($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"]);
-        
-        $qTipoProceso=$this->rel_archivo_documento_model->listado_registros_revisados_por_tipo_proceso_total($aRegistro["idArchivo"],$aRegistro["idTipoProceso"]);
-    
-        
-        $data=array();
-        $data["NumSubTipoProceso_revisado"]=$qSubTipoProceso_revisados->num_rows();
-        $data["NumTipoProceso_revisado"]=$qTipoProceso_revisados->num_rows();
-        $data["NumSubTipoProceso"]=$qSubTipoProceso->num_rows();
-        $data["NumTipoProceso"]=$qTipoProceso->num_rows();
-        $data["idTipoProceso"]=$aRegistro["idTipoProceso"];
-        $data["idSubTipoProceso"]=$aRegistro["idSubTipoProceso"];
-        
-        $data["strTipoProceso_revisado"]="Revisados " . $qTipoProceso_revisados->num_rows() . " de " . $qTipoProceso->num_rows();
-        $data["strSubTipoProceso_revisado"]="Revisados " . $qSubTipoProceso_revisados->num_rows() . " de " . $qSubTipoProceso->num_rows();
+        if($revisado == 0 || $data["revisado"]==  0 ){
+            
+            
+            
+            $this->rel_archivo_preregistro_model->update_registro($data,$id);
+            if($revisado == 0){
+                $data["id_preregistro"]= $id;
+            }
+            if ( $data["revisado"]==  0){
+                $data["id_preregistro"]= 0;
+            }
+            $this->rel_archivo_documento_model->datos_relacion_archivo_documento_update($data,$idRelDoc_Archivo);
+
+            $aRegistro=$this->rel_archivo_documento_model->datos_relacion_archivo_documento($idRelDoc_Archivo)->row_array();
+
+
+            $qSubTipoProceso_revisados=$this->datos_model->listado_registros_revisados_por_sub_tipo_proceso($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"]);
+
+            $qTipoProceso_revisados=$this->datos_model->listado_registros_revisados_por_tipo_proceso($aRegistro["idArchivo"],$aRegistro["idTipoProceso"]);
+
+
+            $qSubTipoProceso=$this->rel_archivo_documento_model->listado_registros_revisados_por_sub_tipo_proceso_total($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"]);
+
+            $qTipoProceso=$this->rel_archivo_documento_model->listado_registros_revisados_por_tipo_proceso_total($aRegistro["idArchivo"],$aRegistro["idTipoProceso"]);
+
+
+            $data=array();
+            $data["NumSubTipoProceso_revisado"]=$qSubTipoProceso_revisados->num_rows();
+            $data["NumTipoProceso_revisado"]=$qTipoProceso_revisados->num_rows();
+            $data["NumSubTipoProceso"]=$qSubTipoProceso->num_rows();
+            $data["NumTipoProceso"]=$qTipoProceso->num_rows();
+            $data["idTipoProceso"]=$aRegistro["idTipoProceso"];
+            $data["idSubTipoProceso"]=$aRegistro["idSubTipoProceso"];
+            $data["Revision"]= $revisado;
+
+            $data["strTipoProceso_revisado"]="Revisados " . $qTipoProceso_revisados->num_rows() . " de " . $qTipoProceso->num_rows();
+            $data["strSubTipoProceso_revisado"]="Revisados " . $qSubTipoProceso_revisados->num_rows() . " de " . $qSubTipoProceso->num_rows();
+
+            
+        } else {
+            $data=array();
+            $data["Revision"]= $revisado;
+        }
         
         header('Cache-Control: no-cache, must-revalidate');
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
         header('Content-type: application/json');
         echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
-        
+
     }
     
     public function edit_recibido_cid($id, $idRelDoc_Archivo) {
         $this->load->model('rel_archivo_documento_model');
+        $this->load->model('datos_model');
         $this->load->model('rel_archivo_preregistro_model');
         
         $data=array();
@@ -1467,31 +2102,37 @@ class Archivo extends MY_Controller {
         $aRegistro=$this->rel_archivo_documento_model->datos_relacion_archivo_documento($idRelDoc_Archivo)->row_array();
         
         
-        $qSubTipoProceso_recibido=$this->rel_archivo_documento_model->listado_registros_recibido_por_sub_tipo_proceso($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"]);
+        $qSubTipoProceso_recibido=$this->datos_model->documentos_subproceso($aRegistro["idArchivo"], $aRegistro["idSubTipoProceso"]);
         
-        $qTipoProceso_recibido=$this->rel_archivo_documento_model->listado_registros_recibido_por_tipo_proceso($aRegistro["idArchivo"],$aRegistro["idTipoProceso"]);
-        
+        $qTipoProceso_recibido=$this->datos_model->documentos_proceso_recibidos($aRegistro["idArchivo"],$aRegistro["idTipoProceso"]);
         
         $qSubTipoProceso=$this->rel_archivo_documento_model->listado_registros_recibido_por_sub_tipo_proceso_total($aRegistro["idArchivo"],$aRegistro["idSubTipoProceso"]);
         
         $qTipoProceso=$this->rel_archivo_documento_model->listado_registros_recibido_por_tipo_proceso_total($aRegistro["idArchivo"],$aRegistro["idTipoProceso"]);
-    
         
-        //$data=array();
-        $data["NumSubTipoProceso_recibido"]=$qSubTipoProceso_recibido->num_rows();
-        $data["NumTipoProceso_recibido"]=$qTipoProceso_recibido->num_rows();
-        $data["NumSubTipoProceso"]=$qSubTipoProceso->num_rows();
-        $data["NumTipoProceso"]=$qTipoProceso->num_rows();
-        $data["idTipoProceso"]=$aRegistro["idTipoProceso"];
-        $data["idSubTipoProceso"]=$aRegistro["idSubTipoProceso"];
+        $qTipoProceso_distinct=$this->datos_model->documentos_proceso_distinct($aRegistro["idArchivo"],$aRegistro["idTipoProceso"]);
         
-        $data["strTipoProceso_recibido"]="Recibidos " . $qTipoProceso_recibido->num_rows() . " de " . $qTipoProceso->num_rows();
-        $data["strSubTipoProceso_recibido"]="Recibidos " . $qSubTipoProceso_recibido->num_rows() . " de " . $qSubTipoProceso->num_rows();
+        $datos=array(
+            "NumSubTipoProceso_recibido" => $qSubTipoProceso_recibido->num_rows(),
+            "NumTipoProceso_recibido" => $qTipoProceso_recibido->num_rows(),
+            "NumSubTipoProceso" =>  $qSubTipoProceso->num_rows(),
+            "NumTipoProceso" => $qTipoProceso->num_rows(),
+            "idTipoProceso" => $aRegistro["idTipoProceso"],
+            "idSubTipoProceso" => $aRegistro["idSubTipoProceso"],
+            "TipoProceso_distinct" =>$qTipoProceso_distinct->num_rows(),
+
+            "strTipoProceso_recibido" => "Recibidos " . $qTipoProceso_recibido->num_rows() . " de " . $qTipoProceso->num_rows(),
+            "strSubTipoProceso_recibido" => "Recibidos " . $qSubTipoProceso_recibido->num_rows() . " de " . $qSubTipoProceso->num_rows()
+        );
         
         header('Cache-Control: no-cache, must-revalidate');
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
         header('Content-type: application/json');
-        echo json_encode($data);
+        
+        
+        echo json_encode($datos);
+        
+       // var_dump(json_decode($datos, true));
 
         
     }
@@ -2771,6 +3412,30 @@ class Archivo extends MY_Controller {
         
     }
     
+      public function cambio_estatus_concentracion($estatus) {
+        $this->load->model('rel_archivo_documento_model');
+        
+        
+        $idArchivo=$this->input->post("idArchivo_concentracion");
+        
+       
+        
+        
+        $retorno = $this->rel_archivo_documento_model->cambiar_estatus_ot($idArchivo, $estatus);
+       
+        
+       
+        
+        if ($retorno == 0) {
+            die('Estatus Actual no Permitido');
+        }
+        
+        $idSubProceso=0;
+        $idTpDoc=0;
+        header("Location:" . site_url('archivo/cambios/'. $idArchivo.'/'.$idTipoProceso.'/'.$idSubProceso.'/'.$idTpDoc.'/-1'.'#section_'.$idTpDoc));   
+        
+    }
+    
     
      public function cambio_estatus_rechazar($estatus) {
         $this->load->model('rel_archivo_documento_model');
@@ -2855,6 +3520,59 @@ class Archivo extends MY_Controller {
     
      public function agregar_observaciones_documento() {
         $this->load->model('observaciones_model');
+         
+         
+        $idArchivo=$this->input->post("idArchivo_observacion");
+         
+        $tipo_usuario = $this->input->post("tipo_usuario");
+        $mensaje = $this->input->post("Motivo");
+         
+        $data =array(
+             
+            'Motivo'    => $mensaje,
+            'Fecha'     => date('Y-m-d H:i:s'),
+            'idUsuario' => $this->session->userdata('id'),
+            'idDireccion_responsable' =>  $this->session->userdata('idDireccion_responsable'),
+            'idArchivo' => $this->input->post("idArchivo_observacion"),
+            'idTipoProceso' => $this->input->post("idTipoProceso_observacion"),
+            'idSubTipoProceso' => $this->input->post("idSubTipoProceso_observacion"),
+            'idDocumento' => $this->input->post("idDocumento_observacion"),
+            //Direccion del preregistro
+            'idDireccion' => $this->input->post("idDireccion_observacion"),
+            'idContrato' => $this->input->post("idContrato_observacion"),
+            'tipo_observacion' => $this->input->post("tipo_observacion"),
+            'tipo_usuario' => $tipo_usuario,
+             
+        );
+         
+        if( $tipo_usuario == 0){
+            //direccion responsable_documento
+            $data['direccion_respuesta']=$this->input->post("direccion_respuesta");
+        }
+         
+        $this->observaciones_model->agregar_observaciones_por_documento($data);
+          
+        //1 Solicita respuesta y son de CID
+        if ($data['tipo_observacion'] == 1 && $tipo_usuario== 0 ){
+            $this->enviar_correo($data['idUsuario'], $this->input->post("usuario_preregistro"), $mensaje);
+        }
+        //$retorno = $this->observaciones_model->agregar_observaciones_por_documento($data);
+        
+       /*
+         
+        if($retorno['retorno'] < 0){
+            header('Location:'.site_url('archivo/cambios/' .$idArchivo . '/' .$retorno['error']));
+        }
+        else{
+             
+            header('Location:'.site_url('archivo/cambios/' .$idArchivo)); 
+        }*/
+         
+    }
+    
+    
+     public function agregar_observaciones_estimacion() {
+        $this->load->model('observaciones_estimacion_model');
         
         
         $idArchivo=$this->input->post("idArchivo_observacion");
@@ -2867,23 +3585,21 @@ class Archivo extends MY_Controller {
             'Motivo'    => $mensaje,
             'Fecha'     => date('Y-m-d H:i:s'),
             'idUsuario' => $this->session->userdata('id'),
-            'idDireccion_responsable' =>  $this->session->userdata('idDireccion_responsable'),
-            'idArchivo' => $this->input->post("idArchivo_observacion"),
-            'idTipoProceso' => $this->input->post("idTipoProceso_observacion"),
-            'idSubTipoProceso' => $this->input->post("idSubTipoProceso_observacion"),
-            'idDocumento' => $this->input->post("idDocumento_observacion"),
-            'idDireccion' => $this->input->post("idDireccion_observacion"),
-            'idContrato' => $this->input->post("idContrato_observacion"),
+            'idDireccion_responsable' =>  $this->session->userdata("idDireccion_responsable"),
+            'idDireccion' =>  $this->input->post("idDireccion"),
+            'idArchivo' => $this->input->post("idArchivo"),
+            'idEstimacion' => $this->input->post("idEstimacion"),
+            
             'tipo_observacion' => $this->input->post("tipo_observacion"),
             'tipo_usuario' => $tipo_usuario,
             
         );
         
         if( $tipo_usuario == 0){
-            $data['direccion_respuesta']=$this->input->post("direccion_respuesta");
+            $data['direccion_respuesta'] = $this->input->post("direccion_respuesta");
         }
         
-        $this->observaciones_model->agregar_observaciones_por_documento($data);
+        $this->observaciones_estimacion_model->agregar_observacion_estimacion($data);
          
         //1 Solicita respuesta y son de CID
         if ($data['tipo_observacion'] == 1 && $tipo_usuario== 0 ){
@@ -2940,6 +3656,22 @@ class Archivo extends MY_Controller {
         
     }
     
+    
+    public function modificar_observaciones_estimacion($id) {
+        $this->load->model('observaciones_estimacion_model');
+        
+        $data =array(
+            
+            'Motivo'    => $this->input->post("Motivo"),
+            'tipo_observacion' => $this->input->post("tipo_observacion"),
+            'Fecha'     => date('Y-m-d H:i:s'),
+    
+        );
+        
+        $this->observaciones_estimacion_model->observaciones_estimacion_update($data, $id);
+       
+    }
+    
     public function eliminar_observacion_documento($id) {
         $this->load->model('observaciones_model');
         $data =array(
@@ -2948,6 +3680,18 @@ class Archivo extends MY_Controller {
           
         );
         $this->observaciones_model->observaciones_documento_update($data, $id);
+        
+    }
+    
+    
+    public function eliminar_observacion_estimacion($id) {
+        $this->load->model('observaciones_estimacion_model');
+        $data =array(
+            
+            'eliminacion_logica'    => 1,
+          
+        );
+        $this->observaciones_estimacion_model->observaciones_estimacion_update($data, $id);
         
     }
     
@@ -3003,7 +3747,8 @@ class Archivo extends MY_Controller {
             echo "mensaje " . $mensaje;
         }
     }
-
+    
+    
     public function ver_observaciones_documento($idArchivo ,$idTipoProceso, $idSubTipoProceso,$idDocumento) {
         $this->load->model('observaciones_model');
         $this->load->model('control_usuarios_model');
@@ -3140,7 +3885,7 @@ class Archivo extends MY_Controller {
                                 if (isset($qEnlacesVistos)) {
                                     if ($qEnlacesVistos->num_rows() > 0) {
                                         $i = 0;
-                                        foreach ($qEnlacesVistos->result() as $rCid) {
+                                        foreach ($qEnlacesVistos->result() as $rEnlacesVistos) {
                                             $i++;
                                             
                                            $tabla.= "<tr>";
@@ -3159,7 +3904,7 @@ class Archivo extends MY_Controller {
                                                         
                                                 
                                            
-                                           $tabla.="<td class='text-justify'>" . $rCid->Motivo. "</td>";  
+                                           $tabla.="<td class='text-justify'>" . $rEnlacesVistos->Motivo. "</td>";  
                                            $tabla.="<td class='text-justify'>"; 
                                                     if($rEnlacesVistos->tipo_observacion==0){
                                                         $tabla.= 'No se Solicito Repuesta';
@@ -3394,6 +4139,399 @@ class Archivo extends MY_Controller {
         echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);                      
          
     }
+
+    public function ver_observaciones_documento_estimacion($idArchivo ,$idEstimacion) {
+        $this->load->model('observaciones_estimacion_model');
+        $this->load->model('control_usuarios_model');
+        
+         
+        $aUsuarios=$this->control_usuarios_model->addw_Usuarios();
+       
+        
+         
+        $qHistorial=$this->observaciones_estimacion_model->listado_observaciones_estimacion($idEstimacion);
+        $qEnlaces = $this->observaciones_estimacion_model->listado_observaciones_estimacion_enlaces($idEstimacion);
+        $qEnlacesVistos = $this->observaciones_estimacion_model->listado_observaciones_estimacion_enlaces_vistos($idEstimacion);
+        $qCid = $this->observaciones_estimacion_model->listado_observaciones_estimacion_cid($idEstimacion);
+         
+         
+        $tabla='
+            <div>
+
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                  <li role="presentacion" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Nuevos (' . $qEnlaces->num_rows.')</a></li>
+                  <li role="presentation"><a href="#vistos" aria-controls="messages" role="tab" data-toggle="tab">Enlaces (' . $qEnlacesVistos->num_rows.')</a></li>
+                  <li role="presentation"><a href="#cid" aria-controls="cid" role="tab" data-toggle="tab">CID (' . $qCid->num_rows.')</a></li>
+                  <li role="presentation"><a href="#todo" aria-controls="messages" role="tab" data-toggle="tab">Todas (' . $qHistorial->num_rows.')</a></li>
+                      
+                  
+                </ul>
+
+                <!-- Tab panes -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="home">
+                        
+                        <table class="table table-striped table-hover table-condensed" id="tabla_scroll">
+                            <thead>
+                                <tr>                                    
+                                    <th>
+                                        #
+                                    </th> 
+                                   
+                                    <th>
+                                        Fecha
+                                    </th>
+                                    <th>
+                                        Usuario
+                                    </th>
+                                    
+                                    <th>
+                                        Motivo
+                                    </th>
+                                    <th>
+                                        Respuesta
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>';
+         
+         
+                                if (isset($qEnlaces)) {
+                                    if ($qEnlaces->num_rows() > 0) {
+                                        $i = 0;
+                                        foreach ($qEnlaces->result() as $rEnlaces) {
+                                            $i++;
+                                            
+                                           $tabla.= "<tr>";
+                                           //$tabla.=  "<td>" . $i . "</td>";
+                                           $tabla.= "<td>";
+                                                        if($rEnlaces->tipo_observacion ==1){
+                                                
+                                                            $tabla.= "<a href='#' data-toggle='modal' data-target='#modal-ver-observacion' role='button'  class='btn btn-xs btn-warning' onclick='responder_observacion_documento(".$rEnlaces->id.")'>
+                                                               <span class='glyphicon glyphicon-send'></span>
+                                                            </a>";
+                                                                
+                                                        }else{
+                                                            $tabla.= "<a href='#' id='visto".$rEnlaces->id."' class='btn btn-xs btn-success' title= 'Marcar como Visto' onclick='marcar_visto(".$rEnlaces->id.")'>
+                                                               <span class='glyphicon glyphicon-ok'></span>
+                                                            </a>";
+                                                        }
+                                           $tabla.= "</td> "; 
+                                           $tabla.= "<td class='sinwarp'>" .date("d-m-Y h:i:s", strtotime($rEnlaces->Fecha)) . "</td>";
+                                           $tabla.="<td>" . $aUsuarios[$rEnlaces->idUsuario] . "</td>"; 
+                                                        
+                                                
+                                           
+                                           $tabla.="<td class='text-justify'>" . $rEnlaces->Motivo. "</td>";  
+                                           $tabla.="<td class='text-justify'>"; 
+                                                    if($rEnlaces->tipo_observacion==0){
+                                                        $tabla.= 'No se Solicito Repuesta';
+                                                    }
+                                                    else if ($rEnlaces->Respuesta){
+                                                        $tabla.= "".$rEnlaces->Respuesta;
+                                                    }else{
+                                                        $tabla.='Esperando Respuesta';
+                                                    }
+                                           $tabla.="</td>" ;
+                                               
+                                           $tabla.= "</tr>";
+                                            
+                                        }
+                                    }
+                                }
+        
+                                
+                        $tabla.=' </tbody>
+                                        </table> ';  
+
+
+        $tabla.=   '</div>
+                    <div role="tabpanel" class="tab-pane" id="vistos">
+                        <table class="table table-striped table-hover table-condensed" id="tabla_scroll">
+                            <thead>
+                                <tr>                                    
+                                    <th>
+                                        #
+                                    </th> 
+                                   
+                                    <th>
+                                        Fecha
+                                    </th>
+                                    <th>
+                                        Usuario
+                                    </th>
+                                    
+                                    <th>
+                                        Motivo
+                                    </th>
+                                    <th>
+                                        Respuesta
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>';
+         
+         
+                                if (isset($qEnlacesVistos)) {
+                                    if ($qEnlacesVistos->num_rows() > 0) {
+                                        $i = 0;
+                                        foreach ($qEnlacesVistos->result() as $rEnlacesVistos) {
+                                            $i++;
+                                            
+                                           $tabla.= "<tr>";
+                                           $tabla.=  "<td>" . $i . "</td>";
+                                           /*$tabla.= "<td>
+                                                
+                                                        <a href='#' data-toggle='modal' data-target='#mod-observacion-documento' role='button'  class='btn btn-xs btn-success' onclick='modificar_observacion_documento(".$rCid->id.")'>
+                                                           <span class='glyphicon glyphicon-pencil'></span>
+                                                        </a>
+                                                        <a href='#' class='btn btn-xs btn-danger' onclick='eliminar_observacion_documento(".$rCid->id.")'>
+                                                           <span class='glyphicon glyphicon-remove'></span>
+                                                        </a>
+                                                     </td> "; */
+                                           $tabla.= "<td class='sinwarp'>" .date("d-m-Y h:i:s", strtotime($rEnlacesVistos->Fecha)) . "</td>";
+                                           $tabla.="<td>" . $aUsuarios[$rEnlacesVistos->idUsuario] . "</td>"; 
+                                                        
+                                                
+                                           
+                                           $tabla.="<td class='text-justify'>" . $rEnlacesVistos->Motivo. "</td>";  
+                                           $tabla.="<td class='text-justify'>"; 
+                                                    if($rEnlacesVistos->tipo_observacion==0){
+                                                        $tabla.= 'No se Solicito Repuesta';
+                                                    }
+                                                    else if ($rEnlacesVistos->Respuesta){
+                                                        $tabla.= "".$rEnlacesVistos->Respuesta;
+                                                    }else{
+                                                        $tabla.='Esperando Respuesta';
+                                                    }
+                                           $tabla.="</td>"; 
+                                               
+                                           $tabla.= "</tr>";
+                                            
+                                        }
+                                    }
+                                }
+        
+                                
+                        $tabla.=' </tbody>
+                                        </table> ';  
+    $tabla.='    </div>
+                <div role="tabpanel" class="tab-pane" id="cid">
+                        <table class="table table-striped table-hover table-condensed" id="tabla_scroll">
+                            <thead>
+                                <tr>                                    
+                                    <th>
+                                        #
+                                    </th> 
+                                   
+                                    <th>
+                                        Fecha
+                                    </th>
+                                    <th>
+                                        Usuario
+                                    </th>
+                                    
+                                    <th>
+                                        Motivo
+                                    </th>
+                                    <th>
+                                        Respuesta
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>';
+         
+         
+                                if (isset($qCid)) {
+                                    if ($qCid->num_rows() > 0) {
+                                        $i = 0;
+                                        foreach ($qCid->result() as $rCid) {
+                                            $i++;
+                                            
+                                           $tabla.= "<tr>";
+                                           //$tabla.=  "<td>" . $i . "</td>";
+                                           $tabla.= "<td>
+                                               
+                                                        <a href='#' data-toggle='modal' data-target='#mod-observacion-estimacion' role='button'  class='btn btn-xs btn-success' onclick='modificar_observacion_estimacion(". $rCid->id .")'>
+                                                           <span class='glyphicon glyphicon-pencil'></span>
+                                                        </a>
+                                                        <a href='#' class='btn btn-xs btn-danger' onclick='eliminar_observacion_estimacion(".$rCid->id.")'>
+                                                           <span class='glyphicon glyphicon-remove'></span>
+                                                        </a>
+                                                     </td> "; 
+                                           $tabla.= "<td class='sinwarp'>" .date("d-m-Y h:i:s", strtotime($rCid->Fecha)) . "</td>";
+                                           $tabla.="<td>" . $aUsuarios[$rCid->idUsuario] . "</td>"; 
+                                                        
+                                                
+                                           
+                                           $tabla.="<td class='text-justify'>" . $rCid->Motivo. "</td>";  
+                                           $tabla.="<td class='text-justify'>"; 
+                                                    if($rCid->tipo_observacion==0){
+                                                        $tabla.= 'No se Solicito Repuesta';
+                                                    }
+                                                    else if ($rCid->Respuesta){
+                                                        $tabla.= "".$rCid->Respuesta;
+                                                    }else{
+                                                        $tabla.='Esperando Respuesta';
+                                                    }
+                                           $tabla.="</td>"; 
+                                               
+                                           $tabla.= "</tr>";
+                                            
+                                        }
+                                    }
+                                }
+        
+                                
+                        $tabla.=' </tbody>
+                                        </table> ';  
+    $tabla.='    </div>
+                    
+                    <div role="tabpanel" class="tab-pane" id="todo">
+                        <table class="table table-striped table-hover table-condensed" id="tabla_scroll">
+                            <thead>
+                                <tr>                                    
+                                    <th>
+                                        #
+                                    </th> 
+                                   
+                                    <th>
+                                        Fecha
+                                    </th>
+                                    <th>
+                                        Usuario
+                                    </th>
+                                    
+                                    <th>
+                                        Motivo
+                                    </th>
+                                    <th>
+                                        Respuesta
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>';
+         
+         
+                                if (isset($qHistorial)) {
+                                    if ($qHistorial->num_rows() > 0) {
+                                        $i = 0;
+                                        foreach ($qHistorial->result() as $rHistorial) {
+                                            $i++;
+                                            
+                                           $tabla.= "<tr>";
+                                           $tabla.=  "<td>" . $i . "</td>";
+                                           //$tabla.= "<td>
+                                                
+                                                       // <a href='#' data-toggle='modal' data-target='#modal-ver-observacion' role='button'  class='btn btn-xs btn-warning' onclick='uf_modificar_observacion(".$rHistorial->id.")'>
+                                                       //     <span class='glyphicon glyphicon-search'></span>
+                                                      //  </a>
+                                                   // </td> "; 
+                                           $tabla.= "<td class='sinwarp'>" .date("d-m-Y h:i:s", strtotime($rHistorial->Fecha)) . "</td>";
+                                           $tabla.="<td>" . $aUsuarios[$rHistorial->idUsuario] . "</td>"; 
+                                                        
+                                                
+                                           
+                                           $tabla.="<td class='text-justify'>" . $rHistorial->Motivo. "</td>";  
+                                           $tabla.="<td class='text-justify'>"; 
+                                                    if($rHistorial->tipo_observacion==0){
+                                                        $tabla.= 'No se Solicito Repuesta';
+                                                    }
+                                                    else if ($rHistorial->Respuesta){
+                                                        $tabla.= "".$rHistorial->Respuesta;
+                                                    }else{
+                                                        $tabla.='Esperando Respuesta';
+                                                    }
+                                           $tabla.="</td>";  
+                                               
+                                           $tabla.= "</tr>";
+                                            
+                                        }
+                                    }
+                                }
+        
+                                
+                        $tabla.=' </tbody>
+                                        </table> ';                        
+                                
+    $tabla.=     '</div>
+                  
+                </div>
+
+            </div>';
+                
+         /*
+         
+        $tabla='  <table class="table table-striped table-hover table-condensed" id="tabla_scroll">
+                            <thead>
+                                <tr>                                    
+                                    <th>
+                                        #
+                                    </th> 
+                                   
+                                    <th>
+                                        Fecha
+                                    </th>
+                                    <th>
+                                        Usuario
+                                    </th>
+                                    
+                                    <th>
+                                        Motivo
+                                    </th>
+                                    <th>
+                                        Respuesta
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+         ';
+         
+         
+                                if (isset($qHistorial)) {
+                                    if ($qHistorial->num_rows() > 0) {
+                                        $i = 0;
+                                        foreach ($qHistorial->result() as $rHistorial) {
+                                            $i++;
+                                            
+                                           $tabla.= "<tr>";
+                                           $tabla.=  "<td>" . $i . "</td>";
+                                           //$tabla.= "<td>
+                                                
+                                                       // <a href='#' data-toggle='modal' data-target='#modal-ver-observacion' role='button'  class='btn btn-xs btn-warning' onclick='uf_modificar_observacion(".$rHistorial->id.")'>
+                                                       //     <span class='glyphicon glyphicon-search'></span>
+                                                      //  </a>
+                                                   // </td> "; 
+                                           $tabla.= "<td class='sinwarp'>" .date("d-m-Y h:i:s", strtotime($rHistorial->Fecha)) . "</td>";
+                                           $tabla.="<td>" . $aUsuarios[$rHistorial->idUsuario] . "</td>"; 
+                                                        
+                                                
+                                           
+                                           $tabla.="<td class='text-justify'>" . $rHistorial->Motivo. "</td>";  
+                                           $tabla.="<td class='text-justify'>" . $rHistorial->Respuesta. "</td>"; 
+                                               
+                                           $tabla.= "</tr>";
+                                            
+                                        }
+                                    }
+                                }
+        
+                                
+        $tabla.=' </tbody>
+                        </table> ';       */                  
+                                
+        $data=array();
+        $data["historial"]=$tabla;
+                                
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Content-type: application/json');
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);                      
+         
+    }
+    
+    
     
     
     public function ver_observaciones_documento_direccion($idArchivo ,$idTipoProceso, $idSubTipoProceso,$idDocumento) {
@@ -3489,6 +4627,100 @@ class Archivo extends MY_Controller {
          
     }
     
+    
+    public function ver_observaciones_estimacion_direccion($idEstimacion) {
+        $this->load->model('observaciones_estimacion_model');
+        $this->load->model('control_usuarios_model');
+        
+         
+        $aUsuarios=$this->control_usuarios_model->addw_Usuarios();
+       
+        $direccion =  $this->session->userdata('idDireccion_responsable');
+        $qHistorial=$this->observaciones_estimacion_model->listado_observaciones_estimacion_direccion($idEstimacion, $direccion);
+         
+         
+         $tabla='
+         
+         
+          <table class="table table-striped table-hover table-condensed" id="tabla_scroll">
+                            <thead>
+                                <tr>                                    
+                                    <th>
+                                        #
+                                    </th> 
+                                   
+                                    <th>
+                                        Fecha
+                                    </th>
+                                    <th>
+                                        Usuario
+                                    </th>
+                                    
+                                    <th>
+                                        Motivo
+                                    </th>
+                                    <th>
+                                        Respuesta
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+         ';
+         
+         
+                                if (isset($qHistorial)) {
+                                    if ($qHistorial->num_rows() > 0) {
+                                        $i = 0;
+                                        foreach ($qHistorial->result() as $rHistorial) {
+                                            $i++;
+                                            
+                                           $tabla.= "<tr>";
+                                           //$tabla.=  "<td>" . $i . "</td>";
+                                           $tabla.= "<td>
+                                                
+                                                        <a href='#' data-toggle='modal' data-target='#mod-observacion-estimacion' role='button'  class='btn btn-xs btn-success' onclick='modificar_observacion_estimacion(". $rHistorial->id .")'>
+                                                           <span class='glyphicon glyphicon-pencil'></span>
+                                                        </a>
+                                                        <a href='#' class='btn btn-xs btn-danger' onclick='eliminar_observacion_estimacion(".$rHistorial->id.")'>
+                                                           <span class='glyphicon glyphicon-remove'></span>
+                                                        </a>
+                                                     </td> "; 
+                                           $tabla.= "<td class='sinwarp'>" .date("d-m-Y h:i:s", strtotime($rHistorial->Fecha)) . "</td>";
+                                           $tabla.="<td>" . $aUsuarios[$rHistorial->idUsuario] . "</td>"; 
+                                                        
+                                                
+                                           
+                                           $tabla.="<td class='text-justify'>" . $rHistorial->Motivo. "</td>";  
+                                           $tabla.="<td class='text-justify'>" ;
+                                                if ( $rHistorial->tipo_observacion == 1) { 
+                                                   $tabla.= $rHistorial->Respuesta ;
+
+                                                } else { 
+                                                    $tabla.= "No Requerida";
+                                                }
+                                                
+                                           $tabla.= "</td>"; 
+                                               
+                                           $tabla.= "</tr>";
+                                            
+                                        }
+                                    }
+                                }
+        
+                                
+        $tabla.=' </tbody>
+                        </table> ';                        
+                                
+        $data=array();
+        $data["historial"]=$tabla;
+                                
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Content-type: application/json');
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);                      
+         
+    }
+    
     public function agregar_observaciones_por_archivo($idArchivo) {
         $this->load->model('observaciones_model');
         
@@ -3520,7 +4752,7 @@ class Archivo extends MY_Controller {
         
     }
     
-     /*public function agregar_observaciones_documento() {
+     /*public function () {
         $this->load->model('observaciones_model');
         
         
@@ -4022,7 +5254,7 @@ class Archivo extends MY_Controller {
                                                    }else{
                                                         //$Ubicaciones_disponibles.=$Ubicacion_fisica;
                                                        $estilo = "background:#D8D8D8;color:#000";
-                                                       $Ubicaciones_disponibles.= '<p  style= '.$estilo. '>'. $Ubicacion_fisica . '</p>';
+                                                       $Ubicaciones_disponibles.= '<a  style= '.$estilo. '>'. $Ubicacion_fisica . '</a>';
                                                    }
                                                    $Ubicaciones_disponibles.="<br>";
                                                }
@@ -4214,7 +5446,110 @@ class Archivo extends MY_Controller {
                                                        
                                                              //$Ubicaciones_disponibles.=$Ubicacion_fisica;
                                                             $estilo = "background:#D8D8D8;color:#000";
-                                                            $Ubicaciones_disponibles.= '<p  style= '.$estilo. '>'. $Ubicacion_fisica . '</p>';
+                                                            $Ubicaciones_disponibles.= '<a  style= '.$estilo. '>'. $Ubicacion_fisica . '</a>';
+                                                        
+                                                   }
+                                                   
+                                                   
+                                                   
+                                                   
+                                                   $Ubicaciones_disponibles.="<br>";
+                                               }
+                                               
+                                                
+                                                $tabla.="<td class='text-justify'>" . $Ubicaciones_disponibles .  "</td>";  
+                                               
+                                               
+                                        }
+                                    $tabla.= "</tr>";    
+                                 }   
+       
+        $tabla.=' </tbody>
+                        </table> ';                        
+        
+        //exit();
+        $data=array();
+        $data["ubicacion_fisica_libre"]=$tabla;
+                                
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Content-type: application/json');
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);                      
+         
+         
+    }
+    
+    
+    public function ver_ubicaciones_libres_captura($idArchivo) {
+        $this->load->model("ubicacion_fisica_model");
+        $this->load->model("rel_archivo_documento_model");
+        $this->load->model("datos_model");
+        
+       
+       
+            
+                $desde = 'A';   // access attributes
+                $hasta = 'P';   // access class methods
+     
+        
+        //$desde = 'A';
+        //$hasta = 'G';
+    
+        //echo $desde . ' ' . $hasta;
+        //exit();
+        $qColumnas=$this->ubicacion_fisica_model->listado_ubicacion_ordenada_por_columna_area($desde, $hasta);
+       /* $qUbicacionOcupadaArchivo = $this->ubicacion_fisica_model->ubicacion_ocupada_archivo(366,1717);
+        if ($qUbicacionOcupadaArchivo->num_rows() < 0) {
+            echo 'Ocupada en archivo';
+        }
+        else{
+            echo 'No';
+        }
+        exit();*/
+         
+         $tabla='
+         
+         
+          <table class="table table-striped table-hover table-condensed" id="tabla_scroll">
+                            <thead>
+                                <tr>                                    
+                                                                      
+       ';                                    
+
+                  
+                                                    foreach ($qColumnas->result() as $rowdata){ 
+                                                        $tabla.=' <th scope="col">' .  $rowdata->Columna .'</th>';
+                                                     }
+                 
+        $tabla.='         
+
+                                </tr>
+                            </thead>
+                            <tbody>
+         ';
+         
+         
+                                for( $i= 1 ; $i <= 4 ; $i++ ){
+                                     $tabla.= "<tr>";
+                                    foreach ($qColumnas->result() as $rowdata){
+
+                                               $qCajas=$this->ubicacion_fisica_model->listado_ubicacion_ordenada_por_caja($rowdata->Columna,$i);
+                                               $Ubicaciones_disponibles="";
+                                               foreach ($qCajas->result() as $rRow_cajas) { 
+                                                   
+                                                   $Ubicacion_fisica=$rRow_cajas->Columna .'.'. $rRow_cajas->Fila .'.'. $rRow_cajas->Posicion.'.'. $rRow_cajas->Caja.'.'. $rRow_cajas->Apartado;
+                                                   $qUbicacionOcupadaArchivo = $this->ubicacion_fisica_model->ubicacion_ocupada_archivo($rRow_cajas->id,$idArchivo);
+                                                   
+                                                   if ($rRow_cajas->utilizado==0 || $qUbicacionOcupadaArchivo->num_rows() > 0){
+                                                       
+                                                        $click="uf_agregar_ubicacion_fisica(".$rRow_cajas->id.",'". $rRow_cajas->Columna .'.'. $rRow_cajas->Fila .'.'. $rRow_cajas->Posicion.'.'. $rRow_cajas->Caja.'.'. $rRow_cajas->Apartado ."')";
+                                                        $estilo = "background:#cde7f9;color:#000;";
+                                                        $Ubicaciones_disponibles.='<a href="#" style= '.$estilo.' onclick='.$click.'>' . $rRow_cajas->Columna .'.'. $rRow_cajas->Fila .'.'. $rRow_cajas->Posicion.'.'. $rRow_cajas->Caja.'.'. $rRow_cajas->Apartado . '</a>';
+                                                   }else {
+                                                       
+                                                             //$Ubicaciones_disponibles.=$Ubicacion_fisica;
+                                                            $estilo = "background:#D8D8D8;color:#000";
+                                                            $Ubicaciones_disponibles.= '<a  style= '.$estilo. '>'. $Ubicacion_fisica . '</a>';
                                                         
                                                    }
                                                    
@@ -4321,7 +5656,7 @@ class Archivo extends MY_Controller {
                                                        
                                                              //$Ubicaciones_disponibles.=$Ubicacion_fisica;
                                                             $estilo = "background:#D8D8D8;color:#000";
-                                                            $Ubicaciones_disponibles.= '<p  style= '.$estilo. '>'. $Ubicacion_fisica . '</p>';
+                                                            $Ubicaciones_disponibles.= '<a  style= '.$estilo. '>'. $Ubicacion_fisica . '</a>';
                                                         
                                                    }
                                                    
@@ -4356,34 +5691,44 @@ class Archivo extends MY_Controller {
         $this->load->model('ubicacion_fisica_model');
         $idArchivo = $this->input->post('idArchivo');
         $idUbicacion =  $this->input->post('idUbicacionFisica');
-         $data=array(
-            'idTipoProceso'=> $this->input->post('idTipoProceso'),
-            'idUbicacionFisica'=> $idUbicacion,
-            'Caja'=>  $this->input->post('Caja'),
-            'Documentos'=>  $this->input->post('Documentos'),
-            'idArchivo'=>  $this->input->post('idArchivo'),
-            'NoFolioInicial'=>  $this->input->post('NoFolioInicial'),
-            'NoFolioFinal'=>  $this->input->post('NoFolioFinal'),
-            'NoHojas'=>  $this->input->post('NoHojas'),
-             );
+        $idTipoProceso = $this->input->post('idTipoProceso');
+        $retorno ="";
+        //Todos los procesos
+        if ( $idTipoProceso == 6){
+            $qProcesos = $this->datos_model->get_procesos_archivo($idArchivo);
+            foreach($qProcesos->result() as $rProcesos){
+                $data=array(
+                    'idTipoProceso'=> $rProcesos->idTipoProceso,
+                    'idUbicacionFisica'=> $idUbicacion,
+                    'idArchivo'=>  $idArchivo,
+            
+                );
          
-        $retorno = $this->ubicacion_fisica_model->agregar_ubicacion_fisica($data);
+                $retorno = $this->ubicacion_fisica_model->agregar_ubicacion_fisica($data);
+            }
+            
+        } else {
         
+            $data=array(
+               'idTipoProceso'=> $this->input->post('idTipoProceso'),
+               'idUbicacionFisica'=> $idUbicacion,
+               'idArchivo'=>  $idArchivo,
 
-        if($retorno['retorno'] < 0){
-           
-            
-            
-            
-        }else{
-           
-        
-            
+                );
+
+           $retorno = $this->ubicacion_fisica_model->agregar_ubicacion_fisica($data);
         }
+        
+        
+        
+        $this->actualizar_estado_ubicacion($idUbicacion, 1);
+        echo $retorno["retorno"];
+         
     }
     
     //accion: 1 Agregar - 2 Modificar
     public function actualizar_estado_ubicacion($idUbicacion, $accion){
+        $this->load->model('ubicacion_fisica_model');
         if ($accion == 1){
             $u =1;
             $data = array(
@@ -4405,25 +5750,20 @@ class Archivo extends MY_Controller {
     public function modificar_ubicacion_fisica(){
          $this->load->model('ubicacion_fisica_model');
          
-         $idArchivo = $this->input->post('idArchivo_mod');
+         $idArchivo = $this->input->post('idUbi_Archivo');
          $id = $this->input->post('idRel_mod');
          $idUbi_anterior = $this->input->post('idUbi_anterior');
          $idUbi = $this->input->post('idUbicacionFisica_mod');
                  
          $data=array(
             
-            'idUbicacionFisica'=> $this->input->post('idUbicacionFisica_mod'),
-            'Caja'=>  $this->input->post('txtCaja_mod'),
-            'Documentos'=>  $this->input->post('documento_ubicacion_mod'),
-            
-            'NoFolioInicial'=>  $this->input->post('txtFolioInicial_mod'),
-            'NoFolioFinal'=>  $this->input->post('txtFolioFinal_mod'),
-            'NoHojas'=>  $this->input->post('noHojas_mod'),
+            'idUbicacionFisica'=> $idUbi,
+           
              );
 
         $retorno =  $this->ubicacion_fisica_model->datos_relacion_ubicacion_update($data, $id);
         if($retorno['retorno'] < 0){
-            header('Location:'.site_url('archivo/cambios/' . $idArchivo . '/' . $retorno['error']));
+           $respuesta = -1;
         }else {
             if ( $idUbi != $idUbi_anterior ){
                 //checa que no este ocupada esa misma ubicacion en el archivo para liberarla
@@ -4437,8 +5777,9 @@ class Archivo extends MY_Controller {
                 
             } 
             
-            header('Location:'.site_url('archivo/cambios/' . $idArchivo ));
+            $respuesta = 1;
         }
+        echo $respuesta;
     }
     
     public function eliminar_relacion_ubicacion($id){
@@ -4476,6 +5817,78 @@ class Archivo extends MY_Controller {
         }
     }
     
+    public function eliminar_ubicacion($id, $idUbi, $idArchivo){
+        $this->load->model('ubicacion_fisica_model');
+        
+        //echo $id. 'Aqui';
+       // exit();
+        //$pizza  = "porción1 porción2 porción3 porción4 porción5 porción6";
+        
+        /*echo $porciones[0] .'idRel'; // porción1 idRelacion
+        echo $porciones[1] . 'idArc'; // porción2 idArchivo
+        exit();*/
+        $Estatus=0;
+        $data=array(
+            
+            'Estatus'=> $Estatus ,
+            );
+        
+        $retorno = $this->ubicacion_fisica_model->datos_relacion_ubicacion_update($data, $id);
+        //$retorno = $this->procesos_model->datos_proceso_delete($id);
+        //$query = $this->procesos_model->datos_proceso_delete($id);
+        if($retorno['retorno'] < 0){
+           
+        }
+        else{
+            //checa que no este ocupada esa misma ubicacion en el archivo para liberarla
+            $qUbicaciones_libres_de_archivo = $this->ubicacion_fisica_model->datos_relacion_proceso_ubicacion_archivo($idUbi, $idArchivo);
+            
+            if ($qUbicaciones_libres_de_archivo->num_rows() == 0){
+                
+                $this->actualizar_estado_ubicacion($idUbi, 2);
+            }
+            
+           
+        }
+        
+        exit();
+    }
+    
+    
+    public function eliminar_relacion_ubicacion_preregistro($idRel_proceso_ubicacion, $idArchivo, $idUbicacion, $idDireccion){
+        $this->load->model('ubicacion_fisica_model');
+        //$idArchivo = $this->input->post('idArchivoAux');
+        //echo $id. 'Aqui';
+       // exit();
+        //$pizza  = "porción1 porción2 porción3 porción4 porción5 porción6";
+        //$porciones = explode("%20", $id);
+        /*echo $porciones[0] .'idRel'; // porción1 idRelacion
+        echo $porciones[1] . 'idArc'; // porción2 idArchivo
+        exit();*/
+        $Estatus=0;
+        $data=array(
+            
+            'Estatus'=> $Estatus ,
+            );
+        
+        $retorno = $this->ubicacion_fisica_model->datos_relacion_ubicacion_update($data, $idRel_proceso_ubicacion);
+        //$retorno = $this->procesos_model->datos_proceso_delete($id);
+        //$query = $this->procesos_model->datos_proceso_delete($id);
+        if($retorno['retorno'] < 0){
+            header('Location:'.site_url('archivo/preregistrar/' . $idArchivo.'/' . $idDireccion .'/' . $retorno['error']));
+        }
+        else{
+            //checa que no este ocupada esa misma ubicacion en el archivo para liberarla
+            $qUbicaciones_libres_de_archivo = $this->ubicacion_fisica_model->datos_relacion_proceso_ubicacion_archivo($idUbicacion, $idArchivo);
+            
+            if ($qUbicaciones_libres_de_archivo->num_rows() == 0){
+                
+                $this->actualizar_estado_ubicacion($idUbicacion, 2);
+            }
+            
+            header('Location:'.site_url('archivo/preregistrar/' . $idArchivo.'/' . $idDireccion )); 
+        }
+    }
     
     public function estado_trabajo($id, $trabajando, $idArchivo){
         $this->load->model('rel_archivo_documento_model');
@@ -4517,24 +5930,100 @@ class Archivo extends MY_Controller {
     }
     
     
-    public function comprobar_estado_trabajo($id, $idArchivo){
+    public function actualizar_estado_trabajo($idRAD){
         $this->load->model('rel_archivo_documento_model');
-        $query = $this->rel_archivo_documento_model->comprobar_estado_trabajo($idArchivo,$id);
-        /*$row = $trabajando->row_array();
-        /*echo $row;
-        echo $row['idUsuario_Trabajando'];
-        print_r($row);
-        exit();*/
-        //return $row['idUsuario_Trabajando'];*/*/
-        echo json_encode($query->row_array());
+        $resultado ="";
+        
+        //Verificar _estado
+        $estado = $this->rel_archivo_documento_model->comprobar_estado_trabajo($idRAD)->row_array();
+        $usuario = $this->session->userdata('id');
+        //print_r($estado['idUsuario_Trabajando']);
+        
+        
+        
+        //si no estan trabajando actualizarlo
+        if( $estado['idUsuario_Trabajando'] == 0  ){
+            
+            //echo ("Entre");
+
+            $data = array(
+            
+                'idUsuario_Trabajando'=> $usuario ,
+            );
+            
+            $aff = $this->rel_archivo_documento_model->trabajar_bloque($data, $estado['idArchivo'], $estado['idTipoProceso']);
+            if ($aff > 0){
+                $resultado = 1;
+                
+            } else {
+                $resultado = "Error";
+            }
+        } else if ($estado['idUsuario_Trabajando'] == $usuario) {
+            $resultado = 1;
+           
+        }else {
+            $resultado = "Bloque Ocupado";
+        }
+        
+        //exit();
+        
+        
+        echo $resultado;
         
        
     }
     
-    public function trabajar_ot($trabajando, $idArchivo){
+    public function estado_ot($idArchivo){
+        $this->load->model('rel_archivo_documento_model');
+        $this->load->model('datos_model');
+        
+        $idusuario = $this->session->userdata('id');
+        $respuesta = "";
+        
+        $usuario =   $this->datos_model->usuario_trabajando($idArchivo); 
+        if( $usuario->num_rows() == 1 ){
+            foreach ($usuario->result() as $rUsuario){
+                if ($rUsuario->idUsuario_Trabajando > 0  ){ //alguien está trabajando con OT
+                    if($rUsuario->idUsuario_Trabajando == $idusuario){   //el usuario esta trabajando algún bloque en OT
+                        $respuesta = 1;
+                    }
+                } else {   //OT Libre
+                    $respuesta = 1;
+                }
+            }
+        } else {    //hay algun usuario esta trabajando en la OT
+            
+            foreach ($usuario->result() as $rUsuario){
+                if ( ($rUsuario->idUsuario_Trabajando > 0 && $rUsuario->idUsuario_Trabajando == $idusuario) || $rUsuario->idUsuario_Trabajando == 0 ){ 
+                    $respuesta = 1;
+                } else {
+                    $respuesta = -1;
+                }
+            }
+        }
+        echo $respuesta;
+    }
+    
+    
+    public function trabajar_ot($idArchivo){
         $this->load->model('rel_archivo_documento_model');
         
+            $data = array(
+
+                'idUsuario_Trabajando'=> $this->session->userdata('id') ,
+            );
+            $retorno = $this->rel_archivo_documento_model->datos_relacion_archivo_documento_update_por_archivo($data, $idArchivo);
+            if($retorno['retorno'] == 1){
+               $respuesta =  1;
+            }else{
+               $respuesta =  -1;
+            }
         
+        
+        echo $respuesta;
+
+       
+        /*
         if ($trabajando == 1){
             $data=array(
 
@@ -4837,9 +6326,15 @@ class Archivo extends MY_Controller {
         }
         
         if ($tipofiltro == 2){ //Filtro por grupos
+            if ($filtro == 5){
+                $qFiltro = $this->datos_model-> filtrar_archivos_ejercicio($filtro);
+            }else {
             $qFiltro = $this->datos_model->filtrar_archivos_grupo_736($filtro);
+            }
            
         }
+        
+        
         /*if (isset($qFiltro)) {
                                     if ($qFiltro->num_rows() > 0) {
                                        
@@ -4853,13 +6348,13 @@ class Archivo extends MY_Controller {
         $tabla.='
          
            
-          <table class="table table-responsive table-striped table-hover table-bordered" id="t_listado">
+          <table class="table table-responsive table-striped table-hover table-bordered" id="t_listado"  width="200%">
                             <thead>
                             <tr>
                                 <th class="col-md-1">
                                     Acción
                                 </th>
-                                <th>
+                                <th >
                                     Orden de Trabajo
                                 </th>
                                 <th>
@@ -4902,6 +6397,9 @@ class Archivo extends MY_Controller {
                                 </th>
                                 <th >
                                     Finiquitada
+                                </th>
+                                <th >
+                                    Contratista
                                 </th>
                                 <th>
                                     Estatus FIDO
@@ -4941,6 +6439,7 @@ class Archivo extends MY_Controller {
                                                 $tabla.= "<td class='sinwarp'>" . $rFiltro->ImporteContratado . "</td>";
                                                 $tabla.= "<td class='sinwarp'>" . $rFiltro->EjercidoSiop . "</td>";
                                                 $tabla.= "<td class='sinwarp'>" . $finiquitada. "</td>";
+                                                 $tabla.= "<td class='sinwarp'>" . $rFiltro->Contratista . "</td>";
                                                 $tabla.= "<td class='sinwarp'> <a href='#' class='btn btn-warning btn-xs' title=''  data-toggle='modal' data-target='#modal-historico-archivo' role='button' onclick='ver_historico_archivo(" . $rFiltro->id  .")'><span class='glyphicon glyphicon-search'></span></a>&nbsp;</td>";
                                            
                                                //$tabla.= "<td class='sinwarp'>" .$rProcesos->Estatus. "</td>";
@@ -4967,137 +6466,27 @@ class Archivo extends MY_Controller {
     
     
     public function filtrar_archivos_direccion($filtro){
-        $this->load->model('datos_model');
+        $this->load->model('rel_archivo_preregistro_model');
         $tabla ="";
         
         //Filtro por grupos
-        $qFiltro = $this->datos_model->filtrar_archivos_direccion($filtro);
-           
-        
-        /*if (isset($qFiltro)) {
-                                    if ($qFiltro->num_rows() > 0) {
-                                       
-                                        foreach ($qFiltro->result() as $rFiltro) {
-                                            echo $rFiltro->OrdenTrabajo;
-                                        }
-                                    }
+        $qFiltro = $this->rel_archivo_preregistro_model->filtrar_archivos_direccion($filtro);
+       
+        if (isset($qFiltro)) {
+            if ($qFiltro->num_rows() > 0) {
+                $i = 0;
+                $tabla.='<option value="" selected="selected">SELECCIONA UNA OT </option>';
+                foreach ($qFiltro->result() as $rFiltro) {
+                    
+                    $tabla.='<option value="'. $rFiltro-> id .'" id="orden_trabajo" name="orden_trabajo">' . $rFiltro->OrdenTrabajo . '</option>';
+                }
+            } else{
+                $tabla.='<option value="" selected="selected">DIRECCIÓN SIN PREREGISTROS </option>';
+            }
         }
-        exit();*/
-        
-        $tabla.='
-         
            
-          <table class="table table-responsive table-striped table-hover table-bordered" id="t_listado">
-                            <thead>
-                            <tr>
-                                <th class="col-md-1">
-                                    Acción
-                                </th>
-                                <th>
-                                    Orden de Trabajo
-                                </th>
-                                <th>
-                                    Contrato
-                                </th>
-                                <th>
-                                    Obra
-                                </th>                               
-                                <th>
-                                    Descripcion
-                                </th>
-                               
-                                  <th >
-                                    Normatividad
-                                </th> 
-                                  <th >
-                                    Modalidad
-                                </th> 
-                                <th >
-                                    Ejercicio
-                                </th> 
-                                <th >
-                                    Estatus Obra
-                                </th>
-                                
-                                <th >
-                                    Direccion Ejecutora
-                                </th>
-                                <th >
-                                    Supervisor
-                                </th>
-                                <th >
-                                    Inicio Contrato
-                                </th>
-                                <th >
-                                    Monto Contratado
-                                </th>
-                                <th >
-                                    Monto Ejercido por SIOP
-                                </th>
-                                <th >
-                                    Finiquitada
-                                </th>
-                                <th>
-                                    Estatus FIDO
-                                </th>
-                               
-                            </tr>
-                        </thead>
-                        <tbody>
-         ';
-         
-         
-                                if (isset($qFiltro)) {
-                                    if ($qFiltro->num_rows() > 0) {
-                                        $i = 0;
-                                        foreach ($qFiltro->result() as $rFiltro) {
-                                            if ( $rFiltro->Finiquitada == 0){
-                                                $finiquitada = 'NO';
-                                            }else {
-                                                $finiquitada = 'SI';
-                                            }
-                                           $tabla.= "<tr>";
-                                                $tabla.=  "<td>" ;
-                                                $tabla.=  "<div class='checkbox' id='recibir_preregistro_".$rFiltro->id."'>
-                                                                <label>
-                                                                  <input type='checkbox' onchange='aceptar_preregistro($rFiltro->id, $rFiltro->idDireccion_responsable)'> Recibir Preregistro
-                                                                </label>
-                                                              </div>"   ;
-                                                $tabla.=  "<div ' id='preregistro_aceptado".$rFiltro->id."' style='display:none'>
-                                                                Preregistro Recibido
-                                                           </div>"   ;
-                                                $tabla.= "<div id='preregistro_ubi".$rFiltro->id."' class='d-n'>";
-                                                $tabla.=    "<a href='". site_url('archivo/cambios/' . $rFiltro->id) ."'  class='btn btn-xs btn-success'><span class='glyphicon glyphicon-pencil'></span></a></td>";
-                                                $tabla.= "</div>";
-                                                
-                                                $tabla.=  "<td>" . $rFiltro->OrdenTrabajo . "</td>";
-
-                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Contrato . "</td>";
-                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Obra . "</td>";
-                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Descripcion . "</td>";
-                                               
-                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Normatividad . "</td>";
-                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->idModalidad . "</td>";
-                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->idEjercicio . "</td>";
-                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->EstatusObra . "</td>";
-                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Direccion . "</td>";
-                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Supervisor . "</td>";
-                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->FechaInicio . "</td>";
-                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->ImporteContratado . "</td>";
-                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->EjercidoSiop . "</td>";
-                                                $tabla.= "<td class='sinwarp'>" . $finiquitada. "</td>";
-                                                $tabla.= "<td class='sinwarp'> <a href='#' class='btn btn-warning btn-xs' title=''  data-toggle='modal' data-target='#modal-historico-archivo' role='button' onclick='ver_historico_archivo(" . $rFiltro->id  .")'><span class='glyphicon glyphicon-search'></span></a>&nbsp;</td>";
-                                           
-                                               //$tabla.= "<td class='sinwarp'>" .$rProcesos->Estatus. "</td>";
-                                           $tabla.= "</tr>";
-                                            
-                                        }
-                                    }
-                                }
         
-                                
-        $tabla.=' </tbody>
-                        </table> ';                        
+                          
                                 
         $data=array();
         $data["tabla"]=$tabla;
@@ -5111,47 +6500,129 @@ class Archivo extends MY_Controller {
     }
     
     
-    public function ver_todo(){
-        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Archivo","P")==false){
-            header("Location:" . site_url('principal'));
+   
+    public function imprimir_procesos($idArchivo){
+        $this->load->model('datos_model');
+        $this->load->model('procesos_model');
+        
+        $id = $this->datos_model->get_procesos_archivo($idArchivo);
+        $aProcesos = $this->procesos_model->addw_procesos();
+        $resultado = "";
+        $resultado .= '<option value="6" >TODOS</option>';
+         if (isset($id)) {
+            if ($id->num_rows() > 0) {               
+                foreach ($id->result() as $rId) { 
+                    $resultado .= '<option value="'.$rId->idTipoProceso .'" >'. $aProcesos[$rId->idTipoProceso] .'</option>';
+                }
+            }
+         
         }
         
-        $data['meta'] = array(
-            array('name' => 'robots', 'content' => 'no-cache'),
-            array('name' => 'description', 'content' => $this->config->item('titulo_ext') . " - " . $this->config->item('titulo') . " Versión: " . $this->config->item('version')),
-            array('name' => 'AUTHOR', 'content' => 'Luis Montero Covarrubias'),
-            array('name' => 'AUTHOR', 'content' => 'Maria Elena Orozco Chavarria'),
-            array('name' => 'keywords', 'content' => 'tramites, transparencia, estimaciones, generadores, siop'),
-            array('name' => 'Content-type', 'content' => 'text/html; charset=utf-8', 'type' => 'equiv'),
-            array('name' => 'CACHE-CONTROL', 'content' => 'NO-CACHE', 'type' => 'equiv'),
-            array('name' => 'EXPIRES', 'content' => 'Mon, 26 Jul 1997 05:00:00 GMT', 'type' => 'equiv')
-        );
+        
+        $data=array();
+        
+        //echo $tabla;
+        //exit();
+        $data["resultado"]=$resultado;
+                                
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Content-type: application/json');
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+        
+    }
 
-        $data["qArchivos"] = $this->datos_model->listado();
-        //$data["qArchivos_736"] = $this->datos_model->listado_736();
-        $data["aUsuarios"] = $this->datos_model->get_usuarios();
-        $data["Tipos_Arch"] = $this->datos_model->get_Tipos_Arch_select();
-        $data["Tam_Norm"] = $this->datos_model->get_Tam_Norm_select();
-        $data["Tipos_uni"] = $this->datos_model->get_Tipos_uni_select();
-        $data["Titularidades"] = $this->datos_model->get_Titularidades_select();
-        $data["Direcciones"] = $this->datos_model->get_Direcciones_select();
-        $data["Ejercicios"] = $this->datos_model->get_Ejercicio_select();
-        $data["Modalidades"] = $this->datos_model->get_Modalidades_select();
-        
-        
-        $data['usuario'] = $this->session->userdata('nombre');
-        $data["aWidgets"]["widget_menu"] = $this->load->view('widget_menu.php', $data, TRUE);
-        
-        $this->load->model("ubicacion_fisica_model");
-        $this->load->model("datos_model");
+    public function ver_ubicaciones_archivo($idArchivo){
+         $this->load->model('ubicacion_fisica_model');
+         $this->load->model('procesos_model');
          
-        $data["qBloques"] = $this->datos_model->get_bloques();
-        $data["qEstatus"] = $this->datos_model->listado_estatus_archivos();
-        $data["qGrupos"] = $this->datos_model->get_grupos(); //Grupos obra- idBloqueObra
-        $data["qUbicacionesFisicas"]=$this->ubicacion_fisica_model->listado_ubicacion_ordenada_por_columna();
-       
+         $aProcesos = $this->procesos_model->addw_procesos();
+         $qRelProcesoUbicacion= $this->ubicacion_fisica_model->listado_ubicaciones_captura($idArchivo);
+         //$tabla ="";
+         $tabla = '
+                            <div class="col-sm-12 m-b"> 
+                                <a href="#" id="btn-agregar-ubi"  class="btn btn-success btn-sm" data-toggle="modal" data-target="#modal-agregar-ubicacion-fisica" onclick="imprimir_procesos()" role="button" ><span class="glyphicon glyphicon-plus-sign"></span> Agregar Ubicación </a>
+                                <a href="#"  id="btn-ubicaciones-libres"   class="btn btn-danger btn-sm" data-toggle="modal" data-target="#modal-cambiar-ubicacionfisica" role="button" onclick="uf_ver_ubicacion_fisica_libre()"><span class="glyphicon glyphicon-search"></span>  Ubicaciones Libres</a>
+                            </div>
+                                     
+                                <table  id="ubicaciones-tabla-'.$idArchivo.'"  class="table-bordered table-condensed table-responsive table-small table-hover" width="100%">
+                                    <thead>
+                                        <th>Acción</th>
+                                        <th>Proceso</th>
+                                        <th>Ubicacion Fisica</th>
+                                        
+                                       
+                                        
+                                    </thead>
+                                    <tbody>'; 
+        if (isset($qRelProcesoUbicacion)) {
+            if ($qRelProcesoUbicacion->num_rows() > 0) {               
+                foreach ($qRelProcesoUbicacion->result() as $rRelacion) {
+                    
+                    $url_ot= site_url('impresion/etiqueta_orden_trabajo/'. $idArchivo). ' ' .$rRelacion->idTipoProceso .' '. $rRelacion->idUbicacionFisica; 
+                    $url_ot_chica= site_url('impresion/etiqueta_orden_trabajo_chica/'.  $idArchivo . ' ' .$rRelacion->idTipoProceso.' '. $rRelacion->idUbicacionFisica  .' ' . $rRelacion->idRel);
+                    $url_eliminar = site_url('archivo/eliminar_relacion_ubicacion/' . $rRelacion->idRel.' '.$idArchivo .' '. $rRelacion->idUbicacionFisica );
+                    $confirmar= "¿Desea Eliminar esta ubicacion";
+
+
+                    $tabla.= "<tr>";
+
+                    $tabla.=    "<td>";
+                    $tabla.=         "<div class='btn-group'>";
+                    $tabla.=            "<div class='btn-group'>";
+                    $tabla.=                "<button type='button' class='btn btn-default btn-xs dropdown-toggle' id='btn-impresion' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false' style='margin-bottom:5px;''>";
+                    $tabla.=                     "<span class='glyphicon glyphicon-print'></span>";
+                    $tabla.=                "</button>";
+                    $tabla.=                "<ul class='dropdown-menu'>";
+                    $tabla.=                    "<li>";
+                    $tabla.=                        "<a href='". $url_ot. "' target='_blank'>";
+                    $tabla.=                           "<span class='glyphicon glyphicon-file'></span> Etiqueta para Archivo de Recepción";
+                    $tabla.=                        "</a>";
+                    $tabla.=                    "</li>";
+                    
+
+                    $tabla.=               "</ul>";
+                    $tabla.=            "</div>";
+                   
+                    $tabla.=            "<a id='btn-tabla-elim' class='btn btn-danger btn-xs del_documento'  title='Eliminar Ubicación' onclick='eliminar_ubicacion(". $rRelacion->idRel .",".$rRelacion->idUbi .")'  ><span class='glyphicon glyphicon-remove'></span></a> ";
+                    $tabla.=        "</div>";
+
+
+                    $tabla.=     "</td>";
+                    $tabla.=    "<td> ". $aProcesos[$rRelacion->idTipoProceso] ."</td>"; 
+                   
+                    $tabla.=    "<td> ". $rRelacion->Columna . '.' . $rRelacion->Fila.'.' . $rRelacion->C .'.' . $rRelacion->Apartado . '.' .$rRelacion->Posicion."</td>"; 
+                   
+
+                    $tabla.=    "</tr>"; 
+                        
+
+                                            
+                                            
+                      
+                                    
+                                            }
+                                        
+                                    
+                        
+                                
+                                              
+                                    }
+                                } 
+                        $tabla.=        "</tbody></table>"; 
+                                
+        $data=array();
         
-        $this->load->view('v_pant_archivo_todos.php', $data);
+        //echo $tabla;
+        //exit();
+        $data["tabla"]=$tabla;
+                                
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Content-type: application/json');
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); 
+                                
+                                
     }
     
     public function ver_ubicaciones_proceso($idArchivo, $proceso){
@@ -5164,12 +6635,7 @@ class Archivo extends MY_Controller {
                                     <thead>
                                         <th>Acción</th>
                                         <th>Ubicacion Fisica</th>
-                                        <th>Caja</th>
-                                        <th>Documento</th>
-                                        <th>No Folio Inicial</th>
-                                        <th>No Folio Final</th>
-                                        <th>No Hojas</th>
-                                        <th>Eliminar</th>
+                                        
                                        
                                         
                                     </thead>
@@ -5188,47 +6654,30 @@ class Archivo extends MY_Controller {
 
                     $tabla.=    "<td>";
                     $tabla.=         "<div class='btn-group'>";
-                    $tabla.=             "<button type='button' class='btn btn-default btn-xs dropdown-toggle' id='btn-impresion' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false' style='margin-bottom:5px;''>";
+                    $tabla.=            "<div class='btn-group'>";
+                    $tabla.=                "<button type='button' class='btn btn-default btn-xs dropdown-toggle' id='btn-impresion' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false' style='margin-bottom:5px;''>";
                     $tabla.=                     "<span class='glyphicon glyphicon-print'></span>";
-                    $tabla.=             "</button>";
-                    $tabla.=             "<ul class='dropdown-menu'>";
-                    $tabla.=                 "<li>";
-                    $tabla.=                    "<a href='". $url_ot. "' target='_blank'>";
+                    $tabla.=                "</button>";
+                    $tabla.=                "<ul class='dropdown-menu'>";
+                    $tabla.=                    "<li>";
+                    $tabla.=                        "<a href='". $url_ot. "' target='_blank'>";
                     $tabla.=                           "<span class='glyphicon glyphicon-file'></span> Etiqueta para Archivo de Recepción";
-                    $tabla.=                    "</a>";
-                    $tabla.=                "</li>";
-                    $tabla.=                "<li>";
-                    $tabla.=                     "<a href='". $url_ot_chica ."' target='_blank'>";
-                    $tabla.=                            "<span class='glyphicon glyphicon-file'></span> Etiqueta para Archivo de Integración";
-                    $tabla.=                      "</a>";
-                    $tabla.=                 "</li>";
+                    $tabla.=                        "</a>";
+                    $tabla.=                    "</li>";
+                    
 
                     $tabla.=               "</ul>";
                     $tabla.=            "</div>";
-                    $tabla.=            "<div class='btn-permisos'>";
-                    $tabla.=                "<a id='btn-tabla-mod' class='btn btn-success btn-xs' id='btn-modificar-ubi' data-toggle='modal' data-target='#modal-modificar-ubicacion' role='button' onclick='uf_modificar_ubicacion(". $rRelacion->idRel .")'>";
+                    $tabla.=            "<a id='btn-tabla-mod' class='btn btn-success btn-xs' id='btn-modificar-ubi' data-toggle='modal' data-target='#modal-modificar-ubicacion' role='button' onclick='uf_modificar_ubicacion(". $rRelacion->idRel .")'>";
                     $tabla.=                    "<span class='glyphicon glyphicon-pencil'></span></a>&nbsp;";
-                    $tabla.=             "</div>";
+                    $tabla.=            "<a id='btn-tabla-elim' class='btn btn-danger btn-xs del_documento' href='' title='Eliminar Solicitud' onclick='return confirm('¿Confirma eliminar Registro?');'' target='_self' ><span class='glyphicon glyphicon-remove'></span></a> ";
+                    $tabla.=        "</div>";
 
 
                     $tabla.=     "</td>"; 
                    
                     $tabla.=    "<td> ". $rRelacion->Columna . '.' . $rRelacion->Fila.'.' . $rRelacion->C .'.' . $rRelacion->Apartado . '.' .$rRelacion->Posicion."</td>"; 
                    
-                    $tabla.=    "<td>". $rRelacion->CajaUbi ."</td>"; 
-                    
-                    $tabla.=    "<td>". $rRelacion->Documentos ."</td>"; 
-                    
-                    $tabla.=    "<td>". $rRelacion->NoFolioInicial ."</td>"; 
-                   
-                    $tabla.=    "<td>". $rRelacion->NoFolioFinal ."</td>"; 
-                    
-                    $tabla.=    "<td>".  $rRelacion->NoHojas ."</td>"; 
-                   
-                    $tabla.=    "<td><div class='btn-permisos'>
-                                                <a id='btn-tabla-elim' class='btn btn-danger btn-xs del_documento' href='' title='Eliminar Solicitud' onclick='return confirm('¿Confirma eliminar Registro?');'' target='_self' ><span class='glyphicon glyphicon-remove'></span></a> 
-                                            </div> 
-                                 </td>"; 
 
                     $tabla.=    "</tr>"; 
                         
@@ -5299,10 +6748,12 @@ class Archivo extends MY_Controller {
          $this->load->model('rel_archivo_preregistro_model');
          $data = array(
                 'preregistro_aceptado' => 1,
+                'fecha_ingreso' => date('Y-m-d H:i:s'),
+                'idUsuario_acepta' => $this->session->userdata("id"),
                 );
             
-         $this->rel_archivo_documento_model->update_rel_archivo_documento_aceptar_preregistro($idArchivo, $idDireccion_responsable, $data);
-         $this->rel_archivo_preregistro_model->datos_relacion_archivo_preregistro_update_preregistro($data, $idDireccion_responsable, $idArchivo) ;
+         //$this->rel_archivo_documento_model->update_rel_archivo_documento_aceptar_preregistro($idArchivo, $idDireccion_responsable, $data);
+         echo $this->rel_archivo_preregistro_model->datos_relacion_archivo_preregistro_update_preregistro($data, $idDireccion_responsable, $idArchivo) ;
        
     }
     
@@ -5439,6 +6890,144 @@ class Archivo extends MY_Controller {
         
         
     }
+    
+    
+    public function mostrar_todos(){
+        $this->load->model('datos_model');
+        $tabla ="";
+        
+        //Filtro por grupos
+        $qFiltro =  $this->datos_model->listado();
+           
+        
+        /*if (isset($qFiltro)) {
+                                    if ($qFiltro->num_rows() > 0) {
+                                       
+                                        foreach ($qFiltro->result() as $rFiltro) {
+                                            echo $rFiltro->OrdenTrabajo;
+                                        }
+                                    }
+        }
+        exit();*/
+        
+        $tabla.='
+         
+           
+          <table class="table table-responsive table-striped table-hover table-bordered" id="t_todos">
+                            <thead>
+                            <tr>
+                                <th class="col-md-1">
+                                    Acción
+                                </th>
+                                <th>
+                                    Orden de Trabajo
+                                </th>
+                                <th>
+                                    Contrato
+                                </th>
+                                <th>
+                                    Obra
+                                </th>                               
+                                <th>
+                                    Descripcion
+                                </th>
+                               
+                                  <th >
+                                    Normatividad
+                                </th> 
+                                  <th >
+                                    Modalidad
+                                </th> 
+                                <th >
+                                    Ejercicio
+                                </th> 
+                                <th >
+                                    Estatus Obra
+                                </th>
+                                
+                                <th >
+                                    Direccion Ejecutora
+                                </th>
+                                <th >
+                                    Supervisor
+                                </th>
+                                <th >
+                                    Inicio Contrato
+                                </th>
+                                <th >
+                                    Monto Contratado
+                                </th>
+                                <th >
+                                    Monto Ejercido por SIOP
+                                </th>
+                                <th >
+                                    Finiquitada
+                                </th>
+                                <th>
+                                    Estatus FIDO
+                                </th>
+                               
+                            </tr>
+                        </thead>
+                        <tbody>
+         ';
+         
+         
+                                if (isset($qFiltro)) {
+                                    if ($qFiltro->num_rows() > 0) {
+                                        $i = 0;
+                                        foreach ($qFiltro->result() as $rFiltro) {
+                                            if ( $rFiltro->Finiquitada == 0){
+                                                $finiquitada = 'NO';
+                                            }else {
+                                                $finiquitada = 'SI';
+                                            }
+                                           $tabla.= "<tr>";
+                                                $tabla.=  "<td>" ;
+                                                
+                                                $tabla.= "<a href='#' onclick='editar_archivo(" . $rFiltro->id . ")' class='btn btn-xs btn-success'><span class='glyphicon glyphicon-pencil'></span></a></td>";
+                                                $tabla.=  "<td>" . $rFiltro->OrdenTrabajo . "</td>";
+
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Contrato . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Obra . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Descripcion . "</td>";
+                                               
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Normatividad . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->idModalidad . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->idEjercicio . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->EstatusObra . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Direccion . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->Supervisor . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->FechaInicio . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->ImporteContratado . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->EjercidoSiop . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $finiquitada. "</td>";
+                                                $tabla.= "<td class='sinwarp'> <a href='#' class='btn btn-warning btn-xs' title=''  data-toggle='modal' data-target='#modal-historico-archivo' role='button' onclick='ver_historico_archivo(" . $rFiltro->id  .")'><span class='glyphicon glyphicon-search'></span></a>&nbsp;</td>";
+                                           
+                                               //$tabla.= "<td class='sinwarp'>" .$rProcesos->Estatus. "</td>";
+                                           $tabla.= "</tr>";
+                                            
+                                        }
+                                    }
+                                }
+        
+                                
+        $tabla.=' </tbody>
+                        </table> ';                        
+                                
+        $data=array();
+        $data["tabla"]=$tabla;
+                                
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Content-type: application/json');
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);  
+        
+        
+    }
+
+
+    
     
     
             
