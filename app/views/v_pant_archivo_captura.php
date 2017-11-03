@@ -465,11 +465,12 @@
 
                         success: function(data) {
                             
-                            if (data > 0){
+                            
                                 $("#aceptar").attr("disabled", "disabled")
-                                $("#doc-recibidos").html(data + " Documentos Recibidos");
+                                $("#doc-recibidos").html(data);
+                                
                                 $("#doc-recibidos").show("sleep")
-                            }
+                            
                             
                              
                         }
@@ -926,6 +927,8 @@
             .a-e{
                 text-align: end;
             }
+            .border{border: 1px solid #000;}
+            
         </style>
     </head>
     <body>
@@ -937,7 +940,7 @@
                 <div class="col-md-12 column">
                     <ol class="breadcrumb">
                             <li><a href="<?php echo site_url("principal/"); ?>">Principal</a></li>
-                            <li class="active">Listado de Archivos</li>
+                            <li class="active">Estado de Obra</li>
                      </ol>
                 </div>
                 <!-- breadcrumb -->
@@ -946,7 +949,7 @@
         
         <div class="container-fluid">
             
-            <div class="row clearfix">
+            <div class="row">
                 
                 
                 <div>
@@ -1051,8 +1054,8 @@
                                 
                         ?>
                         <?php if ($recibe == 1) { ?>
-                        <li role="presentation" <?= $activo_recibe  ?>><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Preregistro</a></li>
-                        <li role="presentation" ><a href="#recepcion" aria-controls="home" role="tab" data-toggle="tab">Recepción Preregistro</a></li>
+                        <li role="presentation" <?= $activo_recibe  ?>><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Recepción Preregistro</a></li>
+                       
                         
                         <li role="presentation"><a href="#verificacion" aria-controls="profile" role="tab" data-toggle="tab" onclick="mostrar_archivos_verificar()">Verificación </a></li>
                         <?php } ?>
@@ -1096,24 +1099,74 @@
                         <div role="tabpanel" <?= $panel_activo_recibe ?> id="home">
                             <div class="col-md-12 m-b m-t">
                     
+                               
                                 
-                                
-                                
-                                <div class="col-xs-10 col-sm-8 m-b m-t-separacion">
-                                    <div class="form-group">
-                                          <label class="col-sm-3 control-label" for="filtroGrupo">Dirección de Preregistro: </label>
-                                          <div class="col-sm-9">
-                                              <select class="form-control" id="direccion_preregistro" name="direccion_preregistro" onchange="cargar_archivos()">
-                                                    <option value="0">SELECCIONA</option>
-                                                    <?php foreach ($qDirecciones->result() as $rowdata) {  ?>
-                                                    <option value="<?php echo $rowdata->id; ?>"><?php echo $rowdata->Nombre; ?></option>
-                                                    <?php } ?>
-                                              </select>
-                                          </div>
+                                <?php if ($recibe == 1) { ?>
+                                <div class="col-xs-12 col-sm-8 col-sm-offset-2 m-b m-t-separacion">
+                                    
+                                    <div class="row">
+                                        <div class="panel panel-primary">
+                                            <div class="panel-heading">
+                                                <h3 class="panel-title">Recibir Preregistro</h3>
+                                                
+                                            </div>
+                                            <div class="panel-body">
+                                                <form class="form-horizontal m-b-separacion" role="form">
+                                                      <div class="form-group">
+                                                        <label for="slc_Direccion" class="col-sm-2 control-label">Selecciona la Dirección: </label>
+                                                        <div class="col-sm-10">
+                                                          <select class="form-control" id="slc_Direccion" name="slc_Direccion" onchange="filtrar_archivos_direccion()">
+                                                            <option value="0">SELECCIONA</option>
+                                                            <?php foreach ($qDirecciones->result() as $rowdata) {  ?>
+                                                            <option value="<?php echo $rowdata->id; ?>"><?php echo $rowdata->Nombre; ?></option>
+                                                            <?php } ?>
+                                                          </select>
+                                                        </div>
+                                                      </div>
+                                                    <div class="form-group">
+                                                            <label for="ot" class="col-sm-2 control-label">Orden Trabajo: </label>
+                                                            <div class="col-sm-10">
+                                                              <select class="form-control" id="orden_trabajo" name="orden_trabajo" onchange="dibujar_tabla_ubicaciones()">
+                                                                
+                                                              </select>
+                                                            </div>
+                                                    </div>
+                                                
+                                                    <div class="form-group m-b">
+                                                        <label for="slc_Direccion" class="col-sm-2 control-label">Aceptar Preregistro: </label>
+                                                        <div class=" col-sm-10">
+                                                          <div class="checkbox">
+                                                            
+                                                              <input class="check-lg" id="aceptar" name="aceptar" type="checkbox" onclick="aceptar_preregistro()"> 
+                                                            
+                                                          </div>
+                                                        </div>
+                                                     </div>
+                                                <div class="col-md-10 col-md-offset-2 d-n m-b" id="doc-recibidos"></div>
+                                                      
+                                                    <div class="col-sm-10 col-sm-offset-2 m-b" id="tabla_ubi_actualizada" class="col-sm-12 d-n"></div>
+                                                        
+                                                      
 
+                                                      
+                                                      <div class="form-group">
+                                                        <div class="col-sm-offset-10 col-sm-2 a-e">
+                                                            <button type="button" class="btn btn-success" onclick="limpiar()">Limpiar</button>
+                                                        </div>
+                                                      </div>
+                                                  </form>
+                                            </div>
+                                        </div>
+                                      
+                                      
                                     </div>
+                                                  
+                                                  
+                                                    
+                                             
 
                                 </div>
+                                <?php } ?>
                                 
                                 <div class="col-xs-12 col-sm-4"></div>
                                 
@@ -1126,489 +1179,7 @@
                                             </a-->
                                         </div>
 
-                                        <div id="filtro-archivos">
-                                            <div class="container-fluid">
-            
-            <div class="row clearfix d-n" >
-                
-                <div class="col-md-12 m-b">
-                    <div class="col-md-11"><h3>Listado de Archivos</h3></div>
-                    
-                </div>
-                <!--
-                <div class="col-md-12 m-b">
-                    <div class="col-md-8"></div>
-                    <div class="col-xs-12 col-md-4">
-                        
-                        <div class="form-group">
-                              <label class="col-sm-4 control-label" for="bloqueObra">Filtrar por Estatus: </label>
-                              <div class="col-sm-8">
-                                  <select class="form-control" id="slc_Estatus" name="slc_Estatus" onchange="filtrar_archivos(1)">
-                                        <option value="0">SELECCIONA</option>
-                                        <?php //foreach ($qEstatus->result() as $rowdata) {  ?>
-                                        <option value="<?php //echo $rowdata->Estatus; ?>"><?php //echo strtoupper($rowdata->Nombre); ?></option>
-                                        <?php //} ?>
-                                  </select>
-                              </div>
-
-                        </div>
-                    </div>
-                   
-                </div>
-                -->
-                
-                <div class="col-md-12 m-b">
-                    
-                    
-                    <div class="col-md-8"></div>
-                    <div class="col-xs-12 col-md-4">
-                        <div class="form-group">
-                              <label class="col-sm-4 control-label" for="filtroGrupo">Filtrar por Grupos: </label>
-                              <div class="col-sm-8">
-                                  <select class="form-control" id="slc_Grupos" name="slc_Grupos" onchange="filtrar_archivos(2)">
-                                        <option value="0">SELECCIONA</option>
-                                        <?php foreach ($qGrupos->result() as $rowdata) {  ?>
-                                        <option value="<?php echo $rowdata->id; ?>"><?php echo $rowdata->Nombre; ?></option>
-                                        <?php } ?>
-                                  </select>
-                              </div>
-
-                        </div>
-                    
-                    </div>
-                    
-                    
-                    
-                </div>
-            </div>
-            <!-- Fin Encabezado -->
-            <div class="row clearfix">
-                <div class="col-md-12  d-n"  id="pantalla-1" name="pantalla-1">
-                    <br>
-                    <div class="col-xs-12 col-md-1">
-                        <button class="btn btn-primary end" onclick="ver_todos()">
-                                    <span class="glyphicon glyphicon-plus"></span> Ver Todos 
-                        </button>
-                    </div>
-                    <div class="col-md-12 column">
-                        <!--a href="#modal-agregar-cat" class="btn btn-primary" role="button" data-toggle="modal" >
-                            <span class="glyphicon glyphicon-plus"></span> Nuevo Archivo
-                        </a-->
-                    </div>
-                    
-                    
-                    
-                                                <div id="tabla-listado-principal">
-                                                    <table class="table table-responsive table-striped table-hover table-bordered" id="t_principal">
-                                                        <thead>
-                                                            <tr>
-                                                                <th class="col-md-1">
-                                                                    Acción
-                                                                </th>
-                                                                <th class="col-md-2">
-                                                                    Orden de Trabajo
-                                                                </th>
-                                                                <th class="col-md-2">
-                                                                    Contrato
-                                                                </th>
-                                                                <th class="col-md-2">
-                                                                    Obra
-                                                                </th>                               
-                                                                <th class="col-md-2">
-                                                                    Descripcion
-                                                                </th>
-
-                                                                  <th class="col-md-1">
-                                                                    Normatividad
-                                                                </th> 
-                                                                  <th class="col-md-1">
-                                                                    Modalidad
-                                                                </th> 
-                                                                <th class="col-md-1">
-                                                                    Ejercicio
-                                                                </th> 
-                                                                <th class="col-md-1">
-                                                                    Estatus Obra
-                                                                </th>
-
-                                                                <th class="col-md-2">
-                                                                    Direccion Ejecutora
-                                                                </th>
-                                                                <th class="col-md-2">
-                                                                    Supervisor
-                                                                </th>
-                                                                <th class="col-md-1">
-                                                                    Inicio Contrato
-                                                                </th>
-                                                                <th class="col-md-1">
-                                                                    Monto Contratado
-                                                                </th>
-                                                                <th class="col-md-1">
-                                                                    Monto Ejercido por SIOP
-                                                                </th>
-                                                                <th class="col-md-1">
-                                                                    Finiquitada
-                                                                </th>
-                                                                <th class="col-md-1">
-                                                                    Estatus FIDO
-                                                                </th>
-
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <?php
-                                                            if (isset($qArchivos_736)) {
-                                                                if ($qArchivos_736->num_rows() > 0) {
-                                                                    foreach ($qArchivos_736->result() as $rArchivo) {
-                                                                        if($rArchivo->Estatus == 0 || $rArchivo->Estatus == 3) {
-                                                                            $clase = 'class="grisecito"';
-                                                                        } else {
-                                                                            $clase = "";
-                                                                        }
-                                                                        ?>
-                                                                        <tr <?php echo $clase;?>>
-                                                                            <td>
-                                                                                
-                                                                                <a href="#"  onclick ="editar_archivo(<?php echo $rArchivo->id ?>)" class="btn btn-xs btn-success"><span class="glyphicon glyphicon-pencil"></span></a>
-
-                                                                                
-
-                                                                                
-                                                                               
-                                                                            </td>  
-                                                                            <td>
-                                                                                <?= $rArchivo->OrdenTrabajo ?>  
-                                                                            </td>
-                                                                            <td>
-                                                                                <?= $rArchivo->Contrato ?>
-                                                                            </td>
-                                                                            <td>
-                                                                                <?= $rArchivo->Obra ?>
-                                                                            </td>                               
-                                                                            <td>
-                                                                                <?= $rArchivo->Descripcion ?>
-                                                                            </td>
-
-                                                                            <td>
-                                                                                <?= $rArchivo->Normatividad ?>
-                                                                            </td> 
-                                                                            <td>
-                                                                                <?php if(isset($Modalidades[$rArchivo->idModalidad])){
-                                                                                    echo $Modalidades[$rArchivo->idModalidad];
-                                                                                } ?>
-                                                                            </td> 
-                                                                            <td>
-                                                                                <?php echo $rArchivo->idEjercicio; ?>
-                                                                            </td> 
-                                                                            <td>
-                                                                                <?php echo $rArchivo->EstatusObra; ?>
-                                                                            </td>
-
-                                                                            <td>
-                                                                                <?php echo $rArchivo->Direccion;  ?>
-
-                                                                            </td> 
-                                                                            <td>
-                                                                                <?php echo $rArchivo->Supervisor; ?>
-                                                                            </td>
-                                                                            <td>
-                                                                                <?php echo $rArchivo->FechaInicio; ?>
-                                                                            </td>
-                                                                            <td>
-                                                                                <?php echo $rArchivo->ImporteContratado; ?>
-                                                                            </td>
-                                                                            <td>
-                                                                                <?php echo $rArchivo->EjercidoSiop; ?>
-                                                                            </td>
-                                                                            <td>
-                                                                                <?php if ($rArchivo->Finiquitada == 0){
-                                                                                    echo 'No';
-                                                                                } else {
-                                                                                    echo 'Si';
-                                                                                }
-                                                                                ?>
-                                                                            </td>
-                                                                            <td>
-                                                                                <a href="#" class="btn btn-warning btn-xs" title=""  data-toggle="modal" data-target="#modal-historico-archivo" role="button" onclick="ver_historico_archivo(<?php echo $rArchivo->id; ?>)"><span class="glyphicon glyphicon-search"></span></a>&nbsp;
-
-                                                                            </td> 
-
-
-
-                                                                        </tr>
-                                                                        <?php
-                                                                    } // foreach
-                                                                } // if numrows
-                                                            } // if isset
-                                                            ?>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Fin Tabla Estimaciones --> 
-                                    <!-- Dialogo Nueva Estimación --> 
-                                    <!-- Historial del Bloque  -->
-                                    <div class="modal fade" id="modal-historico-archivo" role="dialog" aria-labelledby="myModalLabel-observaciones_bloque" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header panel-default">
-                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                                    <h4 class="modal-title" id="myModalLabel-historial">
-                                                        Estatus de bloques
-                                                    </h4>
-                                                </div>
-                                                <div class="modal-body">
-
-                                                            <div id="idHistorial_estatus"></div>
-
-                                                </div>
-                                                <div class="modal-footer">                            
-                                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                    <!--            Fin Dialog-->
-                                    <!-- Modal Nuevo Archivo -->
-                                    <div class="modal fade" id="modal-agregar-cat" role="dialog" aria-labelledby="modal-agregar-cat_myModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                                                        ×
-                                                    </button>
-                                                    <h4 class="modal-titlsamplee" id="modal-nuevo_subdocumentomyModalLabel">Archivo - Nuevo</h4>
-                                                </div>
-
-                                                <form action="<?= site_url('archivo/agregar_archivo')?>" method="post" enctype="multipart/form-data" id="forma1" name="forma1" target="_self" id="forma1" role="form" class="form-horizontal" onSubmit="return valida_Datos();">
-                                                    <div class="modal-body">
-
-                                                            <div class="form-group">
-                                                                <label for="OrdenTrabajo" class="control-label col-sm-3">Orden de Trabajo:</label>
-                                                                <div class="col-sm-7">
-
-                                                                    <input type="text" id="OrdenTrabajo" name="OrdenTrabajo" value="" class="form-control input-sm" required/>          
-                                                                </div>
-                                                            </div>
-                                                             <div class="form-group">
-                                                                <label for="Contrato" class="control-label col-sm-3">Contrato:</label>
-                                                                <div class="col-sm-7">
-                                                                    <input type="text" id="Contrato" name="Contrato" value="" class="form-control input-sm" required/>          
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label for="Obra" class="control-label col-sm-3">Obra:</label>
-                                                                <div class="col-sm-7">
-                                                                    <input type="text" id="Obra" name="Obra" value="" class="form-control input-sm" required/>          
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label for="Descripcion" class="control-label col-sm-3">Descripción:</label>
-                                                                <div class="col-sm-7">
-                                                                    <textarea class="form-control input-sm" rows="3" id="Descripcion" name="Descripcion"></textarea>
-                                                                </div>
-                                                            </div>
-
-                                                            <div class="form-group">
-                                                                <label for="FondodePrograma" class="control-label col-sm-3">Fondo de Programa:</label>
-                                                                <div class="col-sm-7">
-                                                                    <input type="text" id="FondodePrograma" name="FondodePrograma" value="" class="form-control input-sm" required/>          
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label for="Normatividad" class="control-label col-sm-3">Normatividad:</label>
-                                                                <div class="col-sm-7">
-                                                                    <select id="Normatividad" name="Normatividad" class="form-control">
-                                                                        <option value="FEDERAL">Federal</option>
-                                                                        <option value="ESTATAL">Estatal</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label for="Modalidad" class="control-label col-sm-3">Modalidad:</label>
-                                                                <div class="col-sm-7">
-                                                                    <?php echo form_dropdown('idModalidad', $Modalidades, '', 'class="form-control input-sm" id="idModalidad" '); ?>
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label for="Ejercicio" class="control-label col-sm-3">Ejercicio:</label>
-                                                                <div class="col-sm-7">
-                                                                    <input type="number" id="idEjercicio" name="idEjercicio" value="" class="form-control input-sm" required min="1999" max="2049"/>   
-                                                                    <!--<?php echo form_dropdown('idEjercicio', $Ejercicios, '', 'class="form-control input-sm" id="Ejercicio" '); ?>-->
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label class="control-label col-sm-3"> Es Proyecto:
-
-                                                                </label>
-                                                                <div class="col-sm-7">
-                                                                    <input type="checkbox" id="Proyecto" name="Proyecto" value="" class="input-sm" />     
-
-                                                                </div>
-                                                            </div>
-
-
-
-
-                                                    </div>
-                                                    <div class="modal-footer">
-
-                                                        <button type="submit" id="idGuardar" name="idGuardar" class="btn btn-success">
-                                                            Guardar
-                                                        </button>	
-                                                        <button type="button" class="btn btn-danger" data-dismiss="modal">
-                                                            Cancelar
-                                                        </button>                     
-                                                    </div>
-                                                </form>                    
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Modal ver reporte archivos por direccion -->
-                                    <div class="modal fade" id="modal-ver-reporte" role="dialog" aria-labelledby="modal-modificar-cat_myModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                                                        ×
-                                                    </button>
-                                                    <h4 class="modal-titlsamplee" id="modal-nuevo_documentomyModalLabel">Reporte Obras por dirección</h4>
-                                                </div>
-                                                <form action="<?php echo site_url("impresion/reporte_obras_direccion"); ?> " method="post" name="forma1" target="_self" id="forma1" role="form" class="form-horizontal" method="post" enctype="multipart/form-data">
-                                                    <div class="modal-body">
-
-
-
-
-                                                        <div class="form-group">
-                                                          <label class="col-sm-2 control-label" for="bloqueObra">Grupo Obra</label>
-                                                          <div class="col-sm-10">
-                                                              <select class="form-control" id="slc_bloqueObra" name="slc_bloqueObra">
-                                                                    <option value="0">SELECCIONA</option>
-                                                                    <?php foreach ($qBloques->result() as $rowdata) {  ?>
-                                                                    <option value="<?php echo $rowdata->id; ?>"><?php echo $rowdata->Nombre; ?></option>
-                                                                    <?php } ?>
-                                                              </select>
-                                                          </div>
-
-                                                        </div>
-
-                                                    </div>
-                                                    <div class="modal-footer">
-
-
-
-                                                        <button type="submit" class="btn btn-success">
-                                                            Imprimir
-                                                        </button>						
-                                                        <button type="button" class="btn btn-danger" data-dismiss="modal">
-                                                            Cancelar
-                                                        </button>						
-                                                    </div>
-                                                </form>                    
-                                            </div>
-                                        </div>
-                                    </div> 
-
-
-                                    <!-- Modal ver reporte documentos por bloquen -->
-                                    <div class="modal fade" id="modal-ver-reporte-documento-bloque" role="dialog" aria-labelledby="modal-ver-reporte-documento-bloque_myModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                                                        ×
-                                                    </button>
-                                                    <h4 class="modal-titlsamplee" id="modal-nuevo_documentomyModalLabel">Reporte documentos por bloque</h4>
-                                                </div>
-                                                <form action="<?php echo site_url("impresion/reporte_documentos_por_bloque"); ?> " method="post" name="forma1" target="_self" id="forma1" role="form" class="form-horizontal" method="post" enctype="multipart/form-data">
-                                                    <div class="modal-body">
-
-
-
-
-                                                        <div class="form-group">
-                                                          <label class="col-sm-2 control-label" for="bloqueObra">Grupo Obra</label>
-                                                          <div class="col-sm-10">
-                                                              <select class="form-control" id="slc_bloqueObra_doc_bloque" name="slc_bloqueObra_doc_bloque">
-                                                                    <option value="0">SELECCIONA</option>
-                                                                    <?php foreach ($qBloques->result() as $rowdata) {  ?>
-                                                                    <option value="<?php echo $rowdata->id; ?>"><?php echo $rowdata->Nombre; ?></option>
-                                                                    <?php } ?>
-                                                              </select>
-                                                          </div>
-
-                                                        </div>
-
-                                                    </div>
-                                                    <div class="modal-footer">
-
-
-
-                                                        <button type="submit" class="btn btn-success">
-                                                            Imprimir
-                                                        </button>						
-                                                        <button type="button" class="btn btn-danger" data-dismiss="modal">
-                                                            Cancelar
-                                                        </button>						
-                                                    </div>
-                                                </form>                    
-                                            </div>
-                                        </div>
-                                    </div> 
-
-
-                                    <!-- Modal ver reporte documentos por direccion -->
-                                    <div class="modal fade" id="modal-ver-reporte-documento-direccion" role="dialog" aria-labelledby="modal-ver-reporte-documento-bloque_myModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-lg">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                                                        ×
-                                                    </button>
-                                                    <h4 class="modal-titlsamplee" id="modal-nuevo_documentomyModalLabel">Reporte documentos por dirección</h4>
-                                                </div>
-                                                <form action="<?php echo site_url("impresion/reporte_documentos_por_direccion"); ?> " method="post" name="forma1" target="_self" id="forma1" role="form" class="form-horizontal" method="post" enctype="multipart/form-data">
-                                                    <div class="modal-body">
-
-
-
-
-                                                        <div class="form-group">
-                                                          <label class="col-sm-2 control-label" for="bloqueObra">Grupo Obra</label>
-                                                          <div class="col-sm-10">
-                                                              <select class="form-control" id="slc_bloqueObra_doc_direccion" name="slc_bloqueObra_doc_direccion">
-                                                                    <option value="0">SELECCIONA</option>
-                                                                    <?php foreach ($qBloques->result() as $rowdata) {  ?>
-                                                                    <option value="<?php echo $rowdata->id; ?>"><?php echo $rowdata->Nombre; ?></option>
-                                                                    <?php } ?>
-                                                              </select>
-                                                          </div>
-
-                                                        </div>
-
-                                                    </div>
-                                                    <div class="modal-footer">
-
-
-
-                                                        <button type="submit" class="btn btn-success">
-                                                            Imprimir
-                                                        </button>						
-                                                        <button type="button" class="btn btn-danger" data-dismiss="modal">
-                                                            Cancelar
-                                                        </button>						
-                                                    </div>
-                                                </form>                    
-                                            </div>
-                                        </div>
-                                    </div> 
-                                        </div>
+                                        <div id="filtro-tabla" style="display:none"></div>
                                         
                                     </div>
                                 </div>
@@ -1617,13 +1188,11 @@
 
 
                             </div>
-                            <div id="tabla-mostrar-todos" style="display:none"></div>
-                            
                             
                         </div>
                         
                         
-                        <!--Archivos  pocaptura/recepcion) -->
+                        <!--Archivos  pocaptura/recepcion) --><!--
                         <div role="tabpanel" class="tab-pane"id="recepcion">
                             <div class="col-md-12 m-b m-t">
                     
@@ -1685,7 +1254,7 @@
                                                   </form>
                                             </div>
                                         </div>
-                                        
+                                      
                                       
                                     </div>
                                                   
@@ -1704,7 +1273,7 @@
                                         <div class="col-md-12 column">
                                             <!--a href="#modal-agregar-cat" class="btn btn-primary" role="button" data-toggle="modal" >
                                                 <span class="glyphicon glyphicon-plus"></span> Nuevo Archivo
-                                            </a-->
+                                            </a--><!--
                                         </div>
 
                                         <div id="filtro-tabla" style="display:none"></div>
@@ -1718,7 +1287,7 @@
                             </div>
                             
                             
-                        </div>
+                        </div> -->
                         
                         <!-- Archivos poverificacion -->
                         <div role="tabpanel"   class="tab-pane" id="verificacion">

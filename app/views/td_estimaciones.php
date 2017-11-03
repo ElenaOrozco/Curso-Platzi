@@ -1,8 +1,9 @@
-
+<td id="tr-<?= $rRow->idRAD ?>">
 
 
        
             <?php if (!$rRow->tipo_documento == 4): //si no tiene estimaciones ?>
+                <!-- if (!$rRow->tipo_documento == 4): //si no tiene estimaciones -->
                 <div id="container-documento" class="col-xs-12">
 
                     <div id="row-documento" class="row flex-center">
@@ -14,6 +15,23 @@
                                     <br><small><?php if($rRow->responsable_documento != 0){ echo "RESPONSABLE: " .$addw_direciones[$rRow->responsable_documento];}else{ echo "RESPONSABLE: EJECUTORA " . $aArchivo['Direccion']; } ?> </small>
 
                                 </h5>
+                                <div id="idDireccion_preregistra<?= $rRow->idRAD ?>">
+
+                                </div>
+
+                                <div class="direccion m-b">
+                                    <select class="form-control" name="idDireccion<?php echo $rRow->idRAD; ?>" id="idDireccion<?php echo $rRow->idRAD; ?>"  onchange="cambiar_direccion_estimacion(<?= $rRow->idRAD ?>)">
+                                        <option  value="0" >  SELECCIONA DIRECCIÓN </option>
+                                        <?php foreach ($Direcciones->result() as $rDireccion) { ?>
+                                            <option   value ="<?= $rDireccion->id ?>"  ><?= $rDireccion->Nombre ?></option>
+                                        <?php }  ?>
+
+
+
+                                    </select>
+                                </div>
+                                
+                                
                             
                                 
 
@@ -27,7 +45,7 @@
                             <form class="form-inline">
                                 <div class="form-group">
                                   <label class="sr-only" for="exampleInputEmail3">No. de Estimaciones</label>
-                                  <input type="number" class="form-control" id="noEstimaciones" name="noEstimaciones" placeholder="No Estimaciones" onkeypress="return validar(event)" onchange="cargar_estimaciones( event, <?= $rRow->idRAD  ?>, <?= $idArchivo ?> , <?= $preregistro ?>)">
+                                  <input type="number" class="form-control" id="noEstimaciones" name="noEstimaciones" placeholder="No Estimaciones" onkeypress="return validar(event)" onchange="cargar_estimaciones_PRE_CID( event, <?= $rRow->idRAD  ?>, <?= $idArchivo ?>)">
                                 </div>
 
                                 
@@ -85,17 +103,13 @@
 
                     </div> <!-- row-documento -->
                     
-                    <div class="row-estimaciones">
-                        <div id="div_estimaciones_<?php echo $rRow->idRAD?>"> 
-                        </div>
-                       
-                    </div>
+                   
                     
                    
                 </div><!-- row-documento -->
                 <hr>
             <?php else: //si  tiene estimaciones ?>
-                
+                <!-- if ($rRow->tipo_documento == 4): //tiene estimaciones -->
                 <div id="container-documento" class="col-xs-12">
 
                     <div id="row-documento" class="row flex-center">
@@ -191,10 +205,12 @@
                                 </div>
 
                         </div> <!--row-estatus-->
+                    
 
 
 
                     </div> <!-- row-documento -->
+                    <?php endif; ?>
                    
                     <div class="row m-t" id="row-estimaciones">
                         <div id="div_estimaciones_<?php echo $rRow->idRAD?>"> 
@@ -202,6 +218,7 @@
                                                    
                             <?php  
                             $estimaciones_existentes = $this->ferfunc->get_subreg_distinct("saaEstimaciones", "idRel_Archivo_Documento= " . $rRow->idRAD , "Numero_Estimacion, idRel_Archivo_Documento"); 
+                           
                             if ($estimaciones_existentes->num_rows() >0){
                                 //echo $estimaciones_existentes->num_rows();
                                 foreach ($estimaciones_existentes->result() as $estimaciones) { 
@@ -260,7 +277,7 @@
 
                                                                     
 
-                                                                    if ($rEstimaciones->original_recibido==1 && $rEstimaciones->idDireccion_responsable == $idDireccion_responsable){
+                                                                    if ($rEstimaciones->original_recibido==1){
                                                                             $seleccion_estimaciones = "Original";
                                                                             $value_estimaciones = 2;
                                                                             $seleccion_estimaciones1 = "Copia";
@@ -272,7 +289,7 @@
                                                                             $value_estimaciones3 = 0;
                                                                     }
 
-                                                                    else if ($rEstimaciones->copia==1 && $rEstimaciones->idDireccion_responsable == $idDireccion_responsable){
+                                                                    else if ($rEstimaciones->copia==1 ){
                                                                             $seleccion_estimaciones = "Copia";
                                                                             $value_estimaciones = 1;
                                                                             $seleccion_estimaciones1 = "Original";
@@ -283,7 +300,7 @@
                                                                             $value_estimaciones3 = 0;
                                                                     }
 
-                                                                    else if ($rEstimaciones->no_aplica==1 && $rEstimaciones->idDireccion_responsable == $idDireccion_responsable){
+                                                                    else if ($rEstimaciones->no_aplica==1){
                                                                         $seleccion_estimaciones = "No aplica";
                                                                         $value_estimaciones = 3;
                                                                         $seleccion_estimaciones1 = "Original";
@@ -310,14 +327,43 @@
                                                                     <div class="row">
                                                                         <div class="col-md-5">
                                                                            
-                                                                            <h5> EST. <?php  echo $rEstimaciones->Numero_Estimacion .' - ' .$addw_SubDocumentos[$rEstimaciones->idSubDocumento]?></h5>
+                                                                            <h6> EST. <?php  echo $rEstimaciones->Numero_Estimacion .' - ' .$addw_SubDocumentos[$rEstimaciones->idSubDocumento]?></h6>
+                                                                            
+                                                                            <?php if ($rEstimaciones->idDireccion_responsable > 0){ $d = "style = 'display:none' "; }else { $d = "  ";}?>
+                                                                            <div class="direccion-estimacion m-b">
+                                                                               
+                                                                                    <select class="form-control" name="DireccionEstimacion<?php echo $rEstimaciones->id; ?>" <?= $d ?> id="DireccionEstimacion<?php echo $rEstimaciones->id; ?>" >
+                                                                                        <?php if($rEstimaciones->idDireccion_responsable== 0): ?>
+
+
+                                                                                            <option  value="0" selected="selected" >  SELECCIONA DIRECCIÓN </option>
+                                                                                        <?php endif;?>
+
+
+                                                                                        <?php foreach ($Direcciones->result() as $rDireccion) { ?>
+
+                                                                                            <?php if($rEstimaciones->idDireccion_responsable >0 == $rDireccion->id): ?>
+                                                                                                <option   value ="<?= $rDireccion->id ?>" ><?= $rDireccion->Nombre ?></option>
+                                                                                            <?php else: ?>
+                                                                                                <option   value ="<?= $rDireccion->id ?>"  ><?= $rDireccion->Nombre ?></option>
+                                                                                            <?php endif;?>
+                                                                                        <?php }  ?>
+
+
+
+
+
+                                                                                    </select>
+                                                                                
+                                                                                
+                                                                            </div>
 
                                                                         </div> 
                                                                         
                                                                         <div class="col-md-2">
                                                                            
    
-                                                                            <select class="form-control m-b" name="tipo_documento_est<?php echo $rEstimaciones->id; ?>" id="tipo_documento_est<?php echo $rEstimaciones->id; ?>" onchange="uf_recibir_tipo_estimacion(<?= $rEstimaciones->id;?>)" >
+                                                                            <select class="form-control m-b" name="tipo_documento_est<?php echo $rEstimaciones->id; ?>" id="tipo_documento_est<?php echo $rEstimaciones->id; ?>" onchange="ingresar_estimacion_cid(<?= $rEstimaciones->id;?>)" >
                                                                                 <option value="<?= $value_estimaciones ?>" id="select" name="select"><?php echo $seleccion_estimaciones ?></option>
 
                                                                                 <option id="tipo_documento_est<?php echo $rEstimaciones->id; ?>" name="tipo_documento_est<?php echo $rEstimaciones->id; ?>" value="<?php echo $value_estimaciones1 ?>"><?php echo $seleccion_estimaciones1 ?></option>
@@ -331,17 +377,17 @@
                                                                         <div class="col-md-2">
                                                                             <div class="">
                                                                                 <label class="sr-only" for="exampleInputEmail3">No. Hojas</label>
-                                                                                <input type="number" class="form-control" id="noHojas_est_<?= $rEstimaciones->id ?>" name="noHojas_est_<?= $rEstimaciones->id ?>" placeholder="No Hojas" value="<?php if($rEstimaciones->idDireccion_responsable == $idDireccion_responsable) echo $rEstimaciones->noHojas;?>" onchange="cargar_noHojas_estimaciones(<?= $rEstimaciones->id ?>)" min="0">
+                                                                                <input type="number" class="form-control" id="noHojas_est_<?= $rEstimaciones->id ?>" name="noHojas_est_<?= $rEstimaciones->id ?>" placeholder="No Hojas" value="<?= $rEstimaciones->noHojas;?>" onchange="cargar_noHojas_estimaciones(<?= $rEstimaciones->id ?>)" min="0">
                                                                             </div>
 
                                                                         </div>
                                                                                 
                                                                         <div class="col-md-2">
-                                                                            <a href="#observaciones_bloque" id="btn-ver-obs"  data-toggle="modal" title="Ver Observaciones" class="btn btn-default btn-sm" data-target="#observaciones_estimaciones" title="Observaciones" role="button" onclick="ver_observaciones_estimacion(<?php echo $idArchivo; ?>,<?php echo $rEstimaciones->id; ?> ,<?= $preregistro ?>)">
+                                                                            <a href="#" id="btn-ver-obs"  data-toggle="modal" title="Ver Observaciones" class="btn btn-default btn-sm" data-target="#observaciones_estimaciones" title="Observaciones" role="button" onclick="ver_observaciones_estimacion(<?php echo $idArchivo; ?>,<?php echo $rEstimaciones->id; ?> ,<?= $preregistro ?>)">
                                                                                 <span class="glyphicon glyphicon-search"></span>
                                                                             </a>
-                                                                            <a href="#" id="btn-agregar-obs"  data-toggle="modal" title="Agregar observaciones" data-target="#observacion_estimacion" role="button" class="btn btn-warning btn-sm" onclick="uf_agregar_observaciones_estimacion(<?php echo $rEstimaciones->id .' , ' .$rRow->direccion_preregistra .' , ' .$idDireccion_responsable  ?>)">
-                                                                                <span class="glyphicon glyphicon-list"></span>
+                                                                            <a href="#" id="btn-agregar-obs"  data-toggle="modal" title="Agregar observaciones" data-target="#observacion_estimacion" role="button" class="btn btn-warning btn-sm" onclick="uf_agregar_observaciones_estimacion(<?php echo $rEstimaciones->id .' ,13 , ' .$idDireccion_responsable  ?>)">
+                                                                                <span class="glyphicon glyphicon-comment"></span>
                                                                             </a>
 
 
@@ -354,28 +400,20 @@
 
 
                                                                             <div class="checkbox">
-                                                                                <?php if($recibe ==1  && $Estatus==10): ?>
-                                                                                    <label>
-                                                                                         <input   type="checkbox" value="" onchange="uf_recibir_estimacion(this, <?= $rEstimaciones->id ?>)" <?= $strchecked_recibido ?> > Recibido
-                                                                                    </label>
-                                                                                 <?php else: ?>
+                                                                              
                                                                                      <label>
-                                                                                         <input   type="checkbox" value="" disabled="disabled" <?= $strchecked_recibido ?> > Recibido
+                                                                                         <input   type="checkbox" value="" disabled="disabled" > Recibido
                                                                                      </label>
-                                                                                 <?php endif; ?>
+                                                                               
                                                                             </div>
 
                                                                             <div class="checkbox">
-                                                                                 <?php if($reviso ==1  && $Estatus==20): ?>
+                                                                                 
                                                                                      <label>
-                                                                                         <input  type="checkbox"  value="" id="revisado-<?= $rEstimaciones->id ?>" onchange=" uf_revisado_estimacion(this, <?= $rEstimaciones->id ?>)" <?= $strchecked_revisado ?> > Revisado
-                                                                                     </label>
-                                                                                 <?php  else: ?>
-                                                                                     <label>
-                                                                                         <input  type="checkbox" value="" disabled="disabled" <?= $strchecked_revisado ?>> Revisado
+                                                                                         <input  type="checkbox" value="" disabled="disabled" > Revisado
                                                                                      </label>
 
-                                                                                 <?php endif; ?>
+                                                                                
                                                                             </div>
 
                                                                         </div> 
@@ -417,7 +455,8 @@
                     
                 </div><!-- row-documento -->
                 <hr>
-            <?php endif; ?>
+            
+</td>
         
 
                                                  

@@ -2496,9 +2496,11 @@
                                                     <td width="200">
                                                        <div id="numero_documentos_proceso_preregistrados_preregistro<?= $rProcesos->idTipoProceso?>">
                                                             <?php  
-                                                                
+                                                                if ($preregistro == 1){
                                                                     $qDocumentos_proceso_recibido = $this->datos_model->documentos_proceso_por_direccion($idArchivo, $idDireccion_responsable, $rProcesos->idTipoProceso);
-                                                                
+                                                                } else {
+                                                                   $qDocumentos_proceso_recibido = $this->datos_model->documentos_proceso_preregistrados($idArchivo, $rProcesos->idTipoProceso);
+                                                                }
                                                                     $qDocumentos_proceso_recibido_total = $this->datos_model->total_procesos($idArchivo, $rProcesos->idTipoProceso);
                                                                     echo "Preregistrados " . $qDocumentos_proceso_recibido->num_rows() . " de " . $qDocumentos_proceso_recibido_total->num_rows();
 
@@ -2574,14 +2576,16 @@
                                                                                         <?= $rSubProcesos->Nombre ?>
                                                                                     </td> 
 
-                                                                                    <?php if($preregistro ==1): ?>
+                                                                                    
                                                                                     <td width="200">
                                                                                         <div id="numero_documentos_subproceso_preregistrados<?= $rSubProcesos->id;  ?>">
 
                                                                                             <?php  
-                                                                                            
-                                                                                                $qDocumentos_subproceso_recibido = $this->datos_model->documentos_subproceso_por_direccion($idArchivo, $idDireccion_responsable, $rSubProcesos->id);
-                                                                                            
+                                                                                                if($preregistro == 1){
+                                                                                                    $qDocumentos_subproceso_recibido = $this->datos_model->documentos_subproceso_por_direccion($idArchivo, $idDireccion_responsable, $rSubProcesos->id);
+                                                                                                } else {
+                                                                                                    $qDocumentos_subproceso_recibido = $this->datos_model->documentos_subproceso_preregistro($idArchivo, $rSubProcesos->id);
+                                                                                                }
 
                                                                                                 $qDocumentos_subproceso_recibido_total = $this->datos_model->total_subprocesos($idArchivo, $rSubProcesos->id);
                                                                                                 echo "Preregistrados " . $qDocumentos_subproceso_recibido->num_rows() . " de " . $qDocumentos_subproceso_recibido_total->num_rows();
@@ -2593,7 +2597,7 @@
 
 
                                                                                     </td>
-                                                                                    <?php endif; ?>
+                                                                                    
                                                                                     <?php if($preregistro==0): ?>
                                                                                     <td width="200">
                                                                                         <div id="numero_documentos_subproceso_recibidos<?= $rSubProcesos->id;  ?>">
@@ -2681,7 +2685,9 @@
                                                                                                                 <?php endif; ?>
                                                                                                                 <?php endforeach; ?>
                                                                                                             <?php endif; ?>
+                                                                                                             
                                                                                                         <?php endif; ?>
+                                                                                                        
                                                                                                     <?php endif; ?>
                                                                                                 <?php endif; ?> 
                                                                         
@@ -2763,15 +2769,38 @@
                                                                         
                                                                         
                                                                                                 <?php else:?>
-                                                                                                    <!--else estatus mas de 30 y no preregistro  -->
+                                                                                                    <!--else (sino es recibe ni reviso ) y status mas de 30 -->
                                                                                                    
-                                                                                                            <?php //include 'row_documentos_vacia.php'; ?>
+                                                                                                            <?php //include 'row_documentos_vacia.php'; trae toda la plantilla?>
                                                                                                             <?php $qPreregistro_v = $this->datos_model->documentos_de_archivo_relacion($rDocumentos->id); ?>
                                                                                                             <?php $disabled = "disabled='disabled'"?>
                                                                                                             <?php if (isset($qPreregistro_v)): ?>
                                                                                                                 <?php if ($qPreregistro_v->num_rows() > 0): ?>
                                                                                                                     <?php foreach ($qPreregistro_v->result() as $rRow): ?>
-                                                                                                                        <?php include 'row_documentos_preregistro.php'; ?>
+                                                                                                                        
+                                                                                                                        <?php if ($rRow->id_preregistro > 0): //Si tiene id_Preregistro ?> 
+                                                                                                                            <?php if ($rRow->Nombre == "11.1 ESTIMACIONES"): ?> 
+                                                                                                                                <?php include 'row_estimaciones.php'; ?>
+                                                                                                                            <?php else: ?>
+                                                                                                                                <?php include 'row_documentos_preregistro.php'; ?>
+                                                                                                                            <?php endif; ?>
+                                                                                                                        
+                                                                                                                           
+                                                                                                                        <?php else: ?>
+                                                                                                                            <?php if ($rRow->Nombre == "11.1 ESTIMACIONES"): ?> 
+                                                                                                                                <?php include 'row_estimaciones.php'; ?>
+                                                                                                                            <?php else: ?>
+                                                                                                                                <?php if ($rRow->idRAP): ?> 
+                                                                                                                                    <?php include 'row_documentos_preregistro.php'; ?>
+                                                                                                                                <?php else: ?>
+                                                                                                                                    <?php include 'row_documentos_vacia.php'; ?> 
+                                                                                                                                <?php endif; ?>
+                                                                                                                            <?php endif; ?>
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        <?php endif; ?>
+                                                                                                    
+                                                                                                                        <?php include 'row_digitalizar.php'; ?>
                                                                                                                     <?php endforeach; ?>
                                                                                                                 <?php endif; ?>
                                                                                                             <?php endif; ?>
@@ -2998,6 +3027,30 @@
             </div>
         </div>
     </div>
+    
+    <!-- Historial del Bloque  -->
+        <div class="modal fade" id="observaciones_estimaciones" role="dialog" aria-labelledby="myModalLabel-observaciones_bloque" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header panel-default">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel-historial">
+                            Observaciones
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        
+                                <div id="idObservacionesEstimaciones"></div>
+                                                                              
+                    </div>
+                    <div class="modal-footer">                            
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!--            Fin Dialog-->
         
     <!-- Selecciona los Documentos -->
     <div class="modal fade" id="modal-nuevo_anexo" role="dialog" aria-hidden="true">
@@ -4087,7 +4140,66 @@
                     </div>
                 </div>
             </div>       <!-- Modificar archivo --> 
+          <!-- Dialog Model Observaciones Bloque -->
+        <div class="modal fade" id="observacion_estimacion" role="dialog" aria-labelledby="myModalLabel-observacion_bloque" aria-hidden="true">
+            <div class="modal-dialog">
+            	
+                <form class="form-horizontal" role="form">
+                <div class="modal-content">
+                    <div class="modal-header panel-danger">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
+                            Observaciones
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                                   
+                       
+                        
+                        <div class="form-group">
+                            <label for="observaciones" class="control-label col-sm-4">Agregar Observaciones</label>
+                            <div class="col-sm-10">
+                                <textarea class="form-control col-md-12" id="motivo_observacion_estimacion" name="motivo_observacion_estimacion" cols="70" rows="5"></textarea>
+                            </div>
+                         </div>
+                        
+                         <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value="0" name="tipo_observacion_estimacion" id="tipo_observacion_estimacion">
+                                Solicitar respuesta
+                            </label>
+                        </div>
+                       
+                        
+                                                   
+                        
+                                                          
+                        
+                    </div>
+                    
+                    <div class="modal-footer">
+                        
+                       
+                        <input type="hidden" name="idArchivo_realizo_observacion" id="idArchivo_realizo_observacion" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
+                        <input type="hidden" name="idEstimacion_observacion" id="idEstimacion_observacion" required value="" class="form-control" >
+                        <input type="hidden" name="idDireccion_respuesta" id="idDireccion_respuesta" required value="" >
+                        <input type="hidden" name="direccion_realizo_observacion" id="direccion_realizo_observacion" required value="" >
+                        <input type="hidden" name="usuario_realizo_observacion" id="usuario_realizo_observacion" required value="" >
+                        <input type="hidden" name="tipo_usuario_realizo_observacion" id="tipo_usuario_realizo_observacion" required value="<?php echo $preregistro ?>" >
+                        
+                       
+                        
+                        
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
+                        <a class="btn btn-primary" onclick="agregar_observaciones_estimacion()">Aceptar</a>
+                    </div>
+                </div>
+               
+        	</form>
+            </div>
 
+        </div>
+    <!--            Fin Dialog-->
             <!--Cambiar/Seleccionar Bloque -->    
         <div class="modal fade" id="modal-cambiar-bloque" role="dialog" aria-labelledby="myModalLabel-cambiar-direccion" aria-hidden="true">
             <div class="modal-dialog modal-lg">

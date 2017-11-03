@@ -15,6 +15,10 @@ class Bloques_obras extends MY_Controller {
     }
     
     public function index(){
+        $this->load->library('ferfunc');
+        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Grupos obras","P")==false){
+            header("Location:" . site_url('principal'));
+        }
          $data['meta'] = array(
             array('name' => 'robots', 'content' => 'no-cache'),
             array('name' => 'description', 'content' => $this->config->item('titulo_ext') . " - " . $this->config->item('titulo') . " Versión: " . $this->config->item('version')),

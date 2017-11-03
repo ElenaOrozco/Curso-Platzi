@@ -334,6 +334,24 @@ class Datos_model extends CI_Model {
         return $query;
     }
     
+    public function documentos_proceso_preregistrados($idArchivo, $idProceso){
+        $sql= ' SELECT DISTINCT idRAD
+                FROM plantilla_documento
+                WHERE idArchivo = ? AND idRAP > 0 
+                AND idTipoProceso = ?';
+        $query = $this->db->query($sql, array($idArchivo, $idProceso));
+        return $query;
+    }
+    
+    public function documentos_subproceso_preregistro($idArchivo, $idSubProceso) {
+         $sql= 'SELECT DISTINCT idRAD
+                FROM plantilla_documento
+                WHERE idArchivo = ? AND idRAP > 0 
+                AND idSubTipoProceso = ?';
+        $query = $this->db->query($sql, array($idArchivo, $idSubProceso));
+        return $query;
+    }
+
     public function documentos_de_archivo($idArchivo, $idSubProceso){
         $sql= 'SELECT *
                 FROM plantilla_documento
@@ -1820,7 +1838,7 @@ class Datos_model extends CI_Model {
     
     public function buscar_id_ejecutora($direccion){
          $sql = "SELECT id FROM `catDirecciones`
-                    WHERE `catDirecciones`.`Nombre` LIKE ? ";
+                    WHERE `catDirecciones`.`Nombre` LIKE '%$direccion%' ";
         
         $query = $this->db->query($sql, array($direccion));
         return $query;

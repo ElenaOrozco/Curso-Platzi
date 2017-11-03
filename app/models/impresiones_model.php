@@ -47,6 +47,90 @@ class Impresiones_model extends CI_Model {
         return $query;
     }
     
+    public function idRAD_estimaciones($id){
+        $sql = 'SELECT DISTINCT `saaEstimaciones`.`idRel_Archivo_Documento` FROM `saaEstimaciones` 
+                INNER JOIN `saaRel_Archivo_Documento`
+                ON `saaEstimaciones`.`idRel_Archivo_Documento` = `saaRel_Archivo_Documento`.id
+                WHERE `saaRel_Archivo_Documento`.idArchivo = ?';
+        $query = $this->db->query($sql, array($id));
+        return $query;
+
+    }
+    
+    public function get_subdocumentos($id, $direccion){
+        $sql = 'SELECT `saaEstimaciones`.*, `saaSubDocumentos`.`Nombre`
+                FROM `saaEstimaciones` 
+                INNER JOIN `saaRel_Archivo_Documento`
+                ON `saaEstimaciones`.`idRel_Archivo_Documento` = `saaRel_Archivo_Documento`.id
+                INNER JOIN `saaSubDocumentos`
+                ON `saaSubDocumentos`.id = `saaEstimaciones`.`idSubDocumento`
+                WHERE `saaRel_Archivo_Documento`.idArchivo = ?
+                AND `saaEstimaciones`.idDireccion_responsable = ?
+                ORDER BY Numero_Estimacion, ordenar_subdocumento ASC';
+        $query = $this->db->query($sql, array($id, $direccion));
+        return $query;
+
+    }
+    
+    public function get_subdocumentos_archivo($id){
+        $sql = 'SELECT `saaEstimaciones`.*, `saaSubDocumentos`.`Nombre`
+                FROM `saaEstimaciones` 
+                INNER JOIN `saaRel_Archivo_Documento`
+                ON `saaEstimaciones`.`idRel_Archivo_Documento` = `saaRel_Archivo_Documento`.id
+                INNER JOIN `saaSubDocumentos`
+                ON `saaSubDocumentos`.id = `saaEstimaciones`.`idSubDocumento`
+                WHERE `saaRel_Archivo_Documento`.idArchivo = ?
+                
+                ORDER BY Numero_Estimacion, ordenar_subdocumento ASC';
+        $query = $this->db->query($sql, array($id));
+        return $query;
+
+    }
+    
+    public function estimaciones_preregistradas($idRAD, $direccion){
+        $sql = 'SELECT * FROM saaEstimaciones 
+                WHERE idRel_Archivo_Documento = ?
+                AND idDireccion_responsable= ?';
+        $query = $this->db->query($sql, array($idRAD, $direccion));
+        return $query;
+    }
+    
+    public function buscar_preregistro($idRAD, $direccion){
+        $sql = 'SELECT * FROM `saaRel_Archivo_Preregistro`
+                WHERE id_Rel_Archivo_Documento = ? AND idDireccion_responsable = ?';
+        $query = $this->db->query($sql, array($idRAD, $direccion));
+        return $query;
+    }
+    
+    public function buscar_preregistro_archivo($idRAD){
+        $sql = 'SELECT * FROM `saaRel_Archivo_Preregistro`
+                WHERE id_Rel_Archivo_Documento = ?';
+        $query = $this->db->query($sql, array($idRAD));
+        return $query;
+    }
+    
+    public function preregistra_estimaciones($data){
+        
+            $this->db->insert('saaRel_Archivo_Preregistro', $data);
+            $e = $this->db->_error_message();
+            $aff = $this->db->affected_rows();
+            $last_query = $this->db->last_query();
+            $registro = $this->db->insert_id();
+            
+            if (!empty($registro)) {
+                $this->log_new(array('Tabla' => 'saaRel_Archivo_Preregistro', 'Data' => $data, 'id' => $registro));
+            }
+
+            if ($aff <1 ){ return "Error"; } else { return "Exito";}
+    }
+
+    public function  agrego_estimaciones($id, $direccion){
+        $sql = 'SELECT * FROM `saaRel_Archivo_Preregistro`
+                WHERE idArchivo = ? AND tipo_documento =4 AND idDireccion_responsable = ?';
+        $query = $this->db->query($sql, array($idRAD, $direccion));
+        return $query;
+    }
+
     public function get_estimaciones_archivo($id, $usuario){
         $sql='SELECT * FROM `saaEstimaciones`
             WHERE idRel_Archivo_Documento = ? AND 
@@ -1090,6 +1174,29 @@ WHERE (`memMemorias`.`id` =?);';
         return $query;
     }
     
+    public function  datos_reporte_preregistro_cid ($id){
+       /*$query = $this->db->get_where("saaArchivo", array("id" => $id));
+        return $query; */
+        $sql = 'SELECT 
+                `saaRel_Archivo_Preregistro`.*,
+                `saaRel_Archivo_Documento`.`idTipoProceso`,
+                `saaDocumentos`.`Nombre`
+
+                FROM saaRel_Archivo_Preregistro
+                INNER JOIN `saaRel_Archivo_Documento`
+                ON saaRel_Archivo_Documento.id = `saaRel_Archivo_Preregistro`.`id_Rel_Archivo_Documento`
+                                INNER JOIN saaDocumentos 
+                                ON saaRel_Archivo_Documento.idDocumento = saaDocumentos.id
+                                WHERE `saaRel_Archivo_Preregistro`.idArchivo= ? 
+                                AND `saaRel_Archivo_Preregistro`.`eliminacion_logica`=0
+                                ORDER BY idTipoProceso, Nombre ASC
+                                            ';
+        $query = $this->db->query($sql, array($id, $idDireccion_responsable));
+        return $query;
+    }
+    
+    
+    
     
     public function get_direcciones_por_bloque($bloque){
         $sql = 'SELECT DISTINCT idDireccion, direccion  FROM saaArchivo WHERE idBloqueObra=?';
@@ -1208,6 +1315,23 @@ WHERE (`memMemorias`.`id` =?);';
     public function documentos_preregistro_ot() {
         
     }
-   
+    
+    public function traer_datos($id){
+        $this -> db -> select ( 'r.*, u.Nombre, a.OrdenTrabajo, a.identificado, rel.fojas_utiles, rel.`legajos`, a.Obra, a.FechaInicio, a.FechaTermino' ); 
+        $this -> db -> from ( 'saaConcentracion_Registros as r' ); 
+        $this -> db -> join ( 'saaRel_ArchivoConcentracion_Ubicacion as rel' ,  'rel.id = r.idRACU' ); 
+        $this -> db -> join ( 'saaUbicaciones_Concentracion as u' ,  'r.idUbicacion = u.id' ); 
+        $this -> db -> join ( 'saaArchivo as a' ,  'rel.idArchivo = a.id' ); 
+        $this -> db -> where ('r.id', $id);
+        $query = $this -> db -> get( ); 
+        
+        echo $query->num_rows();
+        return $query;
+    }
+
+    public function log_new($cambios) {
+            $this->load->model("control_usuarios_model");
+            return $this->control_usuarios_model->log_new($cambios);
+    }
     
 }

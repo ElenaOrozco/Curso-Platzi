@@ -245,7 +245,7 @@
                         </div>
                     </div>
                 </div>
-                    -->
+                    --><!--
                 <div class="col-md-12">
                     <div class="col-md-8"></div>
                     <div class="col-md-4">
@@ -262,7 +262,7 @@
 
                         </div>
                     </div>
-                </div>
+                </div>-->
             </div>
             <!-- Fin Encabezado -->
             <div class="row clearfix">
@@ -277,7 +277,7 @@
                     <div id="filtro-tabla" style="display:none"></div>
                     
                     <div id="tabla-principal">
-                        <table class="table table-responsive table-striped table-hover table-bordered" id="t_listado">
+                        <table class="table table-responsive table-striped table-hover table-bordered" id="t_listado" style="font-size: 85%">
                             <thead>
                                 <tr>
                                     <th class="col-md-1">

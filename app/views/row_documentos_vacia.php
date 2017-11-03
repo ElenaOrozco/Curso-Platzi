@@ -92,7 +92,7 @@
                 </a>
 
                 <a href="#" id="btn-agregar-obs"  data-toggle="modal" title="Agregar observaciones" data-target="#observacion_bloque" role="button" class="btn btn-warning btn-sm" onclick="uf_agregar_observaciones(<?php echo $rRow->idTipoProceso .' , ' . $rRow->idSubTipoProceso . ' , ' .$rRow->idDocumento . ' , ' .$idDireccion_responsable . ' , ' .$idusuario; ?>)">
-                    <span class="glyphicon glyphicon-list"></span>
+                    <span class="glyphicon glyphicon-comment"></span>
                 </a>
 
             </div> <!-- row-acciones -->

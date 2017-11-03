@@ -80,11 +80,15 @@
                         <?php  } ?>
                         <?php  //} }?>
                         <?php  //} ?>
-                        <?php if(isset($idArchivo) && uri_string()== "archivo/cambios/" .$idArchivo)  { ?>
+                        <?php if(isset($idArchivo) && (uri_string()== "archivo/cambios/" .$idArchivo || uri_string()== "archivo/preregistrar/" .$idArchivo) )  { ?>
                         <li class="dropdown list-style"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-print"></span> Impresiones</a>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a class="col-md-4" href="<?php echo site_url("impresion/reporte_estatus_archivo"). '/' . $aArchivo['id']; ?> " target="_blank" >Documentos Archivo</a>
+                                    <?php if (uri_string()== "archivo/cambios/" .$idArchivo) : ?>
+                                        <a  href="<?php echo site_url("impresion/reporte_preregistro"). '/' . $aArchivo['id']; ?> " target="_blank" >Preregistro</a>
+                                    <?php else: ?>
+                                        <a  href="<?php echo site_url("impresion/reporte_preregistro_cid"). '/' . $aArchivo['id']; ?> " target="_blank" >Preregistro</a>
+                                    <?php endif;?>
                                 </li>
                                 
 

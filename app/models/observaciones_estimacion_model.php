@@ -322,7 +322,7 @@ class observaciones_estimacion_model extends CI_Model {
             }
             // si hay debug
             $e .= "<pre>" . $last_query . "</pre>";
-            print_r($e);
+           
             return array("retorno" => "-1", "error" => $e);
         } else {
             return array("retorno" => "1", "registro" => $registro);

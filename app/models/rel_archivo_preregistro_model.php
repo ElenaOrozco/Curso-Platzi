@@ -146,6 +146,43 @@ class Rel_archivo_preregistro_model extends CI_Model {
         }
     
     }
+
+    public function datos_relacion_archivo_preregistro_delete($idRel, $idArchivo, $idDireccion){
+        
+
+        $datos = $this->db->query('SELECT * FROM saaRel_Archivo_Preregistro Where idDireccion_responsable='.$idDireccion. ' AND id_Rel_Archivo_Documento='. $idRel)->row_array();
+        $this->log_save(array('Tabla' => 'saaRel_Archivo_Preregistro', 'Data' => $datos, 'id' => $datos['id']));
+        $this->db->where('id', $datos['id']);
+        $this->db->delete('saaRel_Archivo_Preregistro');
+        
+        $aff = $this->db->affected_rows();
+
+        if($aff < 1) {
+            return "Error ";
+        } else {
+            return "Exito ";
+        }
+    }
+
+    public function registro_delete($id){
+        
+
+        $datos = $this->db->query('SELECT * FROM saaRel_Archivo_Preregistro Where id='.$id)->row_array();
+        $this->log_save(array('Tabla' => 'saaRel_Archivo_Preregistro', 'Data' => $datos, 'id' => $id));
+        $this->db->where('id', $id);
+        $this->db->delete('saaRel_Archivo_Preregistro');
+        
+        $aff = $this->db->affected_rows();
+
+        if($aff < 1) {
+            return "Error ";
+        } else {
+            return "Exito ";
+        }
+    }
+
+
+
     public function filtrar_archivos_direccion($filtro){
         $sql = "SELECT DISTINCT A.id,
                 A.OrdenTrabajo,
@@ -167,6 +204,10 @@ class Rel_archivo_preregistro_model extends CI_Model {
         return $query;
     }
     
+    public function insertar_preregistro_estimaciones(){
+        
+    }
+
     public function datos_relacion_archivo_preregistro_update_preregistro($data, $idDireccion_responsable, $idArchivo) {
         
         $datos = $data;
@@ -184,13 +225,8 @@ class Rel_archivo_preregistro_model extends CI_Model {
         $estado=$this->db->update('saaRel_Archivo_Preregistro', $data, array('id' => $id));
         $aff = $this->db->affected_rows();
 
-        if($aff < 1) {
-            return "Error ";
-        } else {
-            return "Exito ";
-        }
-        
-       
+        if ($aff <1 ){ return "Error"; } else { return "Exito";}
+   
         
     }
     
@@ -224,12 +260,16 @@ class Rel_archivo_preregistro_model extends CI_Model {
             if (!empty($registro)) {
                 $this->log_new(array('Tabla' => 'saaRel_Archivo_Preregistro', 'Data' => $data, 'id' => $registro));
             }
+
+            if ($aff <1 ){ return "Error"; } else { return "Exito";}
         
         
             
             
        
     }
+
+
     
     public function log_save($cambios) {
             $this->load->model("control_usuarios_model");

@@ -59,12 +59,20 @@ class Archivo_todos extends MY_Controller {
      public function fetch_archivos(){  
            $this->load->model('archivo_todos_model');  
            $fetch_data = $this->archivo_todos_model->make_datatables();  
+           $preregistro = $this->session->userdata("preregistro");
+           
            
            $data = array();  
            foreach($fetch_data as $row)  
            {  
                 $sub_array = array();  
-                $sub_array[] = ' <a href="'. site_url('archivo/cambios/' .$row->id) .'"   class="btn btn-xs btn-success"><span class="glyphicon glyphicon-pencil"></span></a>';  
+                $sub_array = array();  
+                if ($preregistro == 1  ) {
+                    $sub_array[]   =  ' <a href="'. site_url('archivo/cambios/' .$row->id) .'"   class="btn btn-xs btn-success"><span class="glyphicon glyphicon-pencil"></span></a>';
+                } else {
+                    $sub_array[]   =  ' <a href="'. site_url('archivo/preregistrar/' .$row->id) .'"   class="btn btn-xs btn-success"><span class="glyphicon glyphicon-pencil"></span></a>';
+                }
+                
                 $sub_array[] = $row->OrdenTrabajo ;  
                 $sub_array[] = $row->Contrato;  
                 $sub_array[] = $row->Obra ;  

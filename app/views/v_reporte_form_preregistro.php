@@ -449,54 +449,178 @@
                        
                            
         }
-        function uf_recibir_tipo_documento(idRel_Archivo_Documento, idArchivo, preregistro, idDireccion) {
+
+
+
+
+
+         
+
+
+        function preregistro_documento_cid(idRel_Archivo_Documento, idArchivo) {
+
+
                         
-                        //alert($("#tipo_documento"+idRel_Archivo_Documento).val())
-                        if($("#tipo_documento"+idRel_Archivo_Documento).val()==1){
-                            preregistrado=1;
-                        }
-                        if($("#tipo_documento"+idRel_Archivo_Documento).val()==2){ 
-                            preregistrado=2;
-                        }
-                        if($("#tipo_documento"+idRel_Archivo_Documento).val()==0){
-                            preregistrado=0;
-                            $("#noHojas_doc_"+idRel_Archivo_Documento).val("")
-                            $("#oculta-noHojas-"+idRel_Archivo_Documento).css("display", "none")
-                        }
-                        if($("#tipo_documento"+idRel_Archivo_Documento).val()==3){
-                            preregistrado=3;
-                            $("#noHojas_doc_"+idRel_Archivo_Documento).val(0)
-                            $("#oculta-noHojas-"+idRel_Archivo_Documento).html("<b>No Hojas: </b> 0")
-                        }
-                        //Si contiene estimaciones
-                        if($("#tipo_documento"+idRel_Archivo_Documento).val()==4){
-                            preregistrado=4;
-                            $("#form-agregar-estimaciones").css("display", "block");
-                        }
-                        //alert('preregistrado ' +preregistrado)
-                        
-                       
-                    //alert ($("#tipo_documento"+idRel_Archivo_Documento).val())
-                       
-                       
+                        //Verificar estado trabajo
                         $.ajax({
                            type:"POST",
-                           url:"<?php echo site_url('archivo/cid_preregistra'); ?>/" + idRel_Archivo_Documento +'/' + idArchivo +'/' + idDireccion,
-                           data: {preregistrado:preregistrado} ,
+                           url:"<?php echo site_url('archivo/actualizar_estado_trabajo'); ?>/" + idRel_Archivo_Documento,
                            success: function(data) {
-                             //$('.center').html(data); 
-                                //alert('Data ' +data)
+                                console.log(data)
+                                var msj = data
+                                  //Si no esta ocupado el bloque
+                                if ( data == 1){
+
+
+
+                                                               
+                                                                
+                                                                
+                                                                
+                                    //preregistrar
+                                    if ($("#idDireccion"+idRel_Archivo_Documento).val() == 0){
+                                        
+                                        alerta_error("Selecciona una dirección para preregistrar")
+                                        $("#tipo_documento"+idRel_Archivo_Documento).val("0")
+                                        
+
+                                    } else {
+                                        var idDireccion = $("#idDireccion"+idRel_Archivo_Documento).val();
+                                                
+                                        //alert($("#tipo_documento"+idRel_Archivo_Documento).val())
+                                        if($("#tipo_documento"+idRel_Archivo_Documento).val()==1){
+                                            preregistrado=1;
+                                        }
+                                        if($("#tipo_documento"+idRel_Archivo_Documento).val()==2){ 
+                                            preregistrado=2;
+                                        }
+                                        if($("#tipo_documento"+idRel_Archivo_Documento).val()==0){
+                                            preregistrado=0;
+                                            $("#idDireccion"+idRel_Archivo_Documento).css("display", "block");
+                                            
+                                        }
+                                       
+                                        if($("#tipo_documento"+idRel_Archivo_Documento).val()==3){
+                                            preregistrado=3;
+                                            
+                                        }
+                                        //Si contiene estimaciones
+                                        if($("#tipo_documento"+idRel_Archivo_Documento).val()==4){
+                                            preregistrado=4;
+                                            $("#form-agregar-estimaciones").css("display", "block");
+                                        }
+                                    
+                                           
+                                           
+                                        $.ajax({
+                                               type:"POST",
+                                               url:"<?php echo site_url('archivo/cid_preregistra'); ?>/" + idRel_Archivo_Documento +'/' + idArchivo +'/' + idDireccion,
+                                               data: {preregistrado:preregistrado} ,
+                                               success: function(data) {
+                                                 //$('.center').html(data); 
+                                                    //alert('Data ' +data)
+
+                                                    if (data.resultado = "Exito"){
+                                                            console.log($("#tipo_documento"+idRel_Archivo_Documento).val())
+                                                            console.log(preregistrado)
+                                                            if($("#tipo_documento"+idRel_Archivo_Documento).val()!=0){
+
+                                                                $("#idDireccion"+idRel_Archivo_Documento).css("display", "none");
+                                                                $("#idDireccion_preregistra"+idRel_Archivo_Documento).css("display", "block");
+                                                            } else {
+                                                               
+                                                                //$("#idDireccion"+idRel_Archivo_Documento +  " option[value=0]").attr("selected",true);  
+                                                                $("#idDireccion"+idRel_Archivo_Documento).val("0") 
+                                                                $("#noHojas_doc_"+idRel_Archivo_Documento).val("0") 
+
+                                                                $("#idDireccion"+idRel_Archivo_Documento).css("display", "block");
+                                                                $("#idDireccion_preregistra"+idRel_Archivo_Documento).css("display", "none");
+                                                                
+                                                            }
+                                                           
+
+                                                            $("#tipo_documento"+idRel_Archivo_Documento).css("border-color", "green");
+                                                            $('#numero_documentos_proceso_preregistrados_preregistro'+data["idTipoProceso"]).html(data["strTipoProceso_cid"])
+                                                            $('#numero_documentos_subproceso_preregistrados'+data["idSubTipoProceso"]).html(data["strSubTipoProceso_cid"])
+                                                            
+                                                             if ( console && console.log ) {
+                                                                 console.log( "La solicitud se ha completado correctamente." );
+                                                             }
+                                                             $("#preregistro-"+idRel_Archivo_Documento).val(data.registro);
+
+                                                             actualizar_historial_bloque(idArchivo, data["idTipoProceso"])
+                                                    } else {
+                                                        $("#tipo_documento"+idRel_Archivo_Documento).css("border-color", "red");
+                                                    }
+
+                                                    
+                                                    
+                                                 
+                                               }
+                                             });
+                                    }
                                 
-                                $('#numero_documentos_proceso_preregistrados'+data["idTipoProceso"]).html(data["strTipoProceso_preregistrados"])
-                                $('#numero_documentos_subproceso_preregistrados'+data["idSubTipoProceso"]).html(data["strSubTipoProceso_preregistrados"])
+                       
+                                   
+                               } else {
+                                    
+                               
+                                    $.confirm({
+                                        title: 'Alerta!',
+                                        content: ' '+msj,
+                                        type: 'red',
+                                        typeAnimated: true,
+                                        buttons: {
+                                            Cerrar: {
+                                                text: 'Cerrar',
+                                                btnClass: 'btn-red',
+                                                action: function(){
+                                                }
+                                            }
+                                           
+                                        }
+                                    });
+                                   
                                 
-                                
-                             
+                               }
                            }
                          });
-                        
+                       
+
+            
+             
                        
                            
+        }
+        
+        function actualizar_historial_bloque(idArchivo, Proceso){
+            $.ajax({
+                type:"POST",
+                url:"<?php echo site_url('archivo/actualizar_historial'); ?>/",
+                data: {idArchivo:idArchivo, Proceso:Proceso} ,
+                success: function(data) {
+
+
+                }
+            });
+        }
+
+        function alerta_error(mensaje){
+            $.confirm({
+                title: 'Alerta!',
+                content: mensaje,
+                type: 'red',
+                typeAnimated: true,
+                buttons: {
+                    cerrar: {
+                        text: 'Cerrar',
+                        btnClass: 'btn-red',
+                         close: function () {
+                        }
+                    },
+                   
+                }
+            });
         }
         
         //Cuando hay preregistro
@@ -1164,26 +1288,28 @@
         }
         
         function cargar_identificador(id){
+            //prevent.default()
             var identificador = $("#identificador").val();
+             
             
-           
             $.ajax({
+                    type: "POST",
                     url: "<?php echo site_url('archivo/cargar_identificador') ?>/" + id + "/" + identificador,
-                    dataType: 'json',
+                     
                     success: function (data, textStatus, jqXHR) {
-                         
-                         
+                         $("#identificador").css("border-color", "green");
+                          
                     }
                 });
-                
-                $("#identificador").val("");
+                 
+                /*$("#identificador").val("");
                 $("#caja-i").hide();
                 $("#oculta").html("<b>Identificador: </b>" + identificador);
-                $("#oculta").show();
+                $("#oculta").show();*/
                 //document.getElementById('caja-v').style.display = 'block';
-            
-            
-            
+             
+             
+             
         }
         
         
@@ -1370,6 +1496,59 @@
                 
            
            
+        }
+
+        function cargar_noHojas(e, idRelacion, idArchivo){
+        //var valor = document.getElementById("texto").value;
+          tecla = (document.all) ? e.keyCode : e.which;
+          if (tecla!=13){
+           
+            var hojas = $("#noHojas_doc_"+idRelacion).val();
+            
+            $.post("<?php echo site_url('archivo/cargar_noHojas'); ?>/" + idRelacion +  "/" + idArchivo +  "/" + hojas, 
+                    function() {
+                    //$("#noHojas_doc_"+idRelacion).val(data['noHojas']);
+                    
+
+                  },
+                  'json'
+            ) 
+            .done(function(data, textStatus, jqXHR) {
+                //alert(data.estado)
+                $("#noHojas_doc_"+idRelacion).css("border-color", "green");
+                 if ( console && console.log ) {
+                    console.log( "La solicitud se ha completado correctamente." );
+                }
+            })
+            .fail(function(data, textStatus, jqXHR) {
+                
+                $.alert({
+                    title: 'Alerta!',
+                    content: 'Selecciona un tipo de documento!',
+                });
+                $("#noHojas_doc_"+idRelacion).css("border-color", "red");
+                $("#noHojas_doc_"+idRelacion).val("");
+                
+                if ( console && console.log ) {
+                    console.log( "La solicitud a fallado: " +  textStatus);
+                }
+            })
+
+            
+
+                
+                
+            
+            //$("#caja-noHojas").hide();
+            $("#oculta-noHojas-"+idRelacion).html("<b>No Hojas: </b>" + hojas);
+            $("#noHojas-"+idRelacion).hide();
+            $("#oculta-noHojas-"+idRelacion).show();
+            
+           
+            
+            
+          }
+               
         }
             
             
@@ -1638,11 +1817,13 @@
                  .done(function( data, textStatus, jqXHR ) {
                      if ( console && console.log ) {
                          console.log( "La solicitud se ha completado correctamente." );
+                         console.log( data);
                      }
                  })
-                 .fail(function( jqXHR, textStatus, errorThrown ) {
+                 .fail(function( data, jqXHR, textStatus, errorThrown ) {
                      if ( console && console.log ) {
                          console.log( "La solicitud a fallado: " +  textStatus);
+                         console.log( data);
                      }
                 });
             $("#motivo_observacion_estimacion").val("");
@@ -1828,25 +2009,147 @@
                
         }
         
-        
-        function cargar_estimaciones(idRel, idArchivo, reviso){
-            
-            
-            var estimaciones = $("#noEstimaciones").val(); 
-                $.ajax({
-                    beforeSend: function(){
+        function ingresar_estimacion_cid(idEstimacion) {
                         
-                        $("#div_estimaciones_"+idRel).html("Cargando...")
+                        //alert ($("#tipo_documento_est"+idEstimacion).val())
+                        var direccion = $("#DireccionEstimacion"+idEstimacion).val()
+                        
+                        if (direccion > 0){
+                        
+                            if($("#tipo_documento_est"+idEstimacion).val()==0){
+                                $("#DireccionEstimacion"+idEstimacion).css("display", "block");
+                                recibido=0;
+                                $("#noHojas_est_"+idEstimacion).val(0)
 
-                    },
+                            } else {
+                                 $("#DireccionEstimacion"+idEstimacion).css("display", "none");
+                                if($("#tipo_documento_est"+idEstimacion).val()==1){
+                                recibido=1;
+
+                                }
+                                if($("#tipo_documento_est"+idEstimacion).val()==2){
+
+                                    recibido=2;
+
+                                }
+                                if($("#tipo_documento_est"+idEstimacion).val()==3){
+
+                                    recibido=3;
+                                }
+
+                            }
+
+
+
+
+                        //alert ($("#tipo_documento"+idRel_Archivo_Documento).val())
+
+
+                            $.ajax({
+                               type:"POST",
+                               url:"<?php echo site_url('archivo/ingresar_estimacion_cid'); ?>/" + idEstimacion,
+                               data: {recibido:recibido, direccion:direccion} ,
+                               success: function(data) {
+                                 //$('.center').html(data); 
+                                if (data = 1){
+                                    $("#tipo_documento_est"+idEstimacion).css("border-color", "green");
+                                    $("#DireccionEstimacion"+idEstimacion).css("display", "none");
+                                } else {
+                                    $("#tipo_documento_est"+idEstimacion).css("border-color", "red");
+                                }
+
+                                 //$('#numero_documentos_proceso_recibidos'+data["idTipoProceso"]).html(data["strTipoProceso_recibido"])
+                                 //$('#numero_documentos_subproceso_recibidos'+data["idSubTipoProceso"]).html(data["strSubTipoProceso_recibido"])
+
+                               }
+                             });
+                        } else {
+                            $("#tipo_documento_est"+idEstimacion).css("border-color", "red");
+                        }
+
+                       
+                           
+        }
+        
+        
+        function cargar_estimaciones(e, idRel, idArchivo, preregistro){
+        
+            tecla = (document.all) ? e.keyCode : e.which;
+            if (tecla!=13){
+                $("#tipo_documento"+idRel).val(4);
+
+
+                //uf_recibir_tipo_documento(idRel, idArchivo, preregistro)
+
+
+                var estimaciones = $("#noEstimaciones").val(); 
+                    $.ajax({
+                        beforeSend: function(){
+
+                            $("#div_estimaciones_"+idRel).html("Cargando...")
+
+                        },
+                        type: "POST",
+
+                        url: "<?php echo site_url('archivo/cargar_estimaciones'); ?>/" + idRel+"/"+idArchivo+"/"+estimaciones,
+                        success: function (data) {
+
+                            dibujar_tabla_estimaciones(idRel, idArchivo)
+                            //$("#div_estimaciones_"+idRel).html(data["estimaciones"]); 
+                             //$('#div_estimaciones').html("Hola");
+
+                        }
+                    }) ;
+            }
+
+          
+        }
+        
+        
+        function cargar_estimaciones_PRE_CID(e, idRel, idArchivo){
+        
+            tecla = (document.all) ? e.keyCode : e.which;
+            if (tecla!=13){
+                $("#tipo_documento"+idRel).val(4);
+
+
+                //uf_recibir_tipo_documento(idRel, idArchivo, preregistro)
+
+
+                var estimaciones = $("#noEstimaciones").val(); 
+                    $.ajax({
+                        beforeSend: function(){
+
+                            $("#div_estimaciones_"+idRel).html("Cargando...")
+
+                        },
+                        type: "POST",
+
+                        url: "<?php echo site_url('archivo/cargar_estimaciones'); ?>/" + idRel+"/"+idArchivo+"/"+estimaciones,
+                        success: function (data) {
+
+                            dibujar_tabla_estimaciones_PRE_CID(idRel, idArchivo)
+                            //$("#div_estimaciones_"+idRel).html(data["estimaciones"]); 
+                             //$('#div_estimaciones').html("Hola");
+
+                        }
+                    }) ;
+            }
+
+          
+        }
+        
+        function dibujar_tabla_estimaciones_PRE_CID(idRel, idArchivo){
+            $.ajax({
+                    
                     type: "POST",
                     
-                    url: "<?php echo site_url('archivo/cargar_estimaciones'); ?>/" + idRel+"/"+idArchivo+"/"+estimaciones +"/"+reviso,
+                    url: "<?php echo site_url('archivo/ver_estimaciones_PRE_CID'); ?>/" +idArchivo+"/"+idRel ,
                     success: function (data) {
                         
-                        dibujar_tabla_estimaciones(idRel, idArchivo, reviso)
-                        //$("#div_estimaciones_"+idRel).html(data["estimaciones"]); 
-                         //$('#div_estimaciones').html("Hola");
+                         //alert//("dib" +data["estimaciones"])
+                         $("#div_estimaciones_"+idRel).html(data["estimaciones"]); 
+                        
                          
                     }
                 }) ;
@@ -1936,7 +2239,7 @@
         function eliminar_estimacion(Numero_Estimacion, idRel, idArchivo){
             //alert("OK" +idRel);
             //var idRel = idRel
-                $.confirm({
+                 $.confirm({
                 title: 'Eliminar Registro',
                 content: '¿Deseas Eliminar el Registro?',
                 buttons: {
@@ -1946,13 +2249,22 @@
                             type: "POST",
                             url: "<?php echo site_url('archivo/eliminar_estimacion');?>/"+Numero_Estimacion  + "/" +idRel,
                              success: function (data, textStatus, jqXHR) {
-                                    //alert("Eliminado")
+                                    //alert(data)
+                                    if (data == 0){
+                                        $.alert({
+                                            title: 'Error!',
+                                            content: 'No se puede eliminar la estimacion! (Contiene documentos)',
+                                        });
+                                        
+                                    } else {
                                     dibujar_tabla_estimaciones(idRel, idArchivo)
+                                    }
                                  
                              },
                              error: function(jqXHR, estado, error){
                                 console.log(estado)
                                 console.log(error)
+                                //alert ("No se pudo eliminar ya que tienes documentos")
                              }
                         }) ;
                     },
@@ -1961,6 +2273,7 @@
                     }
                     
                 }});
+                
             
         }
         
@@ -1999,7 +2312,7 @@
                     type: "POST",
                     url: "<?php echo site_url('archivo/editar_estimacion_hojas'); ?>/" + id +  "/"  + hojas,
                     success: function (data, textStatus, jqXHR) {
-                         
+                       $("#noHojas_est_"+id).css("border-color", "green")
                           
                     }
                      
@@ -2069,6 +2382,28 @@
             
         }
         
+        function cambia_direcciones(){
+           
+            var valor=$("#idDireccion-preregistro").val();
+            var texto=$("#idDireccion-preregistro option:selected").text();
+            
+           
+            console.log(valor + " " + texto)
+           
+            $(".direccion select option[value="+ valor +"]").attr("selected",true);
+            
+            
+        }
+        
+        function cambiar_direccion_estimacion(idRAD){
+            var valor=$("#idDireccion"+idRAD).val()
+            var texto=$("#idDireccion"+idRAD).text();
+            
+           
+            console.log(valor + " " + texto)
+           
+            $(".direccion-estimacion select option[value="+ valor +"]").attr("selected",true);
+        }
         
         
         
@@ -2193,6 +2528,171 @@
             }
   
         </style>
+    <style>
+            .align-t-e{
+                text-align: end;
+ 
+            }
+            .plantilla{
+               
+                -moz-box-shadow: 5px 5px 5px #888;
+                -webkit-box-shadow: 5px 5px 5px#888;
+                box-shadow: 5px 5px 5px #888;
+              
+            }
+            .p-l{
+              padding-left: 15px;
+            }
+            
+            .table-small{
+                font-size: 12px;
+                color: #000;
+            }
+            
+            .btn-yellow{
+                background: rgb(250, 235, 204);
+            }
+            .flex{
+                display: flex;
+                justify-content: space-between;
+            }
+            .list-style{
+                list-style: none;
+            }
+            
+            
+            p-t {
+              font-size : 2.5em ;
+              text-align : center;
+              color : #333;
+              text-shadow : 0px 3px 5px #999;
+            }
+            .box{
+              position : absolute;
+              top : calc(50% - 2.5em);
+              left : calc(50% - 3em);
+            }
+            .container-fluid {
+                padding-right: 10px;
+                padding-left: 10px;
+            }
+
+            .tog .tog-con{
+                width : 5em;
+                height : 5em/2;
+                border-radius : 5em/2;
+                box-shadow : 0 0 4px #999;
+                position : relative;
+                background : #f55;
+                transition : all ease-in-out 300ms;
+            }
+            .tog .tog-con:after{
+                  content : "SI";
+                  line-height : 5em/2;
+                  text-align : center;
+                  color : #111;
+                  width : 5em/2;
+                  height : 5em/2;
+                  display : block;
+                  background : #eee;
+                  border-radius : 5em/2;
+                  box-shadow : 0 0 5px -1px;
+                  position : absolute;
+                  left : 0;
+                  transition : all ease-in-out 300ms;
+            }
+    
+            .d-n{
+              display : none;
+            }
+            .input :checked .tog-con{
+                background : #1c5;
+                transition : all ease-in-out 300ms;
+            }
+            .input:after{
+                  left : 5em/2;
+                  content : "NO"
+            }
+            .align-end{
+                text-align: end;
+            }
+            
+            .width-modal{
+                width: 1000px !important;
+            }
+            .enlace-succes{
+                color: #3c763d;
+            }
+            .flex-center{
+                display: flex; 
+                align-items: center;
+            }
+            .m-b{
+                margin-bottom: 10px;
+            }
+            .m-b-separacion{
+                margin-bottom: 30px;
+            }
+            
+            .list-style{
+                list-style: none;
+            }
+            .m-t{
+                margin-top: 10px;
+            }
+            .d-f{
+                display: flex;
+                justify-content: space-between;
+            }
+            .color-red{
+                color: #d9534f;
+            }
+            .m-b-body{
+                margin-bottom: 60px;
+            }
+            .checkbox-lg{
+                width: 25px;
+                height: 25px;
+            }
+            .estatus{
+                padding: 5px;
+                background:rgba(17, 173, 20, 0.12); 
+                border-radius: 2px;
+            }
+            .estatus-sin{
+                padding: 5px;
+                background: rgb(249, 243, 212); 
+                border-radius: 2px;
+            }
+            .estatus-recibir{
+                padding: 5px;
+                background: rgba(136, 205, 255, 0.35); 
+                border-radius: 2px;
+                
+            }
+            hr{
+                margin-bottom: 10px;
+                margin-top: 10px;
+            }
+            body{
+                font-size: 14px;
+                line-height: 20px;
+            }
+            .enlace-blue{
+                color: #31708f;
+                margin-bottom: 5px;
+            }
+            #row-title{
+                color: #8a6d3b;
+                background-color: #fcf8e3;
+                border-color: #faebcc;
+                border-radius: 5px;
+            }
+            h5 small{
+                color: rgba(138, 109, 59, 0.68); 
+            }
+  
+        </style>
     
     <body  class="m-b-body" style="overflow: visible;">
         
@@ -2223,2112 +2723,944 @@
                 <!-- breadcrumb -->
                 
             </div>
-
             
-            <div class="col-sm-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading flex">
-                        <a class="panel-title" data-toggle="collapse" data-parent="#panel-464595" href="#panel-element-566826">Datos de la Obra</a>
-
-                        <div class="col-sm-3">
-                            <div class="col-md-6">
-
-                                <li class="dropdown list-style"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-searchs"></span> Observaciones</a>
-                                    <ul class="dropdown-menu">
-                                        <li>
-                                             <a class="col-md-8" href="#" data-toggle="modal" data-target="#ver_observaciones_bloque_archivo" onclick="ver_observaciones_archivo(<?= $aArchivo['id']?> )"></span> Observaciones de Archivo</a>
-                                        </li>
-                                        <li>
-                                             <a class="col-md-8" href="#" data-toggle="modal" data-target="#ver_observaciones_bloque_archivo_documento" onclick="ver_observaciones_documento_por_archivo(<?= $aArchivo['id']?>)"></span> Observaciones de Documento por Archivo</a>
-                                        </li>
-
-
-                                    </ul>
-                                </li>
-                            </div>
-                            <div class="col-md-6">
-                                <li class="dropdown list-style"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-print"></span> Impresiones</a>
-                                    <ul class="dropdown-menu">
-                                        <li>
-                                            <a class="col-md-4" href="<?php echo site_url("impresion/reporte_preregistro"). '/' . $aArchivo['id']. '/' . $idDireccion_responsable; ?> " target="_blank" >Documentos Archivo</a>
-                                        </li>
-                                        
-
-
-                                    </ul>
-                                </li>
-                            </div>
-                        </div>  
-                    </div>
-
-                    <div id="panel-element-566826" class="panel-collapse collapse in">
-                        <div class="panel-body">
-                            <div class="row clearfix">
-                                <!-- Panel de Control-->
-                                <div class="col-md-8">
-                                    <div class="tab-pane" id="panel-Vales">
-                                            
-                                        <div class="col-md-12">
-                                            <div class="panel panel-primary">
-                                                <div class="panel-heading">Datos Generales </div>
-
-                                                <div class="row panel-body">
-
-                                                    <div class="col-md-4">
-                                                        <dl class="row">
-                                                            <input type="hidden" id="idArchivoAux" name="idArchivoAux" value="<?php echo $aArchivo['id']; ?>">
-                                                            <dt class="col-md-6 text-end">Orden Trabajo</dt>
-                                                            <dd class="col-md-6 text-star"><?php echo $aArchivo['OrdenTrabajo']; ?></dd>
-                                                            <dt class="col-md-6 text-end">Contrato </dt>
-                                                            <dd class="col-md-6 text-star"><?php echo $aArchivo['Contrato']; ?></dd>
-                                                            <dt class="col-md-6 text-end">Obra</dt>
-                                                            <dd class="col-md-6 text-star"><?php echo $aArchivo['Obra']; ?></dd>
-                                                            <dd class="col-md-6 text-star d-n" id="direccion_ejecutora"><?php echo $aArchivo['Direccion']; ?></dd>
-                                                        </dl>
-                                                    </div>
-                                                    
-                                                    <div class="col-md-4">
-                                                        <dl class="row">
-                                                            <dt class="col-md-6 text-end">Modalidad</dt>
-                                                            <dd class="col-md-6 text-star"><?php echo $addw_modalidades[$aArchivo['idModalidad']]; ?></dd>
-                                                            <dt class="col-md-6 text-end">Ejercicio </dt>
-                                                            <dd class="col-md-6 text-star"><?php echo $aArchivo['idEjercicio']; ?></dd>
-                                                            <dt class="col-md-6 text-end">Normatividad</dt>
-                                                            <dd class="col-md-6 text-star"><?php echo $aArchivo['Normatividad']; ?></dd>
-                                                        </dl>
-                                                    </div>
-
-
-                                                    <div class="col-md-4">
-                                                        <dl class="row">
-                                                           
-                                                            <dt class="col-md-6 text-end">Fondo de Programa </dt>
-                                                            <dd class="col-md-6 text-star"><?php echo $aArchivo['FondodePrograma']; ?></dd>  
-                                                        </dl>      
-                                                    </div>  
-                                                </div>
-                                                
-                                                
-                                            </div> <!--Fin panel primary-->
-                                        </div>
-                                    </div>   
+            <div class="col-sm-10 col-md-offset-1">
+                <div class="col-sm-12">
+                    <div class="panel panel-default plantilla">
+                        <div class="panel-heading flex">
+                            <a class="panel-title" data-toggle="collapse" data-parent="#panel-464595" href="#panel-element-566826">Datos de la Obra</a>
+<!--
+                            <div class="col-sm-3">
+                                <div class="col-md-6">
+ 
+                                    <li class="dropdown list-style"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-searchs"></span> Observaciones</a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                 <a class="col-md-8" href="#" data-toggle="modal" data-target="#ver_observaciones_bloque_archivo" onclick="ver_observaciones_archivo(<?= $aArchivo['id']?> )"></span> Observaciones de Archivo</a>
+                                            </li>
+                                            <li>
+                                                 <a class="col-md-8" href="#" data-toggle="modal" data-target="#ver_observaciones_bloque_archivo_documento" onclick="ver_observaciones_documento_por_archivo(<?= $aArchivo['id']?>)"></span> Observaciones de Documento por Archivo</a>
+                                            </li>
+ 
+ 
+                                        </ul>
+                                    </li>
                                 </div>
-                                
-                                <div class="col-md-4">
-                                    <div class="panel panel-warning">
-                                        <div class="panel-heading">
-                                          <h3 class="panel-title"> Datos de Archivo</h3>
-                                        </div>
-                                        <div class="panel-body">
-                                            <div class="col-md-12">
-                                                <form class="form-horizontal">
-                                                    
-                                                    <?php if (!$aArchivo['identificado']){ ?>
-                                                        <div class="form-group" id="caja-i">
-                                                            
-                                                                    <div class="form-group">
-                                                                        <label class="col-sm-3 control-label" for="exampleInputEmail3">Identificador</label>
-                                                                        <div class="col-sm-6">
-                                                                            <input type="text" class="form-control" id="identificador" name="identificador" placeholder="Identificador" value="">
-                                                                            
-                                                                        </div>
-                                                                        <div class="col-sm-3">
-                                                                            <a class="btn btn-default col-sm-12" id="mostrar" onclick="cargar_identificador(<?php echo $idArchivo ?>)">Agregar</a>
-                                                                        </div>
-                                                                    </div>
-
-                                                               
-                                                            
-                                                        </div>
-
-                                                        <div id="oculta" style="display:none">
-                                                            
-                                                        </div>
-                                                    <?php } else { ?>
-                                                        <div style="margin-bottom:20px;">
-                                                             <b><?php echo 'Identificador: '?></b> <?=$aArchivo['identificado']; ?>   
-                                                        </div>
-                                                   <?php } ?>
-                                                    
-                                                    
-                                                    
-                                                    <?php if (!$aArchivo['idBloqueObra'] && $preregistro ==0){ ?>
-                                                        <div class="form-group">
-                                                            <!-- grupo va en la tabla bloque-->
-                                                            <div class="form-group" id=""caja-b>
-                                                              <label class="col-sm-3 control-label" for="exampleInputEmail3">Grupo Obra</label>
-                                                              <div class="col-sm-9">
-                                                                  <select class="form-control" id="slc_obra" name="slc_obra" onchange="cargar_bloqueObra(<?php echo $idArchivo ?>)">
-                                                                        <option value="0">Selecciona un Grupo</option>
-                                                                        <?php foreach ($qBloques->result() as $rowdata) {  ?>
-                                                                        <option value="<?php echo $rowdata->id; ?>"><?php echo $rowdata->Nombre; ?></option>
-                                                                        <?php } ?>
-                                                                  </select>
-                                                              </div>
-
-                                                            </div>
-
-                                                                
-                                                            
-                                                        </div>
-                                                    <?php } else if ($aArchivo['idBloqueObra'] && $preregistro ==0){ ?>
-                                                        <div style="margin-bottom:20px;">
-                                                             <?php echo '<b>Obra: </b>' . $aArchivo['idBloqueObra']; ?>   
-                                                        </div>
-                                                   <?php } ?>
-                                                    
-                                                    <div class="form-group"> 
-                                                        <div class="col-sm-6">
-                                                            <a href="<?php echo site_url("archivo/actualizar_plantilla"). '/' . $aArchivo['id']; ?>" class="btn btn-success"  onclick=""><span class="glyphicon glyphicon-repeat"></span> Actualizar Plantilla </a>
-                                                        </div>
-                                                        <div class="col-sm-6">
-                                                            <a href="#" data-toggle="modal" data-target="#observacion_bloque_archivo" role="button" class="btn btn-success" onclick="agregar_observaciones_archivo(<?= $aArchivo['idDireccion']?>, <?= $aArchivo['idContrato']?>)">
-                                                                <span class="glyphicon glyphicon-plus"></span> Observaciones Archivo
-                                                            </a>
-                                                        </div>
-                                                        
-                                                        
-                                                    </div>
-                                                    
-                                                    
-                                                    <?php if($Editar == 1){
-                                                        
-                                                    if ($NoProcesos_archivo == $NoProcesos_archivo_integracion){ ?>
-                                                    <div class="alert alert-success" role="alert" style="margin-bottom:20px;">
-                                                    
-                                                                
-                                                        <?php echo '<b>Estatus Obra: </b>' . 'Finalizado'; ?> 
-                                                        <div>  
-                                                            <a class="enlace-succes" href="#" data-toggle="modal" data-target="#enviar_concentracion" role="button"  onclick="uf_enviar_concentracion(<?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span> Enviar a Concentración</a>
-                                                        </div> 
-
-                                                              
-                                                          
-                                                    </div>
-                                                    
-                                                    
-                                                    <?php } else {  
-                                                        echo '<b>Bloques finalizados: </b>' . $NoProcesos_archivo_integracion; 
-                                                        }
-                                                    }
-                                                    
-                                                    
-                                                    ?>
-                                                    <div class="alert alert-success" role="alert" style="margin-bottom:20px;">
-                                                    
-                                                                
-                                                        <?php echo '<b>Preregistro: </b>' . $addw_catDireccion[$idDireccion_responsable]; ?> 
-                                                        <input type="hidden" id="direccion_preregistro" value="<?= $idDireccion_responsable ?>">
-                                                        
-
-                                                              
-                                                          
-                                                    </div>
-                                                    
-                                                    <?php if ($reviso ==1){ ?>
-                                                    <div>
-                                                            
-                                                        <label class=""> Trabajar con OT:
-                                                            <input id="estado-trabajo" type="checkbox" class="" onchange="trabajar_ot(this, <?php echo $idArchivo ?>)">
-
-                                                        </label>
-
-
-                                                    </div>
-                                                    <?php }?>
-                                                    
-                                                </form>
-                                                  
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> <!--Fin panel 4 col -->
-                                
-                               
-                                
-                            </div>
-                            
+                                <div class="col-md-6">
+                                    <li class="dropdown list-style"><a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-print"></span> Impresiones</a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="col-md-4" href="<?php echo site_url("impresion/reporte_estatus_archivo"). '/' . $aArchivo['id']; ?> " target="_blank" >Documentos Archivo</a>
+                                            </li>
+                                             
+ 
+ 
+                                        </ul>
+                                    </li>
+                                </div>
+                            </div>  -->
                         </div>
-                    </div>
-                    
-                </div> <!-- panel-default -->
-            </div>
-
-     
-        
-            <div  class="m-b-separacion">
-            <?php 
-            if (isset($qProcesos)) {
-                if ($qProcesos->num_rows() > 0) {
-                    foreach ($qProcesos->result() as $rRow) {
-                          
-                        ?>
-                        
-               <!-- $idProceso,$idSubProceso,$idDocumento -->
-              
-                   <?php  
-                        $strin="  ";
-                        
-                        if ($rRow->id==$idProceso){
-                            $strin=" in ";
-                        }
-                 
-               
-                   ?>
-            <!-- Procesos -->  
-            
-            <div class="col-sm-12">
-            
-            
-                <?php 
-                    $qUbicacion = $this->ferfunc->get_subreg("saaRel_Archivo_Documento",array("idTipoProceso" => $rRow->id,"idArchivo" => $idArchivo));                    
-                    
-                    if ($qUbicacion->num_rows()>0){
-                        
-                    
-                    
-                    $aUbicacion=$qUbicacion->row_array();
-                    $Ubicacion_fisica=$aUbicacion["Ubicacion_fisica"];
-                    $Folio_Desde=$aUbicacion["Folio_Desde"];
-                    $Folio_Hasta=$aUbicacion["Folio_Hasta"];
-                    $Estatus=$aUbicacion["Estatus"];
-                    ?>
-            
-            
-                <div class="row">
-                 
-                 
-                <?php 
-                                    //echo 'Preregistro ' .$preregistro;
-                $style_preregistro= ""; 
-                $style_procesos_preregistro = 'style="display:none"';
-                $col = 9;
-                if ($preregistro == 1) { 
-
-                     $style_preregistro='style="display:none"';
-                     $col = 12;
-                     $style_procesos_preregistro = 'style="display:block"';
-                }
-                ?>           
-                    
-                <div class="col-xs-12 col-sm-3" <?php echo $style_preregistro  ?>>
-                    
-                     <div class="panel-group m-b" id="panel-proceso-<?php echo $rRow->id;  ?>">
-                        <div class="panel panel-info">
-                            <div class="panel-heading">
-                                
-                    
-                                
-                    <?php            
-                   $Usuario_trabajando= "";           
-                   $qUsuario_trabajando = $this->ferfunc->get_subreg_distinct(
-                           "saaRel_Archivo_Documento INNER JOIN saaDocumentos ON saaRel_Archivo_Documento.idDocumento = saaDocumentos.id",
-                           "saaRel_Archivo_Documento.idTipoProceso = $rRow->id AND saaRel_Archivo_Documento.idArchivo= $idArchivo",
-                           "saaRel_Archivo_Documento.idUsuario_Trabajando");
-                   if (isset($qUsuario_trabajando)) {
-                        if ($qUsuario_trabajando->num_rows() > 0) {
-                            foreach ($qUsuario_trabajando->result() as $rUsuario_trabajando) {
-                                $Usuario_trabajando= $rUsuario_trabajando->idUsuario_Trabajando;
-                            }
-                        }
-                   }
-                    ?>       
-                    <div class="table-responsive">
-                    <table class="table">
-                        <tr>
-                            
-                        </tr>
-                        <tr>
-                            <td  colspan="2">
-                                <?php //echo "UT " .$Usuario_trabajando . "idu " .$idusuario ?>
-                                 <?php if ($Usuario_trabajando==0){ ?>
-                                <div>
-                                                            
-                                    <label class=""> Trabajar con Bloque:
-                                        <input id="estado-trabajo" type="checkbox" class="" onchange="checar_estado_trabajo(this, <?php echo $rRow->id ?>, <?php echo $idArchivo ?> , <?= $preregistro ?>,<?= $recibe ?>,<?= $reviso ?>,<?= $Foliar ?>,<?= $Validar ?>,<?= $digitalizar ?>,<?= $Editar ?>,<?= $idusuario ?>,0)">
-                                    
-                                    </label>
-
-
-                                </div>
-                                <?php } ?>
-                                
-                                <?php if ($Usuario_trabajando>0 &&  $Usuario_trabajando != $idusuario){ ?>
-                                <div>
-                                                            
-                                    <label class="color-red"> Bloque Ocupado
-                                        
-                                    
-                                    </label>
-
-
-                                </div>
-                                <?php } ?>
-                                <?php if ($Usuario_trabajando == $idusuario){ ?>
-                                
-                                <label class="color-red" id="bloque-abierto-<?= $rRow->id ?>"> Bloque Abierto </label>
-                                <div id="bloque-libre-<?= $rRow->id ?>">
-                                                            
-                                    <label class=""> Trabajar con Bloque:
-                                        <input id="estado-trabajo" type="checkbox" class="" onchange="checar_estado_trabajo(this, <?php echo $rRow->id ?>, <?php echo $idArchivo ?> , <?= $preregistro ?>,<?= $recibe ?>,<?= $reviso ?>,<?= $Foliar ?>,<?= $Validar ?>,<?= $digitalizar ?>,<?= $Editar ?>,<?= $idusuario ?>,1)">
-                                    
-                                    </label>
-
-
-                                </div>
-                                <div id="bloque-ocupado-<?= $rRow->id ?>">
-                                                            
-                                    
-                                    <div>
-                                                        
-                                        <label class=""> Dejar de trabajar con bloque:
-                                            <input id="dejar_estado-trabajo" type="checkbox" class="" onchange="liberar_estado_trabajo(<?= $rRow->id ?> , <?= $idArchivo ?>, 1)"  />
-
-                                        </label>
-                                    </div>
-                                    <input type="hidden" id="permiso_usuario" value="<?= $preregistro ?>">
-                                    
-
-
-                                </div>
-                                <?php } ?>
-                                
-                                <div id="estado-trabajo-<?php echo $rRow->id ?>"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            
-                            
-                            <td colspan="2">
-                             <?php if ($preregistro ==0){ ?>   
-                                <div>
-                                    <label>Ubicación Física:</label>
-                                    <table  id="info-oculto-<?php echo $rRow->id; ?>" style="display:none" width="100%">
-                                    
-                                        <tr>
-
-                                            <td align="end">
-                                                <div class="btn-ubicaciones">
-                                                    <a href="#" id="btn-agregar-ubi" disabled="disabled" class="btn btn-success btn-sm" data-toggle="modal" data-target="#modal-agregar-ubicacion-fisica" role="button" onclick="uf_agregar_ubicacion(<?php echo $rRow->id; ?>)"><span class="glyphicon glyphicon-plus-sign"></span> Agregar Ubicación </a>
-                                                </div>
-                                            </td>
-
-                                        </tr>
-                                        <tr> <td>&nbsp;</td></tr>
-
-
-                                        <tr align="">
-
-                                           <td align="end">
-                                               <div class="btn-ubicaciones">
-                                                    <a href="#"  id="btn-ubicaciones-libres" disabled="disabled"  class="btn btn-danger btn-sm" data-toggle="modal" data-target="#modal-cambiar-ubicacionfisica" role="button" onclick="uf_ver_ubicacion_fisica_libre(<?php echo $idArea_ubicacion_trabajo ?>, <?php echo $idArchivo ?>)"><span class="glyphicon glyphicon-search"></span>  Ubicaciones Libres</a>
-                                               </div>
-                                           </td>
-
-                                       </tr>
-                                       <tr> <td>&nbsp;</td></tr>
-                                    </table>
-                                </div>
-                                
-                                <div id="tabla_ubi_actualizada_<?php echo $rRow->id ?>" class="d-n"></div>
-                                <div id="tabla_ubi_principal_<?php echo $rRow->id ?>">
-                                 <?php
-                                if (isset($qRelProcesoUbicacion)) {
-                                    if ($qRelProcesoUbicacion->num_rows() > 0) {
-                                ?>       
-                                <table  id="ubicaciones-tabla-<?php echo $rRow->id; ?>" style="display:none" disabled="disabled" class="table-bordered table-condensed table-responsive table-small" width="100%">
-                                    <tr>
-                                        <td>Acción</td>
-                                        <td>Ubicacion Fisica</td>
-                                        <td>Caja</td>
-                                        <td>Documento</td>
-                                        <td>No Folio Inicial</td>
-                                        <td>No Folio Final</td>
-                                        <td>No Hojas</td>
-                                        <td>&nbsp;</td>
-                                       
-                                        
-                                    </tr>
-                                    <?php
-                                        foreach ($qRelProcesoUbicacion->result() as $rRelacion) {
-                                            if ($rRelacion->idTipoProceso == $rRow->id){
-                                                //echo 'proceso' . $rRelacion->idTipoProceso . 'Proc' . $rRow->id ;
-                                               if ( $idArchivo == $rRelacion->idArchivo){
-                                            ?>
-                                    <tr>
-                                        <td> 
-                                            <!-- #MAOC --> 
-                                            
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-default btn-xs dropdown-toggle" id="btn-impresion" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="margin-bottom:5px;">
-                                                 <span class="glyphicon glyphicon-print"></span>
-                                               </button>
-                                               <ul class="dropdown-menu">
-                                                 <li>
-                                                     <a href="<?php echo site_url('impresion/etiqueta_orden_trabajo/' . $aArchivo['id']) . ' ' . $rRow->id .' '. $rRelacion->idUbicacionFisica ?>" target="_blank">
-                                                       <span class="glyphicon glyphicon-file"></span> Etiqueta para Archivo de Recepción
-                                                     </a>
-                                                 </li>
-                                                 <li>
-                                                     <a href="<?php echo site_url('impresion/etiqueta_orden_trabajo_chica/' . $aArchivo['id'] . ' ' . $rRow->id .' '. $rRelacion->idUbicacionFisica  .' ' . $rRelacion->idRel); ?>" target="_blank">
-                                                           <span class="glyphicon glyphicon-file"></span> Etiqueta para Archivo de Integración
-                                                       </a>
-                                                 </li>
-
-                                               </ul>
-                                             </div>
-                                            <div class="btn-permisos">
-                                                <a href="#" id="btn-tabla-mod" class="btn btn-success btn-xs" title="" id="btn-modificar-ubi" data-toggle="modal" data-target="#modal-modificar-ubicacion" role="button" onclick="uf_modificar_ubicacion(<?php echo $rRelacion->idRel; ?>)"><span class="glyphicon glyphicon-pencil"></span></a>&nbsp;
-                                            </div>
-                                        </td>
-                                        <td> <?php echo  $rRelacion->Columna . '.' . $rRelacion->Fila.'.' . $rRelacion->C .'.' . $rRelacion->Apartado . '.' .$rRelacion->Posicion ?></td>
-                                        <td> <?php echo  $rRelacion->CajaUbi ?></td>
-                                        <td> <?php echo  $rRelacion->Documentos ?></td>
-                                        <td><?php echo  $rRelacion->NoFolioInicial ?></td>
-                                        <td> <?php echo  $rRelacion->NoFolioFinal ?></td>
-                                        <td> <?php echo  $rRelacion->NoHojas ?></td>
-                                        <td> 
-                                            <div class="btn-permisos">
-                                                <a id="btn-tabla-elim" class="btn btn-danger btn-xs del_documento" href="<?php echo site_url('archivo/eliminar_relacion_ubicacion_preregistro/' . $rRelacion->idRel.'/'.$idArchivo .'/'. $rRelacion->idUbicacionFisica.'/'. $idDireccion_responsable ); ?>" title="Eliminar Solicitud" onclick="return confirm('¿Confirma eliminar Registro?');" target="_self" ><span class="glyphicon glyphicon-remove" ></span></a> 
-                                            </div> 
-                                        </td>
-                                    </tr>
-                                    <?php 
-                                            }
-                                            }
-                                        }
-                                    ?>
-                                    
-                                </table>
-                                <?php 
-                                              
-                                    }
-                                }
-                                
-                                ?>
-                                </div>
-                             <?php } ?>  
-                            </td>
-                            <!--td>
-                                <input class="form-control" name="ubicacion<?php echo $rRow->id; ?>" type="text"   id="ubicacion<?php echo $rRow->id; ?>" onchange="uf_ubicacion_fisica(this,<?= $idArchivo; ?>,<?= $rRow->id; ?>)" value="<?php echo $Ubicacion_fisica; ?>" >
-                                
-                                
-                              
-                            </td-->
-                        </tr>
-                        <?php                                           
-                            if (($Foliar==1) && ($Estatus==40)){	
-                        ?>
-                        <tr>
-                            <td>
-                                <label>Folio Desde:</label>
-                            </td>
-                        
-                            <td>
-                                <div class="input-folio">
-                                    <input class="form-control" name="folio_desde<?php echo $rRow->id; ?>" type="text"   id="folio_desde<?php echo $rRow->id; ?>" onchange="uf_folio_desde(this,<?= $idArchivo; ?>,<?= $rRow->id; ?>)" value="<?php echo $Folio_Desde; ?>" disabled="disabled">
-                                </div>
-                           </td>
-                        </tr>
-
-                        
-                        <tr>
-                            <td>
-                                <label>Folio Hasta: </label>
-                            </td>
-                        
-                            <td>
-                                <div class="input-folio">
-                                    <input class="form-control" name="folio_hasta<?php echo $rRow->id; ?>" type="text"   id="folio_hasta<?php echo $rRow->id; ?>" onchange="uf_folio_hasta(this,<?= $idArchivo; ?>,<?= $rRow->id; ?>)" value="<?php echo $Folio_Hasta; ?>" disabled="disabled">
-                                </div>
-                            </td>
-                        </tr>
-                        
-                        
-                        <?php                                           
-                            }else{
-                        ?>        
-                        <tr>
-                            <td>
-                                <label>Folio Desde:</label>
-                            </td>
-                        
-                            <td>
-                                 <?php echo $Folio_Desde; ?>
-                            </td>
-                        </tr>
-                        
-                        <tr>
-                            <td>
-                                <label>Folio Hasta:</label>
-                            </td>
-                        
-                            <td>
-                                 <?php echo $Folio_Hasta; ?>
-                            </td>
-                        </tr>
-                        
-                        <?php         
-                            }	
-                        ?>
-                        
-                        
-                        
-                       
-                        
-                        
-                        
-                        
-                         <tr>
-                            <td>
-                               
-                               <a href="#historial" data-toggle="modal" data-target="#historial" title="Historial" role="button" onclick="uf_ver_historia_bloque(<?php echo $idArchivo; ?>,<?php echo $rRow->id; ?>)"><span class="glyphicon glyphicon-search"></span>Ver  Historial  Estatus del Bloque</a>
-                            </td>
-                            <td>
-                            </td>    
-                        </tr>
-                        
-                        
-                        
-                        
-                    </table>
-                    
-                    </div>
-                   
-                                <div id="div-accion-<?php echo $rRow->id ?>" style="display:none" disabled="disabled">
-                                    <div id="div-accion">
-                    <?php /*
-                                 switch ($Estatus) {
-
-            						case -10:
-								// Editable
-                               
-                                    ?>
-                                   
-                                   
-                                   
-									<?php                                           
-									 if ($recibe==1){  	
-                                    ?>
-                                    <li class="active">
-                                        <a href="#" class="d-n" data-toggle="modal" data-target="#enviar_revision" role="button"  onclick="uf_enviar_revision(<?php echo $rRow->id; ?>, <?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span> Enviar Revisión</a>
-                                    </li>
-									<?php                                   
-									}else{
-                                    ?>
-                                     <li><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
-									<?php                                   
-									}
-                                    ?>
-                                
-                                     
-                                     
-                                     <?php
-									 break;
-                                    // Recibir
-									case 10:
-									
-                                    ?>
-                                  
-                                   <?php                                           
-									if ($recibe==1){
-                                                                           
-                                                                                if($preregistro_realizado == 0){
-                                                                                
-                                    ?>
-                                    <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo ' Esperando Preregistro' ?></a></li>    
-				    <?php                                   
-                                                                                }
-                                                                                if($preregistro_realizado > 0){
-                                    ?>
- 				    
-                                    
-                                    <li class="active list-style" id="enviar_revision_<?php echo $rRow->id; ?>">
-                                        <a href="#" data-toggle="modal" data-target="#enviar_revision" role="button"  onclick="uf_enviar_revision(<?php echo $rRow->id; ?>, <?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span> Enviar Revisión</a>
-                                    </li>
-                                    <li class="list-style d-n" id="Estatus-recibir"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
-                                     <?php                                   
-                                                                                }
-                                                                        }else{
-                                    ?>
-                                    
-                                    <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li> 
-                                    <?php
-                                                                       }
-                                                                       
-                                                                        
-                                    ?>
-                                   
-                                
-                                <?php
-									 break;
-                                    // Vo Bo.
-									case 20:
-									
-                                    ?>
-                                  
-                                   <?php                                           
-									if ($reviso==1){
-                                                                            
-                                    ?>
- 			            <!-- 						
-                                    <li>
-                                        <a href="#" data-toggle="modal" data-target="#rechazar_bloque" role="button" onclick="uf_enviar_rechazar(<?php echo $rRow->id; ?>)"><span class="glyphicon glyphicon-share-alt"></span> Rechaza Bloque</a>
-                                    </li>
-                                    -->
-                                    <li class="active list-style">
-                                        <a href="#" data-toggle="modal" data-target="#enviar_validar" role="button" onclick="uf_enviar_validar(<?php echo $rRow->id; ?>, <?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span>Enviar Validar</a>
-                                    </li>
-                                    
-                                    <?php 
-                                                                          
-                                                                        }else{
-                                    ?>
-                                    <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
-									<?php                                   
-									}
-                                    ?>
-                                
-                                
-                             
-                                     
-                                    <?php
-						 break;
-                                    // Vo Bo.
-									case 40:
-									
-                                    ?>
-                                  
-                                   <?php                                           
-									if ($Foliar==1){	
-                                    ?>
- 			            <!--						
-                                    <li>
-                                        <a href="#" data-toggle="modal" data-target="#rechazar_bloque" role="button" onclick="uf_enviar_rechazar(<?php echo $rRow->id; ?>)"><span class="glyphicon glyphicon-share-alt"></span> Rechaza Bloque</a>
-                                    </li>
-                                    -->
-                                    <li class="active list-style">
-                                        <a href="#" data-toggle="modal" data-target="#enviar_digitalizar" role="button" onclick="uf_enviar_digitalizar(<?php echo $rRow->id; ?>, <?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span>Enviar Digitalizar</a>
-                                    </li>
-									<?php                                   
-									}else{
-                                    ?>
-                                    <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
-									<?php                                   
-									}
-                                    ?>
-                                
-
-                                
-                                                                     <?php
-						 break;
-                                    // Vo Bo.
-									case 30:
-									
-                                    ?>
-                                  
-                                   <?php                                           
-									if ($Validar==1){	
-                                    ?>
-                                    <!-- 
-                                    <li>
-                                        <a href="#" data-toggle="modal" data-target="#rechazar_bloque" role="button" onclick="uf_enviar_rechazar(<?php echo $rRow->id; ?>)"><span class="glyphicon glyphicon-share-alt"></span> Rechaza Bloque</a>
-                                    </li>
-                                    -->
-                                    <li class="active list-style">
-                                        <a href="#" data-toggle="modal" data-target="#enviar_foliado" role="button" onclick="uf_enviar_foliado(<?php echo $rRow->id; ?>, <?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span>Enviar Foliado</a>
-                                    </li> 
-                                    
-									<?php                                   
-									}else{
-                                    ?>
-                                    <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
-									<?php                                   
-									}
-                                    ?>
-                                
-
-                                     
-                                     
-                              
-                                    <?php
-						 break;
-                                    // Vo Bo.
-									case 50:
-									
-                                    ?>
-                                  
-                                   <?php                                           
-									if ($digitalizar==1){	
-                                    ?>
-                                    <!-- 
-                                    <li>
-                                        <a href="#" data-toggle="modal" data-target="#rechazar_bloque" role="button" onclick="uf_enviar_rechazar(<?php echo $rRow->id; ?>)"><span class="glyphicon glyphicon-share-alt"></span> Rechaza Bloque</a>
-                                    </li>
-                                    -->
-                                    <li class="active list-style">
-                                        <a href="#" data-toggle="modal" data-target="#enviar_editar" role="button" onclick="uf_enviar_editar(<?php echo $rRow->id; ?>, <?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span>Enviar para Editarlo</a>
-                                    </li>
-									<?php                                   
-									}else{
-                                    ?>
-                                    <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
-									<?php                                   
-									}
-                                    ?>
-     
-                                     
-                                     
-                                     
-                                    <?php
-						 break;
-                                    // Vo Bo.
-									case 60:
-									
-                                    ?>
-                                  
-                                   <?php                                           
-									if ($Editar==1){	
-                                    ?>
- 				    <!--					
-                                    <li>
-                                        <a href="#" data-toggle="modal" data-target="#rechazar_bloque" role="button" onclick="uf_enviar_rechazar(<?php echo $rRow->id; ?>)"><span class="glyphicon glyphicon-share-alt"></span> Rechaza Bloque</a>
-                                    </li>
-                                    -->
-                                    <!--
-                                    <li class="active">
-                                        <a href="#" data-toggle="modal" data-target="#enviar_finalizar" role="button" onclick="uf_enviar_finalizar(<?php echo $rRow->id; ?>, <?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span>Enviar para Finalizarlo</a>
-                                    </li>
-                                    -->
-                                    <li class="active list-style">
-                                        <a href="#" data-toggle="modal" data-target="#enviar_integracion" role="button" onclick="uf_enviar_integracion(<?php echo $rRow->id; ?>, <?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span>Enviar a Integración</a>
-                                    </li>
-									<?php                                   
-									}else{
-                                    ?>
-                                    <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
-									<?php                                   
-									}
-                                    ?>
-                                     
-                                     
-                                     
-                                     <?php
-						 break;
-                                    // Vo Bo.
-									case 70:
-									
-                                    ?>
-                                  
-                                   
- 				    
-                                    
-                                    
-                                    <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
-				
-
-
-                                    
-                                <?php 
-									break;                                       
-                                                                              
-                                                                        
-                                                                        
-                                                                        
-                                   // Autoriza.
-									default:
-									
-                                    ?>
-                                    
-                                    
-                                     
-                                    <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
-                                <?php }  */?>
-                                <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
-                        </div>   
-                    </div>
-
-                    <?php if ($Editar ==1 || $reviso==1 || $recibe ==1) { ?>
-                                <div style="display: none" class="align-end m-b" id="div-agregar-documentos-<?php echo $rRow->id ?>">
-                                        
-                                         
-                                     <div class="btn-documentos">         
-                                             <a href="#" id="btn-agregar-documentos"  class="btn btn-success btn-sm"  data-toggle="modal" data-target="#modal-agregar-documentos" title="Agregar Documentos" role="button" onclick="uf_agregar_documentos(<?php echo $idArchivo; ?>,<?php echo $rRow->id; ?>)">
-                                                <span class="glyphicon glyphicon-plus-sign"></span> Agregar Documentos
-                                            </a>
-                                        
-                                     </div>     
-                                         
-                                 </div>
-                    <?php } ?>
-                                     
-                                       
-                                    
-
-                    
-                   
-                    
-                        <!--
-                         <button class="btn btn-xs btn-success dropdown-toggle" onclick="ubicacion_fisica(<?= $idArchivo; ?>,<?= $rRow->id; ?>)" type="button" >
-                                                        <span class="glyphicon glyphicon-plus" title="Ubicacion Fisica" ></span> Modificar Ubicacion Fisica
-                                                    </button>&nbsp;
-                         -->            
-                    </div>
-                    </div>    
-                    </div> 
-                    
-                     
-                </div>
-               
-                 
-               
-                <!-- Procesos-documentos -->
-                <div class="col-xs-12 col-sm-<?php echo $col  ?>"> 
-                    <div class="panel-group" id="panel-proceso-datos-<?php echo $rRow->id;  ?>">
-                    <div class="panel panel-primary">
-                        
-                        <div class="panel-heading"> 
-                            <a class="panel-title" id="panel-proceso-titulo-<?php echo $rRow->id;  ?>" data-toggle="collapse" data-parent="#panel-proceso-<?php echo $rRow->id;  ?>" href="#panel-element-proceso-<?php echo $rRow->id;  ?>">
-                                <table>
-                                    <tr> <!-- #Estatus -->
-                                        <td width="800" >
-                                        <?php echo $rRow->Nombre;  ?>
-                                        </td>  
-                                        
-                                        
-                                        <td width="200">
-                                            <?php echo "Estatus: " . $addw_Estatus_Bloque[$Estatus]; ?>
-                                        </td> 
-                                        <?php if($preregistro == 1 || $recibe ==1){ ?>
-                                        <td width="250">
-                                            <div id="numero_documentos_proceso_preregistrados<?php echo $rRow->id;  ?>">
-                                                
-                                                 <?php  
-                                                 
-                                            
-                                                        $qDocumentos_sub_proceso_recibido = $this->ferfunc->get_reg_libre("SELECT DISTINCT `saaRel_Archivo_Documento`.`idTipoProceso`, 
-                                                                `saaRel_Archivo_Documento`.`idSubTipoProceso`,`saaRel_Archivo_Preregistro`.* 
-                                                                FROM `saaRel_Archivo_Documento`
-                                                                INNER JOIN `saaRel_Archivo_Preregistro`
-                                                                ON `saaRel_Archivo_Documento`.id = `saaRel_Archivo_Preregistro`.`id_Rel_Archivo_Documento`
-                                                                WHERE `saaRel_Archivo_Preregistro`.idArchivo=" .$idArchivo ."
-                                                                AND (`saaRel_Archivo_Preregistro`.tipo_documento = 1 OR `saaRel_Archivo_Preregistro`.tipo_documento =2 OR `saaRel_Archivo_Preregistro`.tipo_documento =3 OR
-                                                                  `saaRel_Archivo_Preregistro`.tipo_documento=4
-                                                                ) 
-                                                                AND `saaRel_Archivo_Preregistro`.idDireccion_responsable = " .$idDireccion_responsable ."
-                                                                AND `saaRel_Archivo_Documento`.`idTipoProceso` = " . $rRow->id);
-                                                      
-                                                        $qDocumentos_sub_proceso_recibido_total = $this->ferfunc->get_subreg("saaRel_Archivo_Documento",array("idArchivo" => $idArchivo,"idTipoProceso" => $rRow->id),"id");
-                                                        echo "Preregistrados " . $qDocumentos_sub_proceso_recibido->num_rows() . " de " . $qDocumentos_sub_proceso_recibido_total->num_rows();
-                                            
-                                            
-                                                ?>
-                                                
-                                                
-                                            </div>
-                                           
-                                        </td> 
-                                        <?php } ?>
-                                        
-                                        
-                                        
-                                        <td width="250">
-                                            <div id="numero_documentos_proceso_recibidos<?php echo $rRow->id;  ?>">
-                                                
-                                                 <?php
-                                            
-                                                        $qDocumentos_sub_proceso_recibido = $this->ferfunc->get_reg_libre("SELECT DISTINCT  `saaRel_Archivo_Preregistro`.`id_Rel_Archivo_Documento`
-                                                                FROM `saaRel_Archivo_Preregistro`
-                                                                INNER JOIN saaRel_Archivo_Documento
-                                                                ON `saaRel_Archivo_Preregistro`.id_Rel_Archivo_Documento = saaRel_Archivo_Documento.id
-                                                                 WHERE saaRel_Archivo_Documento.idArchivo=" .$idArchivo . " AND  saaRel_Archivo_Documento.idTipoProceso= ". $rRow->id ."
-                                                                 AND `saaRel_Archivo_Preregistro`.eliminacion_logica = 0 AND `saaRel_Archivo_Preregistro`.recibido_cid=1");
-                                                        //$qDocumentos_sub_proceso_recibido_original = $this->ferfunc->get_subreg("saaRel_Archivo_Documento",array("idArchivo" => $idArchivo,"idTipoProceso" => $rRow->id,"original_recibido"=>1),"id");
-                                                        //$qDocumentos_sub_proceso_recibido = $this->ferfunc->get_subreg("saaRel_Archivo_Documento",array("idArchivo" => $idArchivo,"idTipoProceso" => $rRow->id,"copia"=>1,"original_recibido"=>1),"id");
-                                                        $qDocumentos_sub_proceso_recibido_total = $this->ferfunc->get_subreg("saaRel_Archivo_Documento",array("idArchivo" => $idArchivo,"idTipoProceso" => $rRow->id),"id");
-                                                        
-                                                        echo "Recibidos " . $qDocumentos_sub_proceso_recibido->num_rows() . " de " . $qDocumentos_sub_proceso_recibido_total->num_rows();
-                                            
-                                            
-                                                ?>
-                                                
-                                                
-                                            </div>
-                                           
-                                        </td>  
-                                        
-                                        
-                                        
-                                        <td width="250">
-                                            
-                                            <div id="numero_documentos_proceso_revisados<?php echo $rRow->id;  ?>">
-                                                    <?php
-                                            
-                                                        $qDocumentos_sub_proceso_revisados = $this->ferfunc->get_subreg("saaRel_Archivo_Documento",array("idArchivo" => $idArchivo,"idTipoProceso" => $rRow->id,"revisado"=>1),"id");
-                                                        $qDocumentos_sub_proceso_revisados_total = $this->ferfunc->get_subreg("saaRel_Archivo_Documento",array("idArchivo" => $idArchivo,"idTipoProceso" => $rRow->id),"id");
-                                                        
-                                                        echo "Revisados " . $qDocumentos_sub_proceso_revisados->num_rows() . " de " . $qDocumentos_sub_proceso_revisados_total->num_rows();
-                                            
-                                            
-                                                ?>
-                                            </div>
-                                        </td>  
-                                        
-                                        
-                                       </tr> 
-                                    </table>    
-                            </a>
-                        </div>
-                        
-                        <div id="panel-element-proceso-<?php echo $rRow->id;  ?>" class="panel-collapse collapse <?php  echo $strin; ?>" >
-                            <div class="panel-body" <?php echo $style_procesos_preregistro?> id="panel-body-<?php echo $rRow->id;  ?>">
-                                <div class="row clearfix">
-                                    <!-- Panel de Control-->
-                                    <div class="col-md-12 column">
-                                       
-                                          
-                                        
-                                                <?php
-                                                
-                                                    $qSubProcesos = $this->ferfunc->get_subreg("saaSubTipoProceso",array("idTipoProceso" => $rRow->id),0,"Ordenar");
-                                                                
-                                                                                
-                                                if (isset($qSubProcesos)) {
-                                                    if ($qSubProcesos->num_rows() > 0) {
-                                                        foreach ($qSubProcesos->result() as $rRowSubProcesos) {
-                                                               
-                                                            ?>
-                                                            
-                                                        <?php  
-                                                        $strin_subproceso="  ";
-                                                       
-                                                        if ($rRowSubProcesos->id==$idSubProceso){
-                                                            $strin_subproceso=" in ";
-                                                        }
-                                                   
-                                                   ?>                     
-                                                                                
-                                                                                
-                                                <?php
-        
-             
-        /*
-        
-                                                  $qDocumentos = $this->ferfunc->get_subreg(
-                                                          "saaRel_Archivo_Documento INNER JOIN saaDocumentos ON saaRel_Archivo_Documento.idDocumento = saaDocumentos.id",
-                                                          array("saaDocumentos.idSubTipoProceso" => $rRowSubProcesos->id,"saaRel_Archivo_Documento.idArchivo" => $idArchivo),
-                                                          "saaRel_Archivo_Documento.id,preregistro_aceptado, saaRel_Archivo_Documento.recibido_cid, saaRel_Archivo_Documento.idUsuario_recibio,  
-                                                          saaRel_Archivo_Documento.idDireccion_responsable AS direccion_preregistro, saaDocumentos.id as idDoc, saaDocumentos.Nombre,copia,noHojas,
-                                                          revisado,original_recibido,original_revisado, saaDocumentos.idDireccion_responsable, no_aplica");
-                
-      
-                                                          /* 7*/
-                                                
-                                                $qDocumentos =  $qDocumentos = $this->ferfunc->get_reg_libre(
-                                                          "SELECT `saaRel_Archivo_Documento`.id ,
-                                                                `saaRel_Archivo_Documento`.`idTipoProceso`,
-                                                                `saaRel_Archivo_Documento`.`idSubTipoProceso`,
-                                                                `saaRel_Archivo_Documento`.`id_preregistro`,
-                                                                saaDocumentos.id AS idDoc, 
-                                                                saaDocumentos.Nombre,
-                                                                saaDocumentos.idDireccion_responsable
-                                                                FROM saaRel_Archivo_Documento 
-                                                                INNER JOIN saaDocumentos 
-                                                                ON saaRel_Archivo_Documento.idDocumento = saaDocumentos.id
-                                                                WHERE  saaRel_Archivo_Documento.idArchivo=" . $idArchivo . "
-                                                                AND `saaRel_Archivo_Documento`.`idSubTipoProceso` = " .$rRowSubProcesos->id ."
-                                                                AND `saaRel_Archivo_Documento`.`eliminacion_logica` = 0
-                                                                ORDER BY `saaDocumentos`.Nombre ASC" );
-                                                       
-                                                if (isset($qDocumentos)) {
-                                                    if ($qDocumentos->num_rows() > 0) {
-                                                        //echo $qDocumentos->num_rows();
-                                                ?>
-                                                <!-- Subprocesos -->
-                <div class="panel-group" id="panel-sub-proceso-<?php echo $rRowSubProcesos->id;  ?>">
-                    <div class="panel panel-success">
-                        
-                        <div class="panel-heading">
-                            <a class="panel-title" data-toggle="collapse" data-parent="#panel-sub-proceso-<?php echo $rRowSubProcesos->id;  ?>" href="#panel-element-sub-proceso-<?php echo $rRowSubProcesos->id;  ?>">
-                               
-                                <table>
-                                    <tr> <!-- #MAOC SubProcesos-->
-                                        <td width="800" >
-                                           <?php echo $rRowSubProcesos->Nombre;  ?>
-                                        </td> 
-                                        
-                                        <?php if($preregistro ==1 || $recibe ==1) { ?>
-                                        <td width="200">
-                                           
-                                            
-                                            
-                                            <div id="numero_documentos_subproceso_preregistrados<?php echo $rRowSubProcesos->id;  ?>">
-                                                
-                                                
-                                                 <?php
-                                                        
-                                                        $qDocumentos_sub_proceso_recibido = $this->ferfunc->get_reg_libre("SELECT DISTINCT `saaRel_Archivo_Documento`.`idTipoProceso`, 
-                                                                `saaRel_Archivo_Documento`.`idSubTipoProceso`,`saaRel_Archivo_Preregistro`.* 
-                                                                FROM `saaRel_Archivo_Documento`
-                                                                INNER JOIN `saaRel_Archivo_Preregistro`
-                                                                ON `saaRel_Archivo_Documento`.id = `saaRel_Archivo_Preregistro`.`id_Rel_Archivo_Documento`
-                                                                WHERE `saaRel_Archivo_Preregistro`.idArchivo=" .$idArchivo ."
-                                                                AND (`saaRel_Archivo_Preregistro`.tipo_documento = 1 OR `saaRel_Archivo_Preregistro`.tipo_documento =2 OR `saaRel_Archivo_Preregistro`.tipo_documento =3) 
-                                                                AND `saaRel_Archivo_Preregistro`.idDireccion_responsable = " .$idDireccion_responsable ."
-                                                                AND `saaRel_Archivo_Documento`.`idSubTipoProceso` = " . $rRowSubProcesos->id);
-                                                       
-                                                        //$qDocumentos_sub_proceso_recibido_original = $this->ferfunc->get_subreg("saaRel_Archivo_Documento",array("idArchivo" => $idArchivo,"idSubTipoProceso" => $rRowSubProcesos->id,"original_recibido"=>1),"id");
-                                                        $qDocumentos_sub_proceso_recibido_total = $this->ferfunc->get_subreg("saaRel_Archivo_Documento",array("idArchivo" => $idArchivo,"idSubTipoProceso" => $rRowSubProcesos->id),"id");
-                                                        //$total =  $qDocumentos_sub_proceso_recibido->num_rows() + $qDocumentos_sub_proceso_recibido_original->num_rows() ;
-                                                        echo "Preregistrados " . $qDocumentos_sub_proceso_recibido->num_rows() . " de " . $qDocumentos_sub_proceso_recibido_total->num_rows();
-                                            
-                                            
-                                                ?>
-                                            </div>
-                                            
-                                            
-                                            
-                                           
-                                        </td>
-                                        <?php } ?>
-                                        
-                                        <td width="200">
-                                           
-                                            
-                                            
-                                            <div id="numero_documentos_subproceso_recibidos<?php echo $rRowSubProcesos->id;  ?>">
-                                                 <?php
-                                            
-                                                        $qDocumentos_sub_proceso_recibido = $this->ferfunc->get_reg_libre("SELECT DISTINCT  `saaRel_Archivo_Preregistro`.`id_Rel_Archivo_Documento`
-                                                                FROM `saaRel_Archivo_Preregistro`
-                                                                INNER JOIN saaRel_Archivo_Documento
-                                                                ON `saaRel_Archivo_Preregistro`.id_Rel_Archivo_Documento = saaRel_Archivo_Documento.id
-                                                                 WHERE saaRel_Archivo_Documento.idArchivo=" .$idArchivo . " AND  saaRel_Archivo_Documento.idSubTipoProceso= ". $rRowSubProcesos->id ."
-                                                                 AND `saaRel_Archivo_Preregistro`.eliminacion_logica = 0 AND `saaRel_Archivo_Preregistro`.recibido_cid=1");
-                                                        //$qDocumentos_sub_proceso_recibido_original = $this->ferfunc->get_subreg("saaRel_Archivo_Documento",array("idArchivo" => $idArchivo,"idSubTipoProceso" => $rRowSubProcesos->id,"original_recibido"=>1),"id");
-                                                        $qDocumentos_sub_proceso_recibido_total = $this->ferfunc->get_subreg("saaRel_Archivo_Documento",array("idArchivo" => $idArchivo,"idSubTipoProceso" => $rRowSubProcesos->id),"id");
-                                                        
-                                                        echo "Recibidos " . $qDocumentos_sub_proceso_recibido->num_rows() . " de " . $qDocumentos_sub_proceso_recibido_total->num_rows();
-                                            
-                                            
-                                                ?>
-                                            </div>
-                                            
-                                           
-                                        </td>  
-                                        
-                                        
-                                        
-                                           <td width="200">
-                                           
-                                            
-                                            
-                                           
-                                            <div id="numero_documentos_subproceso_revisados<?php echo $rRowSubProcesos->id;  ?>">
-                                                
-                                                <?php
-                                            
-                                                        $qDocumentos_sub_proceso_revisados = $this->ferfunc->get_subreg("saaRel_Archivo_Documento",array("idArchivo" => $idArchivo,"idSubTipoProceso" => $rRowSubProcesos->id,"revisado"=>1),"id");
-                                                        $qDocumentos_sub_proceso_revisados_total = $this->ferfunc->get_subreg("saaRel_Archivo_Documento",array("idArchivo" => $idArchivo,"idSubTipoProceso" => $rRowSubProcesos->id),"id");
-                                                        
-                                                        echo "Revisados " . $qDocumentos_sub_proceso_revisados->num_rows() . " de " . $qDocumentos_sub_proceso_revisados_total->num_rows();
-                                            
-                                            
-                                                ?>
-                                                
-                                            </div>
-                                            
-                                           
-                                        </td>  
-                                     
-                                        
-                                    </tr> 
-                                </table>
-                            </a>
-                        </div>
-                        
-                        <div id="panel-element-sub-proceso-<?php echo $rRowSubProcesos->id;  ?>" class="panel-collapse collapse <?php echo $strin_subproceso;  ?>">
+ 
+                        <div id="panel-element-566826" class="panel-collapse collapse in">
                             <div class="panel-body">
                                 <div class="row clearfix">
                                     <!-- Panel de Control-->
-                                    <div class="col-md-12 column">
-                                      
-                                        <?php
-                                                
-       
-                foreach ($qDocumentos->result() as $rRowDocumentos) {
-                       
-                    ?>
-                        
-       
-                    <?php  
-                         $strin_documento="  ";
-                        
-                         if ($rRowDocumentos->id==$idDocumento){
-                             $strin_documento=" in ";
-                             
-                         }
-
-                    ?>                             
-                   
-                    <?php 
-                         $value=""; 
-                         
-                          
-                          ?>
-                                        
-                                        
-                                        
-                  <div class="panel-group" id="panel-documentos-<?php echo $rRowDocumentos->id;  ?>">
-                  
-                  
-                    
-                    <div class="row"> <!--row idRel_archivo -->
-                        
-                        
-
-                        <div class="col-sm-3 m-b-separacion m-t">
-
-                        
-                                 
-                          <!--- id Dreccion <?= $rRowDocumentos->idDireccion_responsable ?> -->       
-                        <!-- --------------------------------------------------------------------- -->         
-                        <?php 
-                        $visualizo = 0;
-                        
-                        ?>
-
-                        
-
-                       
-
-                          <?php  $qPreregistros = $this->ferfunc->get_reg_libre("SELECT * FROM `saaRel_Archivo_Preregistro`
-                                                                WHERE id_Rel_Archivo_Documento =" .$rRowDocumentos->id  ." AND eliminacion_logica=0"); ?>
-
-                          <?php if ($qPreregistros->num_rows() > 0):?>
-                            <!-- Si hay preregistrados Ciclo -->
-                            <?php foreach ($qPreregistros->result() as $rPreregistros): ?>
-
-                              <?php $checked_recibido="" ?>
-                              <?php if ($rPreregistros->recibido_cid == 1):?>
-                                  <?php $checked_recibido="checked='checked'" ?>
-                              <?php endif; ?>
-
-                              <?php $checked_revisado="" ?>
-                              <?php if ($rPreregistros->revisado == 1):?>
-                                  <?php $checked_revisado="checked='checked'" ?>
-                              <?php endif; ?>
-
-                              <!-- <?= $idDireccion_responsable ?> -->
-    
-                                <?php if ($idDireccion_responsable == $rPreregistros->idDireccion_responsable):?>
-                                  <!-- $idDireccion_responsable <?= $idDireccion_responsable ?> == $rPreregistros->idDireccion_responsable -->
-                                  <?php $visualizo = 1; ?>
-
-                                    <div class="col-sm-12 m-b-separacion">
-                                
-                                      <!--  C/registros -->
-                                    
-                                      <div class="row"> 
-                                     
-                                        <div class="col-sm-8">
-                                            <div class="">  
-                                                <?php if ($rPreregistros->tipo_documento == 4): ?>
-                                                  <?php
-                                                  $seleccion1 = "Contiene Estimaciones";
-                                                  $value1='value="4"';
-                                                  $seleccion = "Selecciona una opción";
-                                                  $value = 'value="0"';
-                                                  
+                                    <div class="col-md-8">
+                                        <div class="tab-pane" id="panel-Vales">
                                                  
-                                                  ?>
-                                                  
-                                                     
-                                                  <select class="form-control" name="tipo_documento<?php echo $rRowDocumentos->id; ?>" id="tipo_documento<?php echo $rRowDocumentos->id; ?>" onchange="uf_recibir_tipo_documento(<?= $rRowDocumentos->id; ?>,<?= $idArchivo ?> ,<?= $preregistro ?> ,<?= $idDireccion_responsable ?>)">
-                                                      
-                                                      <option   <?php echo $value ?> id="select<?php echo $rRowDocumentos->id; ?>" name="select<?php echo $rRowDocumentos->id; ?>"><?php echo $seleccion ?></option>
-                                                      <option id="tipo_documento<?php echo $rRowDocumentos->id; ?>" name="tipo_documento<?php echo $rRowDocumentos->id; ?>" <?php echo $value1 ?> > <?php echo $seleccion1 ?> </option>
-                                                     
-                                                  </select>
-
-                                                <?php  else: ?>
-                                                    <?php  if ($rPreregistros->tipo_documento == 1): ?>
-
-                                                      <?php
-                                                      
-                                                      $seleccion = "Copia";
-                                                      $value = 'value="1"';
-                                                      $seleccion1 = "Original";
-                                                      $value1 ='value="2"';
-                                                      $seleccion2 = "No Aplica";
-                                                      $value2 = 'value="3"';
-                                                      $seleccion3 = "Selecciona una opción";
-                                                      $value3 = 'value="0"';
-                                                    
-                                                      ?>
-                                                    <?php  elseif ($rPreregistros->tipo_documento == 0): ?>
-
-                                                      <?php
-                                                      
-                                                      $seleccion2 = "Copia";
-                                                      $value2 = 'value="1"';
-                                                      $seleccion1 = "Original";
-                                                      $value1 ='value="2"';
-                                                      $seleccion3 = "No Aplica";
-                                                      $value3 = 'value="3"';
-                                                      $seleccion = "Selecciona una opción";
-                                                      $value = 'value="0"';
-                                                    
-                                                      ?>
-
-
-                                                    <?php  elseif ($rPreregistros->tipo_documento == 2): ?>
-
-                                                      <?php
-                                                      
-                                                      
-                                                      $seleccion = "Original";
-                                                      $value ='value="2"';
-                                                      $seleccion1 = "Copia";
-                                                      $value1 = 'value="1"';
-                                                      $seleccion2 = "No Aplica";
-                                                      $value2 = 'value="3"';
-                                                      $seleccion3 = "Selecciona una opción";
-                                                      $value3 = 'value="0"';
-                                                    
-                                                      ?>
-                                                    <?php  elseif ($rPreregistros->tipo_documento == 3): ?>
-
-                                                      <?php
-                                                      
-                                                      
-                                                      $seleccion = "No Aplica";
-                                                      $value = 'value="3"';
-                                                      $seleccion1 = "Original";
-                                                      $value1 ='value="2"';
-                                                      $seleccion2 = "Copia";
-                                                      $value2 = 'value="1"';
-                                                      $seleccion3 = "Selecciona una opción";
-                                                      $value3 = 'value="0"';
-                                                    
-                                                      ?>
-                                                    <?php  endif;  ?>
-                                              
-                                                  
-                                                     
-                                                    <select class="form-control" name="tipo_documento<?php echo $rRowDocumentos->id; ?>" id="tipo_documento<?php echo $rRowDocumentos->id; ?>" onchange="uf_recibir_tipo_documento(<?= $rRowDocumentos->id; ?>,<?= $idArchivo ?> ,<?= $preregistro ?> ,<?= $idDireccion_responsable ?>)">
-                                                        
-                                                        <option   <?php echo $value ?> id="select<?php echo $rRowDocumentos->id; ?>" name="select<?php echo $rRowDocumentos->id; ?>"><?php echo $seleccion ?></option>
-                                                        <option id="tipo_documento<?php echo $rRowDocumentos->id; ?>" name="tipo_documento<?php echo $rRowDocumentos->id; ?>" <?php echo $value1 ?> > <?php echo $seleccion1 ?> </option>
-                                                        <option id="tipo_documento<?php echo $rRowDocumentos->id; ?>" name="tipo_documento<?php echo $rRowDocumentos->id; ?>" <?php echo $value2 ?> > <?php echo $seleccion2 ?> </option>
-                                                        <option id="tipo_documento<?php echo $rRowDocumentos->id; ?>" name="tipo_documento<?php echo $rRowDocumentos->id; ?>" <?php echo $value3 ?> > <?php echo $seleccion3 ?> </option>
-                                                    </select>
-                                                <?php endif; ?> 
-                                                        
-                                            </div>  <!-- /Row tipodocumento -->
-                                                  
-                                            <div class="m-t">  <!--Row Hojas -->
-                                                       
-                                                <label class="sr-only" for="exampleInputEmail3">No. Hojas</label>
-                                                <input type="number" class="form-control" id="noHojas_doc_<?= $rRowDocumentos->id ?>" min="0" name="noHojas_doc" placeholder="No Hojas" value="<?= $rPreregistros->noHojas ?>" onchange="cargar_noHojas_cid(event,<?= $rRowDocumentos->id ?>, <?= $idArchivo ?>)" onkeyup="cargar_noHojas_cid(event,<?= $rRowDocumentos->id ?>, <?= $idArchivo ?>)" onkeypress="return validar(event)"  >
-                                                  
-                                                  
-                                                <div id="oculta-noHojas-<?= $rRowDocumentos->id ?>" class="col-sm-12 d-n"></div>
-                                                 
-                                            </div>  <!--Row hojas -->
-
-                                        </div>  <!--col-sm-8-->
-
-                                        <div class="col-sm-4">
-                                          <div class="">
-                                             
-                                            
-                                                  
-                                            <?php if($recibe ==1  && $Estatus==10): ?>
-                                              <input   type="checkbox" value="" onchange="uf_recibido_cid(this, <?= $rPreregistros->id ?>, <?= $rPreregistros->id_Rel_Archivo_Documento ?>)" <?= $checked_recibido ?>> Recibido
-                                            <?php else: ?>
-                                              <input   type="checkbox" value="" disabled="disabled" <?= $checked_recibido ?>> Recibido
-                                            <?php endif; ?>
-                                          </div>
-
-                                          <div class="" >
-                                            
-                                            <?php if($reviso ==1  && $Estatus==20): ?>
-                                              <input  type="checkbox"  value="" onchange="uf_recibir_revisado(this,  <?= $rPreregistros->id ?> ,<?= $rRowDocumentos->id ?>)" <?= $checked_revisado ?>> Revisado
-                                            <?php  else: ?>
-                                              <input  type="checkbox" value="" disabled="disabled" <?= $checked_revisado ?>> Revisado
-
-                                            <?php endif; ?>
-                                          </div>
-                                            
-                                        </div> <!--col-sm-4-->
-
-                                      </div> <!--/row tipo doc y num hojas -->
-
-                                      <div class="col-sm-12">
-                                        <a href="#observaciones_bloque" id="btn-ver-obs"  data-toggle="modal" title="Ver Observaciones" class="btn btn-default m-t" data-target="#observaciones_bloque" title="Observaciones" role="button" onclick="ver_observaciones_documento(<?php echo $idArchivo; ?>,<?php echo $rRow->id; ?>,<?php echo $rRowSubProcesos->id ?>,<?php echo $rRowDocumentos->idDoc ?> ,<?= $preregistro ?>)">
-                                                <span class="glyphicon glyphicon-search"></span>
-                                        </a>
-                                        <a href="#" id="btn-agregar-obs"  data-toggle="modal" title="Agregar observaciones" data-target="#observacion_bloque" role="button" class="btn btn-warning m-t" onclick="uf_agregar_observaciones(<?php echo $rRow->id .' , ' . $rRowSubProcesos->id . ' , ' .$rRowDocumentos->idDoc . ' , ' .$idDireccion_responsable . ' , ' .$idusuario .','.$rRowDocumentos->idDireccion_responsable ; ?>)">
-                                                        <span class="glyphicon glyphicon-list"></span>
-                                                    </a>
-
-                                           
-                                      </div>
-                                    </div> <!--col-sm-12 mb-separacion-->
-
-                                <?php endif; ?>
-                            <?php endforeach; ?>
-                          <?php endif; ?>
-
-                                 
-                              
-
-                              
-
-                        <?php  if($visualizo == 0):?>
-                          <!-- visualizo==0) -->
-                          
-                                
-                                <!--  Vacia -->
-                            <div class="col-sm-12 m-b-separacion">  
-                                <div class="row"> 
-                               
-                                  <div class="col-sm-8">
-                                      <div class="">  
-                                          <?php if ($rRowSubProcesos->Nombre == "XI. DE ESTIMACIONES"): ?>
-                                            <?php
-                                            $seleccion1 = "Contiene Estimaciones";
-                                            $value1='value="4"';
-                                            $seleccion = "Selecciona una opción";
-                                            $value = 'value="0"';
-                                            
-                                            
-                                            
-                                           
-                                            ?>
-                                            
-                                               
-                                            <select class="form-control" name="tipo_documento<?php echo $rRowDocumentos->id; ?>" id="tipo_documento<?php echo $rRowDocumentos->id; ?>" onchange="uf_recibir_tipo_documento(<?= $rRowDocumentos->id; ?>,<?= $idArchivo ?>,<?= $preregistro ?>,<?= $idDireccion_responsable ?>)" >
-                                                
-                                                <option   <?php echo $value ?> id="select<?php echo $rRowDocumentos->id; ?>" name="select<?php echo $rRowDocumentos->id; ?>"><?php echo $seleccion ?></option>
-                                                <option id="tipo_documento<?php echo $rRowDocumentos->id; ?>" name="tipo_documento<?php echo $rRowDocumentos->id; ?>" <?php echo $value1 ?> > <?php echo $seleccion1 ?> </option>
-                                               
-                                            </select>
-
-                                          <?php  else: ?>
-
-                                              <?php
-                                              $seleccion = "Selecciona una opción";
-                                              $value = 'value="0"';
-                                              $seleccion1 = "Original";
-                                              $value1='value="2"';
-                                              $seleccion2 = "Copia";
-                                              $value2= 'value="1"';
-                                              $seleccion3 = "No Aplica";
-                                              $value3= 'value="3"';
-                                            
-                                              ?>
-                                        
-                                            
-                                               
-                                              <select class="form-control" name="tipo_documento<?php echo $rRowDocumentos->id; ?>" id="tipo_documento<?php echo $rRowDocumentos->id; ?>" onchange="uf_recibir_tipo_documento(<?= $rRowDocumentos->id; ?>,<?= $idArchivo ?>,<?= $preregistro ?>,<?= $idDireccion_responsable ?>)" >
-                                                  
-                                                  <option   <?php echo $value ?> id="select<?php echo $rRowDocumentos->id; ?>" name="select<?php echo $rRowDocumentos->id; ?>"><?php echo $seleccion ?></option>
-                                                  <option id="tipo_documento<?php echo $rRowDocumentos->id; ?>" name="tipo_documento<?php echo $rRowDocumentos->id; ?>" <?php echo $value1 ?> > <?php echo $seleccion1 ?> </option>
-                                                  <option id="tipo_documento<?php echo $rRowDocumentos->id; ?>" name="tipo_documento<?php echo $rRowDocumentos->id; ?>" <?php echo $value2 ?> > <?php echo $seleccion2 ?> </option>
-                                                  <option id="tipo_documento<?php echo $rRowDocumentos->id; ?>" name="tipo_documento<?php echo $rRowDocumentos->id; ?>" <?php echo $value3 ?> > <?php echo $seleccion3 ?> </option>
-                                              </select>
-                                          <?php endif; ?> 
-                                                  
-                                      </div>  <!-- /Row tipodocumento -->
-                                            
-                                      <div class="m-t">  <!--Row Hojas -->
-                                                 
-                                          <label class="sr-only" for="exampleInputEmail3">No. Hojas</label>
-                                          <input type="number" class="form-control" id="noHojas_doc_<?= $rRowDocumentos->id ?>" min="0" name="noHojas_doc" placeholder="No Hojas" value="" onchange="cargar_noHojas_cid(event,<?= $rRowDocumentos->id ?>, <?= $idArchivo ?>)" onkeyup="cargar_noHojas_cid(event,<?= $rRowDocumentos->id ?>, <?= $idArchivo ?>)" onkeypress="return validar(event)"  >
-                                            
-                                            
-                                          <div id="oculta-noHojas-<?= $rRowDocumentos->id ?>" class="col-sm-12 d-n"></div>
-                                           
-                                      </div>  <!--Row hojas -->
-
-                                  </div>  <!--col-sm-8-->
-
-                                  <div class="col-sm-4">
-
-                                          <a href="#observaciones_bloque" id="btn-ver-obs"  data-toggle="modal" title="Ver Observaciones" class="btn btn-default" data-target="#observaciones_bloque" title="Observaciones" role="button" onclick="ver_observaciones_documento(<?php echo $idArchivo; ?>,<?php echo $rRow->id; ?>,<?php echo $rRowSubProcesos->id ?>,<?php echo $rRowDocumentos->idDoc ?>, <?= $preregistro ?>)">
-                                                  <span class="glyphicon glyphicon-search"></span>
-                                          </a>
-                                          <a href="#" id="btn-agregar-obs"  data-toggle="modal" title="Agregar observaciones" data-target="#observacion_bloque" role="button" class="btn btn-warning m-t" onclick="uf_agregar_observaciones(<?php echo $rRow->id .' , ' . $rRowSubProcesos->id . ' , ' .$rRowDocumentos->idDoc . ' , ' .$idDireccion_responsable . ' , ' .$idusuario.','.$rRowDocumentos->idDireccion_responsable; ?>)">
-                                                          <span class="glyphicon glyphicon-list"></span>
-                                                      </a>
-
-                                             
-                                        
-                                    <!--<div class="">
-                                       
-                                        <input   type="checkbox" value="" disabled="disabled"> Recibido
-                                      
-                                    </div>
-
-                                    <div class="" >
-                                      
-                                      
-                                        <input  type="checkbox" value="" disabled="disabled"> Revisado
-
-                                     
-                                    </div>-->
-                                      
-                                  </div> <!--col-sm-4-->
-
-                                </div> <!--/row tipo doc y num hojas -->
-<!--
-                                <div class="col-sm-12">
-                                  <a href="#observaciones_bloque" id="btn-ver-obs"  data-toggle="modal" title="Ver Observaciones" class="btn btn-default m-t" data-target="#observaciones_bloque" title="Observaciones" role="button" onclick="ver_observaciones_documento(<?php echo $idArchivo; ?>,<?php echo $rRow->id; ?>,<?php echo $rRowSubProcesos->id ?>,<?php echo $rRowDocumentos->idDoc ?>, <?= $preregistro ?>)">
-                                          <span class="glyphicon glyphicon-search"></span>
-                                  </a>
-                                  <a href="#" id="btn-agregar-obs"  data-toggle="modal" title="Agregar observaciones" data-target="#observacion_bloque" role="button" class="btn btn-warning m-t" onclick="uf_agregar_observaciones(<?php echo $rRow->id .' , ' . $rRowSubProcesos->id . ' , ' .$rRowDocumentos->idDoc . ' , ' .$idDireccion_responsable . ' , ' .$idusuario.','.$rRowDocumentos->idDireccion_responsable; ?>)">
-                                                  <span class="glyphicon glyphicon-list"></span>
-                                              </a>
-
-                                     
-                                </div>   -->
-                            </div> <!--col-sm-12 mb-separacion-->
-                            
-                            
-                                
-
-                        <?php endif; ?>  
-                
-
-
-<!-- ----------------------------------------------------------------------------------------- -->
-                    
-                      
-                         
-                       
-                                        
-                              
-                    </div> <!-- col-sm-3 -->
-
-                    <div class="col-sm-9" >
-                      <div class="panel panel-warning">
-                          
-                          
-                             
-                         
-                          <div class="panel-heading"> 
-                               <a class="panel-title" data-toggle="collapse" data-parent="#panel-documentos-<?php echo $rRowDocumentos->id;  ?>" href="#panel-element-documentos-<?php echo $rRowDocumentos->id;  ?>">
-                                  
-                                                  
-                                                      <div class="m-b">
-                                                          <?php echo $rRowDocumentos->Nombre;  ?>
-                                                      </div>
-                                                      
-                                                      
-                                                      
-                                              
-                                                  
-                                                      
-                                             
-                                                      
-                                                      
-                                                  
-                                             
-                                          
-                                          
-                                  
-                              </a> 
-                              <p><small><?php if ($rRowDocumentos->idDireccion_responsable != 0) {
-                                        echo $addw_direciones[$rRowDocumentos->idDireccion_responsable];
-                                        $responsable_documento = $rRowDocumentos->idDireccion_responsable;
-                                        }else{
-                                            echo $aArchivo['Direccion'];
-                                            $responsable_documento = $aArchivo['Direccion'];
-                                        }
-                                        ?>
-                                 </small></p>
-                          </div>
-                           
-                          
-                          
-                          <div id="panel-element-documentos-<?php echo $rRowDocumentos->id;  ?>" class="panel-collapse collapse <?php echo $strin_documento;  ?>">
-                              <div class="panel-body" id="panel-body-documentos">
-                                  <div class="row">
-                                      <!-- Panel de Control--> <!-- Documento <?= $rRowDocumentos->id; ?>-->
-                                      <div class="col-sm-12">
-                                          <section id="<?php echo "section_".$rRowDocumentos->id; ?>" class="row">
-                                              
-                                              <?php if ($Editar==1 || $recibe ==1 || $reviso==1){ ?> 
-                                              <div class="row">
-                                                  <div class="col-sm-12 m-b">
-                                                      <div class="col-xs-12 col-sm-12" style="text-align: end">
-                                                                  <div class="btn-documentos">
-                                                                        <a id="btn-eliminar-doc"   class="btn btn-danger del_documento" href="<?php echo site_url('archivo/eliminar_relacion_archivo_documento/' . $rRowDocumentos->id . '/' . $idArchivo); ?>" title="Eliminar Documento" onclick="return confirm('¿Confirma eliminar el documento y sus anexos?');" target="_self"><span class="glyphicon glyphicon-remove" ></span> Eliminar Documento</a>
-                                                                  </div>
-                                                      </div>
-                                                  </div>
-                                                  <?php if ($Editar==1){ ?>
-                                                  <div class="col-sm-12  m-b-separacion">
-                                                              <div class="col-xs-12 col-sm-6">
-                                                                  <button class="btn btn-success dropdown-toggle" onclick="nuevo_doc_anexo(<?= $idArchivo; ?>, <?= $rRowDocumentos->id; ?>,<?= $rRow->id; ?>,<?= $rRowSubProcesos->id;?>, <?= $rRowDocumentos->idDoc; ?>)" type="button" >
-                                                                      <span class="glyphicon glyphicon-plus" title="Nuevo Anexo" ></span> Digitalizar Documento
-                                                                  </button>&nbsp; 
-                                                              </div>
-
-
-
-                                                  </div>
-                                                   <?php } ?> 
-                                              </div>  
-                                                      
-                                                    
-                                               <?php } ?> 
-                                              
-                                              
-                                          <?php
-                                          
-                                          //$qEjercicio = $this->ferfunc->get_subreg("Ejercicios",array("id" =>$aArchivo['idEjercicio']));
-                                          //$aEjercicio=$qEjercicio->row_array();
-                                              
-                                          if($preregistro != 1)    {
-                                              $tabla="saaDocumentosAnexos_".$aArchivo['idEjercicio'];
-                                              
-                                              $qEstimaciones = $this->ferfunc->get_subreg_distinct($tabla, "idRel_Archivo_Documento =" . $rRowDocumentos->id, " Numero_Estimacion, Es_Estimacion, Es_Prorroga " );
-
-                                              if (isset($qEstimaciones)) {
-                                                  if ($qEstimaciones->num_rows() > 0) {
-                                                      foreach ($qEstimaciones->result() as $rRowEstimaciones) {
-
-                                           ?>
-                                              
-                                                      <?php  
-                                              
-                                             
-                                                      $strEstimacion_in="  ";
-                                                      if ($rRowEstimaciones->Numero_Estimacion==$Numero_Estimacion){
-                                                          $strEstimacion_in=" in ";
-                                                      }
-                                                      ?>        
-                                               <div class="panel-group col-sm-12" id="panel-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>">
-                                                   <div class="panel panel-default">
-                                                       <div class="panel-heading">
-                                                       <?php if($rRowEstimaciones->Es_Prorroga == 1){  ?>
-                                                           <a class="panel-title" data-toggle="collapse" data-parent="#panel-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>" href="#panel-element-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>">
-                                                               Prorr-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>
-                                                           </a>
-                                                       <?php }else if($rRowEstimaciones->Es_Estimacion == 1){  ?>
-                                                           <a class="panel-title" data-toggle="collapse" data-parent="#panel-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>" href="#panel-element-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>">
-                                                               Est-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>
-                                                           </a>
-                                                       <?php }else{  ?>
-                                                           <a class="panel-title" data-toggle="collapse" data-parent="#panel-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>" href="#panel-element-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>">
-
-                                                           </a>
-                                                       <?php } ?>
-                                                       </div>
-                                                       <?php if($rRowEstimaciones->Es_Prorroga != 1 && $rRowEstimaciones->Es_Estimacion != 1){ ?>
-                                                           <div id="panel-element-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>" class="panel-collapse collapse in">
-                                                       <?php }else{ ?>
-                                                           <div id="panel-element-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>" class="panel-collapse collapse <?php  echo $strEstimacion_in; ?>">
-                                                       <?php } ?>    
-                                                           <div class="panel-body">
-                                                               <div class="row clearfix"> 
-                                                                   <!-- Panel de Control-->
-                                                                   <div class="col-md-12 column">
-
-                                                                           <?php
-                                                                           $qDocumentosAnexos = $this->ferfunc->get_subreg($tabla,array("idRel_Archivo_Documento" => $rRowDocumentos->id,"Numero_Estimacion"=>$rRowEstimaciones->Numero_Estimacion));
-
-                                                                            if (isset($qDocumentosAnexos)) {
-                                                                                if ($qDocumentosAnexos->num_rows() > 0) { ?>
-                                                                                   <table class="table table-striped table-bordered table-hover text-center">
-                                                                                       <tr>
-                                                                                           <!--th>
-                                                                                               Tipo Documento
-                                                                                           </th-->
-                                                                                           <th class="col-sm-6">
-                                                                                               Accion
-                                                                                           </th>
-                                                                                            <th class="col-sm-3">
-                                                                                               Nombre de Archivo
-                                                                                           </th>
-
-
-
-                                                                                           <th class="col-sm-3">
-
-                                                                                           </th>
-
-
-                                                                                       </tr>
-                                                                               <?php foreach ($qDocumentosAnexos->result() as $rRow_anexos) { ?>
-
-                                                                               <tr>
-                                                                                   <!--td>
-                                                                                       <?php
-                                                                                       echo $rRow_anexos->Documento;
-                                                                                       ?>        
-                                                                                   </td-->
-                                                                                    <td>
-                                                                                       <a href="<?=site_url('archivo/verDoc/'.$rRow_anexos->id.'/'.$aArchivo['idEjercicio'])?>" class="btn btn-default"  role="button" ><span class="glyphicon glyphicon-eye-open"></span> Ver</a>
-                                                                                       <a href="<?=site_url('archivo/descargarDoc/'.$rRow_anexos->id.'/'.$aArchivo['idEjercicio'])?>" class="btn btn-default"  role="button" ><span class="glyphicon glyphicon-download"></span> Descargar</a>
-                                                                                       <a href="<?=site_url('archivo/delete_doc_anexo/'.$rRow_anexos->id.'/'.$aArchivo['idEjercicio'])?>" title="Eliminar" onclick="return confirm('¿Confirma Que Quiere Eliminar el Documento Anexo?');" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></a>
-                                                                                   </td>
-                                                                                   <td>
-                                                                                       <?php
-                                                                                       echo $rRow_anexos->nombrearchivo;
-                                                                                       ?>
-                                                                                   </td>
-
-
-
-                                                                                   <td>
-
-                                                                                        <?php if ($rRow_anexos->idSubDocumento>0){ ?>
-                                                                                                <?php 
-
-                                                                                                $qSubDocumento = $this->ferfunc->get_subreg_distinct('saaSubDocumentos', "id =" . $rRow_anexos->idSubDocumento, " id,Nombre" );
-
-                                                                                                if ($qSubDocumento->num_rows()>0){
-                                                                                                    $aSubDocumento=$qSubDocumento->row_array();
-                                                                                                    echo $aSubDocumento['Nombre']; 
-
-                                                                                                }
-
-                                                                                                ?>
-                                                                                       <?php } ?>
-                                                                                   </td>
-
-
-
-
-                                                                               </tr>
-
-
-                                                                               <?php }
-                                                                                    ?>
-                                                                                   </table>
-                                                                               <?php  
-                                                                               }
-                                                                           }
-                                                                           ?>   
-
-
-
-                                                                       </div>
-                                                               </div>
-                                                           </div>
-                                                       </div>
-                                                   </div>
-
-                                               </div>
-                                          <?php
-                                                  //  }
-                                          
-                                              
-                                         
-                                                      }
-                                                  }
-                                              }
-                                          }//preregistro != 1
-                                              ?>       
-                                                      
-                                              <?php /*if ($preregistro==1){ 
-                                                      $style ="";
-                                                      //echo 'Estatus ' .$Estatus .'preregistro ' .$preregistro;
-                                                      if ($preregistro==1 && $Estatus > 10){
-                                                          //echo 'OK';
-                                                          $style = 'style="display:none"';
-                                                      }
-                                                  
-                                                  ?> 
-                                                  
-                                                  
-                                                  <div class="col-sm-12 m-b"> 
-                                                      
-                                                      <div class="btn-observaciones col-xs-12 col-sm-6" <?= $style ?>>
-                                                          <a href="#" id="btn-agregar-obs"  data-toggle="modal" data-target="#observacion_bloque" role="button" class="btn btn-success" onclick="uf_agregar_observaciones(<?php echo $rRow->id .' , ' . $rRowSubProcesos->id . ' , ' .$rRowDocumentos->idDoc . ' , ' .$rRowDocumentos->direccion_preregistro . ' , ' .$rRowDocumentos->idUsuario_recibio; ?>)">
-                                                              <span class="glyphicon glyphicon-plus-sign"></span> Agregar Observaciones
-                                                          </a>
-                                                      </div>
-                                                  
-                                                      <div class="btn-observaciones col-xs-12 col-sm-6">
-                                                          <a href="#observaciones_bloque" id="btn-ver-obs"  data-toggle="modal" class="btn btn-default" data-target="#observaciones_bloque" title="Observaciones" role="button" onclick="ver_observaciones_documento(<?php echo $idArchivo; ?>,<?php echo $rRow->id; ?>,<?php echo $rRowSubProcesos->id ?>,<?php echo $rRowDocumentos->idDoc ?>)">
-                                                              <span class="glyphicon glyphicon-search"></span> Ver  Observaciones
-                                                          </a>
+                                            <div class="col-md-12">
+                                                <div class="panel panel-primary">
+                                                    <div class="panel-heading">Datos Generales </div>
+ 
+                                                    <div class="row panel-body">
+ 
+                                                        <div class="col-md-12">
+                                                            
+ 
+                                                            <div class="d-f m-b">
+ 
+                                                                <div class="col-md-2 align-t-e"><strong>Orden Trabajo</strong></div>
+                                                                <div class="col-md-10"><?= $aArchivo['OrdenTrabajo']; ?></div>
+                                                            </div>
+                                                            <div class="d-f m-b">
+ 
+                                                                <div class="col-md-2 align-t-e"><strong>Contrato</strong></div>
+                                                                <div class="col-md-10"> <?= $aArchivo['Contrato']; ?></div>
+                                                            </div>
+                                                            <div class="d-f m-b">
+ 
+                                                                <div class="col-md-2  align-t-e"><strong>Obra</strong></div>
+                                                                <div class="col-md-10"><?= $aArchivo['Obra']; ?></div>
+                                                            </div>
+                                                            <div class="d-f m-b">
+ 
+                                                                <div class="col-md-2 align-t-e"><strong>Modalidad</strong></div>
+                                                                <div class="col-md-10"><?= $addw_modalidades[$aArchivo['idModalidad']]; ?> </div>
+                                                            </div>
+                                                            <div class="d-f m-b">
+ 
+                                                                <div class="col-md-2 align-t-e"><strong>Ejercicio</strong></div>
+                                                                <div class="col-md-10"><?= $aArchivo['idEjercicio']; ?></div>
+                                                            </div>
+                                                            <div class="d-f m-b">
+ 
+                                                                <div class="col-md-2 align-t-e"><strong>Normatividad</strong></div>
+                                                                <div class="col-md-10"> <?= $aArchivo['Normatividad']; ?> </div>
+                                                            </div>
+                                                            <div class="d-f m-b">
+ 
+                                                                <div class="col-md-2 align-t-e"><strong>Fondo de Programa</strong></div>
+                                                                <div class="col-md-10"> <?= $aArchivo['FondodePrograma']; ?> </div>
+                                                            </div>
+                                                             
+                                                             
+                                                        </div>
+                                                         
+                                                         
+ 
+ 
                                                           
-                                                      </div>
-                                                  </div>
-                                                  
-                                                  
-                                              <?php } 
-                                              
-                                              */
-                                                  
-                                              ?> 
-                                               
-                                              
-                                              <?php if ($preregistro == 1 || $recibe == 1){ ?> 
-                                                   
-                                                      
-                                                      
+                                                    </div>
+                                                     
+                                                     
+                                                </div> <!--Fin panel primary-->
+                                            </div>
+                                        </div>   
+                                    </div>
+                                     
+                                    <div class="col-md-4">
+                                        <div class="panel panel-warning">
+                                            <div class="panel-heading">Datos de Archivo</div>
+                                            <div class="panel-body">
+                                                <div class="col-md-12">
+                                                    <form class="form-horizontal">
+                                                         
+                                                         
+                                                            <div class="form-group m-b" id="caja-i">
+                                                                 
+                                                                 
+                                                                    <label class="col-sm-4 control-label" for="exampleInputEmail3">Identificador</label>
+                                                                    <div class="col-sm-8">
+                                                                        <input type="text" class="form-control" id="identificador" name="identificador" placeholder="Identificador" value="<?php if ($aArchivo['identificado']) echo $aArchivo['identificado']?>" onchange="cargar_identificador(<?= $idArchivo ?>)">
+                                                                         
+                                                                    </div>
+                                                                    <!--
+                                                                    <div class="col-sm-3">
+                                                                        <a class="btn btn-default col-sm-12" id="mostrar" onclick="cargar_identificador(<?php echo $idArchivo ?>)">Agregar</a>
+                                                                    </div>
+                                                                    -->
+                                                                 
+ 
+                                                                    
+                                                                 
+                                                            </div>
+ 
+                                                         
+                                                         
+                                                         
+                                                         
+                                                        <?php if ($preregistro ==0){ ?>
+                                                             
+                                                                <!-- grupo va en la tabla bloque-->
+                                                                <div class="form-group m-b" id="">
+                                                                  <label class="col-sm-4 control-label" for="exampleInputEmail3">Grupo Obra</label>
+                                                                  <div class="col-sm-8">
+                                                                      <select class="form-control" id="slc_obra" name="slc_obra" onchange="cargar_bloqueObra(<?php echo $idArchivo ?>)">
+                                                                            <option value="0"><?php if ($aArchivo['idBloqueObra']) echo $aArchivo['idBloqueObra']; else echo "Selecciona un Grupo" ?></option>
+                                                                            <?php foreach ($qBloques->result() as $rowdata) {  ?>
+                                                                            <option value="<?php echo $rowdata->id; ?>"><?php echo $rowdata->Nombre; ?></option>
+                                                                            <?php } ?>
+                                                                      </select>
+                                                                  </div>
+ 
+                                                                </div>
+ 
+                                                                     
+                                                       <?php } ?>
+                                                         
+                                                        <div class="form-group m-b"> 
+                                                            <div class="col-sm-12">
+                                                                <a href="<?php echo site_url("archivo/actualizar_plantilla"). '/' . $aArchivo['id']; ?>" class="btn btn-success"  onclick=""><span class="glyphicon glyphicon-repeat"></span> Actualizar Plantilla </a>
+                                                            </div>
+                                                             
+                                                             
+                                                             
+                                                        </div>
+ 
+                                                        <div class="form-group m-b"> 
+                                                            <div class="col-sm-12">
+                                                                    <a href="#" data-toggle="modal" data-target="#observacion_bloque_archivo" role="button" class="btn btn-success" onclick="agregar_observaciones_archivo(<?= $aArchivo['idDireccion']?>, <?= $aArchivo['idContrato']?>)">
+                                                                        <span class="glyphicon glyphicon-plus"></span> Observaciones Archivo
+                                                                    </a>
+                                                            </div>
+                                                        </div>
+                                                    </form>
                                                     
-                                                  
+                                                    <div class="alert alert-success" role="alert" style="margin-bottom:20px;">
+                                                    
+                                                                
+                                                        <b>Dirección Preregistro: </b> 
+                                                        
+                                                        
+                                                        
+                                                        <select class="form-control" name="idDireccion-preregistro" id="idDireccion-preregistro" onchange="cambia_direcciones()" >
+                                                            <option  value="0" >  SELECCIONA DIRECCIÓN </option>
+                                                            <?php foreach ($Direcciones->result() as $rDireccion) { ?>
+                                                                <option   value ="<?= $rDireccion->id ?>"  ><?= $rDireccion->Nombre ?></option>
+                                                            <?php }  ?>
 
-                                                  <?php if ($rRowDocumentos->Nombre == "11.1 ESTIMACIONES"){ ?> 
-                                                  <div class="col-sm-12">   
-                                                          <!--
-                                                          <div class="col-xs-12 col-sm-12" align="end" style="text-align: end; margin-top: 20px">
-   
-                                                                 <!-- $rRowDocumentos->id  ==  id Rel_Archivo_Documento -->
-                                                                  <!--     <form class="form-inline" action="<?php echo  site_url('archivo/cargar_estimaciones/'. $rRowDocumentos->id . '/' . $idArchivo); ?>" method="post">
-                                                                           <div class="form-group">
-                                                                             <label class="sr-only" for="exampleInputEmail3">No. de Estimaciones</label>
-                                                                             <input type="number" class="form-control" id="noEstimaciones" name="noEstimaciones" placeholder="No Estimaciones">
-                                                                           </div>
-   
-                                                                           <button type="submit" class="btn btn-default">Agregar</button>
-                                                                       </form>
-   
-                                                          </div> -->
-                                                       
-                                                          <div class="col-xs-12 col-sm-12" align="end" style="text-align: end; margin-top: 20px">
-   
-                                                                     <!-- $rRowDocumentos->id  ==  id Rel_Archivo_Documento -->
-                                                                           <form class="form-inline d-n" id="form-agregar-estimaciones">
-                                                                               <div class="form-group">
-                                                                                 <label class="sr-only" for="exampleInputEmail3">No. de Estimaciones</label>
-                                                                                 <input type="number" class="form-control" id="noEstimaciones" name="noEstimaciones" placeholder="No Estimaciones">
-                                                                               </div>
-   
-                                                                               <button type="button" class="btn btn-default" onclick="cargar_estimaciones(<?= $rRowDocumentos->id  ?>, <?= $idArchivo ?> , <?= $reviso ?>)">Agregar</button>
-                                                                           </form>
-   
-                                                          </div>
-                                                  </div>
-                                                  <div id="div_estimaciones_<?php echo $rRowDocumentos->id?>">
-   
-                                                   
-                                                  <?php  
-                                                  $estimaciones_existentes = $this->ferfunc->get_subreg_distinct("saaEstimaciones", "idRel_Archivo_Documento= " . $rRowDocumentos->id , "Numero_Estimacion, idRel_Archivo_Documento"); 
-                                                  if ($estimaciones_existentes->num_rows() >0){
-                                                      //echo $estimaciones_existentes->num_rows();
-                                                      foreach ($estimaciones_existentes->result() as $estimaciones) { 
-                                                          //echo $estimaciones->Numero_Estimacion;
-                                                  ?>
-                                               
-                                                      <div class="col-sm-12 m-t" style="margin-bottom:20px" >
-                                                          <div class="panel panel-default">
-                                                              <div class="panel-heading">
-                                                                       
-                                                                      <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse-<?php  echo $estimaciones->Numero_Estimacion ?>" aria-expanded="true" aria-controls="collapse-<?php  echo $estimaciones->Numero_Estimacion ?>">
-                                                                                  <!--div class="display-flex">
-   
-                                                                                      EST. <?php  echo $estimaciones->Numero_Estimacion ?>
-                                                                                      <a class="btn btn-danger del_documento" href="<?php echo site_url('archivo/eliminar_estimacion/' . $estimaciones->Numero_Estimacion  . '/' . $estimaciones->idRel_Archivo_Documento); ?>" title="Eliminar Documento" onclick="return confirm('¿Confirma eliminar la estimación y sus anexos?');" target="_self"><span class="glyphicon glyphicon-remove" ></span> Eliminar Estimacion</a>
-   
-                                                                                  </div-->
-                                                                                  <div class="display-flex">
-   
-                                                                                      EST. <?php  echo $estimaciones->Numero_Estimacion ?>
-                                                                                      <a class="btn btn-danger del_documento" id="eliminar_est" onclick="eliminar_estimacion(<?= $estimaciones->Numero_Estimacion?>,<?=$estimaciones->idRel_Archivo_Documento?>,<?=$idArchivo?>)" target="_self"><span class="glyphicon glyphicon-remove"></span> Eliminar Estimacion</a>
-   
-                                                                                  </div>
-   
-   
-                                                                      </a>
-                                                                   
-                                                              </div>
-                                                              <div id="collapse-<?php  echo $estimaciones->Numero_Estimacion  ?>" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-<?php  echo $estimaciones->Numero_Estimacion  ?>">
-                                                                  <div class="panel-body">
-                                                                      <?php 
-                                                           
-                                                           
-                                                                      $qEstimaciones = $this->ferfunc->get_subreg("saaEstimaciones",array("idRel_Archivo_Documento" => $rRowDocumentos->id,), "*", "Numero_Estimacion,ordenar_subdocumento");
-                                                                      if (isset($qEstimaciones)){ 
-   
-                                                                          if ($qEstimaciones->num_rows() >0){
-                                                                             foreach ($qEstimaciones->result() as $rEstimaciones) { 
-                                                                                 //echo $estimaciones->Numero_Estimacion .' == '. $rEstimaciones->Numero_Estimacion;
-                                                                                 if($estimaciones->Numero_Estimacion  == $rEstimaciones->Numero_Estimacion){
-                                                                                      
-   
-                                                                      ?>  
-                                                                      <?php 
-   
-   
-                                                                          $strchecked_revisado=""; 
-                                                                          $value_estimaciones= "";
-                                                                          $seleccion_estimaciones = "";
-                                                                           
-                                                                         
-                                                                          if ($rEstimaciones->revisado==1){
-                                                                               $strchecked_revisado='checked="checked"';
-                                                                              }
-   
-                                                                          if ($rEstimaciones->original_recibido==0 && $rEstimaciones->copia==0 && $rEstimaciones->no_aplica==0){
-                                                                                  $seleccion_estimaciones = "Selecciona una opción";
-                                                                                  $value_estimaciones = 0;
-                                                                                  $seleccion_estimaciones1 = "Copia";
-                                                                                  $value_estimaciones1 = 1;
-                                                                                  $seleccion_estimaciones2 = "Original";
-                                                                                  $value_estimaciones2 = 2;
-                                                                                  $seleccion_estimaciones3 = "No Aplica";
-                                                                                  $value_estimaciones3 = 3;
-                                                                          }
-                                                                          
-                                                                          if ($rEstimaciones->original_recibido==1){
-                                                                                  $seleccion_estimaciones = "Original";
-                                                                                  $value_estimaciones = 2;
-                                                                                  $seleccion_estimaciones1 = "Copia";
-                                                                                  $value_estimaciones1 = 1;
-                                                                                  
-                                                                                  $seleccion_estimaciones2 = "No Aplica";
-                                                                                  $value_estimaciones2 = 3;
-                                                                                  $seleccion_estimaciones3 = "Selecciona una opcion";
-                                                                                  $value_estimaciones3 = 0;
-                                                                          }
-                                                                          
-                                                                          if ($rEstimaciones->copia==1){
-                                                                                  $seleccion_estimaciones = "Copia";
-                                                                                  $value_estimaciones = 1;
-                                                                                  $seleccion_estimaciones1 = "Original";
-                                                                                  $value_estimaciones1 = 2;
-                                                                                  $seleccion_estimaciones2 = "No Aplica";
-                                                                                  $value_estimaciones2 = 3;
-                                                                                  $seleccion_estimaciones3 = "Selecciona una opcion";
-                                                                                  $value_estimaciones3 = 0;
-                                                                          }
-                                                                          
-                                                                          if ($rEstimaciones->no_aplica==1){
-                                                                              $seleccion_estimaciones = "No aplica";
-                                                                              $value_estimaciones = 3;
-                                                                              $seleccion_estimaciones1 = "Original";
-                                                                              $value_estimaciones1 = 2;
-                                                                              $seleccion_estimaciones2 = "Copia";
-                                                                              $value_estimaciones2 = 1;
-                                                                              $seleccion_estimaciones3 = "Selecciona una opcion";
-                                                                              $value_estimaciones3 = 0;
-                                                                          }
-                                                                          
-                                                                          
-                                                                              
-                                                                         
-   
-   
-   
-                                                                      ?>  
-   
-                                                                    <div class="row m-b-separacion">
-                                                           
-                                                                      <div class="col-md-5">
-                                                                                 
-                                                                                   
-                                                                      
-                                                                          <div class="col-md-8">
-   
-                                                                              <select class="form-control m-b" name="tipo_documento_est<?php echo $rEstimaciones->id; ?>" id="tipo_documento_est<?php echo $rEstimaciones->id; ?>" onchange="uf_recibir_tipo_estimacion(<?= $rEstimaciones->id;?>)" >
-                                                                                  <option value="<?= $value_estimaciones ?>" id="select" name="select"><?php echo $seleccion_estimaciones ?></option>
-                                                                                  
-                                                                                  <option id="tipo_documento_est<?php echo $rEstimaciones->id; ?>" name="tipo_documento_est<?php echo $rEstimaciones->id; ?>" value="<?php echo $value_estimaciones1 ?>"><?php echo $seleccion_estimaciones1 ?></option>
-                                                                                  <option id="tipo_documento_est<?php echo $rEstimaciones->id; ?>" name="tipo_documento_est<?php echo $rEstimaciones->id; ?>" value="<?php echo $value_estimaciones2 ?>"><?php echo $seleccion_estimaciones2 ?></option>
-                                                                                  <option id="tipo_documento_est<?php echo $rEstimaciones->id; ?>" name="tipo_documento_est<?php echo $rEstimaciones->id; ?>" value="<?php echo $value_estimaciones3 ?>"><?php echo $seleccion_estimaciones3 ?></option>
-                                                                                </select>
-   
-                                                                                <!-- $rRowDocumentos->id  ==  id Rel_Archivo_Documento -->
-                                                                                <div class="m-b">
-                                                                                  <div class="">
-                                                                                     <label class="sr-only" for="exampleInputEmail3">No. Hojas</label>
-                                                                                     <input type="number" class="form-control" id="noHojas_est_<?= $rEstimaciones->id ?>" name="noHojas_est_<?= $rEstimaciones->id ?>" placeholder="No Hojas" value="" onchange="cargar_noHojas_estimaciones(<?= $rEstimaciones->id ?>)" min="0">
-                                                                                  </div>
-                                                                                            
-                                                                                </div>
-                                                                                
-                                                                                <div class="m-b" id="div_noHojas_est_<?= $rEstimaciones->id ?>" name="div_noHojas_est_<?= $rEstimaciones->id ?>">
-                                                                                    <?php echo '<b>No Hojas: </b>' . $rEstimaciones->noHojas?>
-                                                                                
-                                                                                </div>
-                                                                                
-                                                                                <div  class="m-b d-n" id="div_noHojas_est_aux_<?= $rEstimaciones->id ?>" name="div_noHojas_est_aux_<?= $rEstimaciones->id ?>">
-                                                                                    
-                                                                                
-                                                                                </div>
-                                                                                
-                                                                                
+
+
+                                                        </select>
+
                                                               
-   
-                                                                                 
-   
-   
-                                                                          </div>
-                                                                          <?php if($reviso ==1 ){
-                                                                              $disable_estimacion= "";
-                                                                          } else {
-                                                                              $disable_estimacion= "disabled = 'disabled'";
-                                                                          }
-                                                                          ?>
-                                                                          <div class="col-md-4" >
-                                                                              <div class="checkbox-inline">
-                                                                                  <label><input name="Est_revisado<?php echo $rEstimaciones->id; ?>" type="checkbox"   id="Est_revisado<?php echo $rEstimaciones->id; ?>"  onclick="uf_revisado_estimacion(this,<?= $rEstimaciones->id; ?>)"   <?php echo $strchecked_revisado ?> <?= $disable_estimacion ?>>Revisado</label>
-                                                                              </div>
-   
-                                                                          </div> 
-                                                                          
-                                                                          <div class="col-sm-12">
-                                                                            <a href="#observaciones_bloque" id="btn-ver-obs"  data-toggle="modal" title="Ver Observaciones" class="btn btn-default m-t" data-target="#observaciones_estimaciones" title="Observaciones" role="button" onclick="ver_observaciones_estimacion(<?php echo $idArchivo; ?>,<?php echo $rEstimaciones->id; ?> ,<?= $preregistro ?>)">
-                                                                                    <span class="glyphicon glyphicon-search"></span>
-                                                                            </a>
-                                                                            <a href="#" id="btn-agregar-obs"  data-toggle="modal" title="Agregar observaciones" data-target="#observacion_estimacion" role="button" class="btn btn-warning m-t" onclick="uf_agregar_observaciones_estimacion(<?php echo $rEstimaciones->id .' , ' .$rRowDocumentos->idDireccion_responsable .' , ' .$idDireccion_responsable  ?>)">
-                                                                                            <span class="glyphicon glyphicon-list"></span>
-                                                                                        </a>
-
-
-                                                                          </div>
-   
-                                                                      </div>
-                                                                      <div class="col-md-7 m-b">
-                                                                          <div class="panel panel-default">
-                                                                              <div class="panel-heading" role="tab" id="heading-<?php  echo $rEstimaciones->id ?>">
-                                                                                <h4 class="panel-title">
-                                                                                  <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse-<?php  echo $rEstimaciones->id ?>" aria-expanded="true" aria-controls="collapse-<?php  echo $rEstimaciones->id?>">
-                                                                                      <div style="display:flex; justify-content: space-between">
-   
-                                                                                          EST. <?php  echo $rEstimaciones->Numero_Estimacion .' - ' .$addw_SubDocumentos[$rEstimaciones->idSubDocumento]?>
-   
-   
-                                                                                      </div>
-   
-   
-                                                                                  </a>
-                                                                                </h4>
-                                                                              </div>
-                                                                              <div id="collapse-<?php  echo $rEstimaciones->id ?>" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-<?php  echo $rEstimaciones->id ?>">
-                                                                                <div class="panel-body">
-   
-                                                                                </div>
-                                                                              </div>
-                                                                          </div> 
-                                                                      </div>
-                                                                    </div> <!--Fin row-->
-                                                                       
-                                                                       
-                                                                      <?php  
-                                                                                  }              
-                                                                              }
-                                                                          }
-                                                                                                   
-                                                                      } //if $qEstimaciones
+                                                          
+                                                    </div>
+                                                         
+                                                         
+                                                        <?php if($Editar == 1){
+                                                             
+                                                        if ($NoProcesos_archivo == $NoProcesos_archivo_integracion){ ?>
+                                                        <div class="alert alert-success" role="alert" style="margin-bottom:20px;">
+                                                         
+                                                                     
+                                                            <?php echo '<b>Estatus Obra: </b>' . 'Finalizado'; ?> 
+                                                            <div>  
+                                                                <a class="enlace-succes" href="#" data-toggle="modal" data-target="#enviar_concentracion" role="button"  onclick="uf_enviar_concentracion()"><span class="glyphicon glyphicon-share-alt"></span> Enviar a Concentración</a>
+                                                            </div> 
+ 
                                                                    
-                                                                  
-                                                                      ?>  
-                                                                  </div>   <!-- panel body-->
-                                                              </div> <!-- panel collapse-->
-                                                           
                                                                
-                                                          </div>
-                                                      </div>
-                                               
-                                               
-                                               
-                                                      <?php 
-                                                              }
-                                                          } 
+                                                        </div>
+                                                         
+                                                         
+                                                        <?php } else {  
+                                                            echo '<b>Bloques finalizados: </b>' . $NoProcesos_archivo_integracion; 
+                                                            }
+                                                        }
+                                                         
+                                                         
+                                                        ?>
+                                                         
+                                                        <?php if ($reviso ==1): ?>
+                                                    
+                                                            <div id="trabajar_ot">
+                                                                <?php $usuario =   $this->datos_model->usuario_trabajando($idArchivo);   ?> 
+                                                                <?php  if( $usuario->num_rows() == 1 ): ?>
+                                                                    <?php foreach ($usuario->result() as $rUsuario):?>
+                                                                        <?php if ($rUsuario->idUsuario_Trabajando > 0  ): ?> <!--//alguien está trabajando con OT ?> -->
+                                                                            <?php if($rUsuario->idUsuario_Trabajando == $idusuario): ?> <!-- //el usuario esta trabajando algún bloque en OT?> -->
+                                                                
+                                                                                <label><span class='glyphicon glyphicon-folder-open'></span> Trabajando con OT</label>
+                                                                     
+                                                                            <?php else:  ?> <!--  //hay algun usuario esta trabajando en la OT ?>-->
+                                                                
+                                                                                <label><span class='glyphicon glyphicon-ban-circle'></span> OT Ocupada</label>
+                                                                            <?php  endif;?>
+                                                                        <?php else: ?> <!--  //OT Libre?>-->
+                                                                
+                                                                                <label><span class='glyphicon glyphicon-folder-open'></span> OT Libre</label>
+                                                                        <?php  endif;?>
+                                                                    <?php endforeach;?>
+                                                                <?php else:  ?> <!--  //hay algun usuario esta trabajando en la OT ?>-->
+                                                                
+                                                                    <label><span class='glyphicon glyphicon-ban-circle'></span> OT Ocupada</label>
+                                                               <?php  endif;?>
+                                                            </div>
+                                                        <?php  endif;?>
+                                                            
+                                                         
+                                                    
                                                        
-                                                       
-                                                      ?>
-                                                      </div>
-                                              <?php } ?> 
-                                               
-                                              <?php } ?> 
-                                                
-   
-   
-                                               
-                                               
-                                          </section>     
-                                      </div>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                    
-                    </div><!--
-                        <div class="col-sm-2" >
-                            <!---Direccion responsable <?= $rRowDocumentos->idDireccion_responsable ?> <?= $rRowDocumentos->id ?> -->
-                      <!--      <div>
-                                <?php echo $addw_direciones[$rRowDocumentos->idDireccion_responsable];  ?>
-                            </div>
-                        </div>-->
-                    </div> 
-                        
-                  
-                </div>
-           
-                    
-      <?php
-           
-    }
-    ?>           
-                                        
-                                        
-                                        
-                                        
-                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div> <!--Fin panel 4 col -->
+                                     
+                                    
+                                     
                                 </div>
+                                 
                             </div>
                         </div>
-                    </div>
-                   
+                         
+                    </div> <!-- panel-default -->
                 </div>
+            </div>
+
            
-         <?php
-            }
-    }
-    ?>                                     
-                                        
-
-      <?php
-            }
-        }
-    }
-    ?>           
-
-                                        
-                                        
-                                        
-                                        
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                   
-                </div>
             
-                    </div>
+            
+            <!-- Procesos -->
+            <?php if (isset($qProcesos)): ?>
+                <?php if ($qProcesos->num_rows() > 0): ?>
+                        <?php foreach ($qProcesos->result() as $rProcesos): ?>
+                            <div class="col-md-10 col-md-offset-1"> 
+                            <?php $col = 12; ?>
+
+                            <?php if($preregistro == 0): ?>
+                                <!--Bloque Informacion Bloque Azul -->
+                                <div class="col-xs-12 col-sm-3">
+                                    <div class="alert alert-info">
+                                        <div class="row"> 
+                                            <div class="col-sm-12"> 
+                                                <label>Información del Bloque</label>
+                                            </div>
+                                        </div>
+                                        <div class="row"> 
+                                            <div class="col-sm-12" id="estado-bloque-<?= $rProcesos->idTipoProceso ?>"> 
+                                                <label>
+                                                    <?php if ($rProcesos->idUsuario_Trabajando > 0){
+                                                            if ($rProcesos->idUsuario_Trabajando == $idusuario){
+                                                                echo "<span class='glyphicon glyphicon-folder-open'></span> Trabajando con Bloque";
+                                                            } else {
+                                                                echo "<span class='glyphicon glyphicon-ban-circle'></span> Bloque Ocupado";
+                                                            }
+                                                        }else{
+                                                            echo "<span class='glyphicon glyphicon-edit'></span> Bloque Libre "; 
+                                                        }
+                                                    ?>
+                                                </label>
+ 
+                                            </div>
+                                        </div>
+                                        
+                                        <hr>
+                                        
+                                        <div class="row">
+                                            <div class="col-sm-12"> 
+                                                <label>Ubicación Física:</label>
+                                            </div>
+                                            <div class="col-sm-12 m-b"> 
+                                                <a href="#" id="btn-agregar-ubi"  class="btn btn-success btn-sm" data-toggle="modal" data-target="#modal-agregar-ubicacion-fisica" role="button" onclick="uf_agregar_ubicacion(<?php echo $rProcesos->idTipoProceso; ?>)"><span class="glyphicon glyphicon-plus-sign"></span> Agregar Ubicación </a>
+                                                <a href="#"  id="btn-ubicaciones-libres"   class="btn btn-danger btn-sm" data-toggle="modal" data-target="#modal-cambiar-ubicacionfisica" role="button" onclick="uf_ver_ubicacion_fisica_libre(<?php echo $idArea_ubicacion_trabajo ?>, <?php echo $idArchivo ?>)"><span class="glyphicon glyphicon-search"></span>  Ubicaciones Libres</a>
+                                            </div>
+                                            <div class="col-sm-12 m-b" id="tabla_ubi_actualizada_<?= $rProcesos->idTipoProceso ?>" class="col-sm-12 d-n"></div>
+                                            <div class="col-sm-12 m-b" id="tabla_ubi_principal_<?= $rProcesos->idTipoProceso ?>">
+                                                <?php if (isset($qRelProcesoUbicacion)): ?>
+                                                    <?php if ($qRelProcesoUbicacion->num_rows() > 0): ?>
+                                                  
+                                                        <table  id="ubicaciones-tabla-<?= $rProcesos->idTipoProceso ?>"  class="table-bordered table-condensed table-responsive table-small" width="100%">
+                                                            <tr>
+                                                                <td>Acción</td>
+                                                                <td>Ubicacion Fisica</td>
+                                                                
+                                                            </tr>
+                                                            
+                                                            <?php foreach ($qRelProcesoUbicacion->result() as $rRelacion): ?>
+                                                                <?php if ($rRelacion->idTipoProceso == $rProcesos->idTipoProceso): ?>
+                                                                    <?php if ( $idArchivo == $rRelacion->idArchivo): ?>
+                                                                    
+                                                                    <tr>
+                                                                        <td> 
+                                                                            <!-- #MAOC --> 
+
+                                                                            
+                                                                            <div class="btn-group">
+                                                                                <div class="btn-group">
+                                                                                    <button type="button" class="btn btn-default btn-xs dropdown-toggle" id="btn-impresion" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="margin-righ:5px;">
+                                                                                        <span class="glyphicon glyphicon-print"></span>
+                                                                                    </button>
+                                                                                    <ul class="dropdown-menu">
+                                                                                        <li>
+                                                                                            <a href="<?php echo site_url('impresion/etiqueta_orden_trabajo/' . $aArchivo['id']) . ' ' . $rProcesos->idTipoProceso .' '. $rRelacion->idUbicacionFisica ?>" target="_blank">
+                                                                                              <span class="glyphicon glyphicon-file"></span> Etiqueta para Archivo de Recepción
+                                                                                            </a>
+                                                                                        </li>
+
+
+                                                                                    </ul>
+                                                                                 
+                                                                                
+                                                                                </div>
+                                                                                <a  style="margin-righ:5px;" href="#" id="btn-tabla-mod" class="btn btn-success btn-xs" title="" id="btn-modificar-ubi" data-toggle="modal" data-target="#modal-modificar-ubicacion" role="button" onclick="uf_modificar_ubicacion(<?php echo $rRelacion->idRel; ?>)"><span class="glyphicon glyphicon-pencil"></span></a>&nbsp;
+                                                                            
+                                                                                <a  style="margin-righ:5px;" id="btn-tabla-elim" class="btn btn-danger btn-xs del_documento" href="<?php echo site_url('archivo/eliminar_relacion_ubicacion/' . $rRelacion->idRel.' '.$idArchivo .' '. $rRelacion->idUbicacionFisica ); ?>" title="Eliminar Solicitud" onclick="return confirm('¿Confirma eliminar Registro?');" target="_self" ><span class="glyphicon glyphicon-remove" ></span></a> 
+                                                                            </div>
+                                                                            
+                                                                        </td>
+                                                                        <td> <?php echo  $rRelacion->Columna . '.' . $rRelacion->Fila.'.' . $rRelacion->C .'.' . $rRelacion->Apartado . '.' .$rRelacion->Posicion ?></td>
+                                                                        
+                                                                        
+                                                                    </tr>
+                                                                    <?php endif; ?>
+                                                                <?php endif; ?>
+                                                            <?php endforeach; ?>
+                                               
+
+                                                        </table>
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
+                                           
+                                           </div> <!-- tabla_ubi_principal -->
+                                        </div>
+                                        
+                                        <hr>
+                                        <div class="row"> 
+                                            <?php if (($Foliar==1) && ($rProcesos->Estatus == 40 )): ?>
+                       
+                                                
+                                                
+                                                <div class="col-sm-12">
+                                                            <label for="inputEmail3" class="control-label">Folio Desde:</label>
+                                                           <input class="form-control" name="folio_desde<?= $rProcesos->idTipoProceso; ?>" type="text"   id="folio_desde<?= $rProcesos->idTipoProceso; ?>" onchange="uf_folio_desde(this,<?= $idArchivo; ?>,<?= $rProcesos->idTipoProceso; ?>)" value="">
+                                                </div>
+                                                <div class="col-sm-12">
+                                                            <label for="inputEmail3" class="control-label">Folio Hasta:</label>
+                                                           <input class="form-control" name="folio_hasta<?= $rProcesos->idTipoProceso; ?>" type="text"   id="folio_hasta<?= $rProcesos->idTipoProceso; ?>" onchange="uf_folio_hasta(this,<?= $idArchivo; ?>,<?= $rProcesos->idTipoProceso; ?>)" value="">
+                                                </div>
+                           
+                                            <?php else: ?>  
+                                                <?php $qFolio = $this->datos_model->get_folio($idArchivo, $rProcesos->idTipoProceso); ?>
+                                                <?php if ($qFolio->num_rows()>0){
+                        
                     
-                 
-        </div>
-                 
-            <?php
-                 }  
-            ?>
-                 
-      </div>           
-      <?php
-            }
-        }
-    }
-    ?>           
-                </div>
-                <br>
+                    
+                                                    $qFolio=$qFolio->row_array();
+                                                    
+                                                    $Folio_Desde=$qFolio["Folio_Desde"];
+                                                    $Folio_Hasta=$qFolio["Folio_Hasta"];
+                                                    
+                                                } ?>
+                      
+                                               <!---
+                                                <div class="col-sm-12 m-t">    
+                                                    <form class="form-horizontal" role="form">
+                                                        <div class="form-group">
+                                                            <label for="inputEmail3" class="col-sm-3 control-label">Folio Desde:</label>
+                                                            <div class="col-md-3 col-md-offset-1">
+                                                                <input class="form-control"  value="<?= $qFolio["Folio_Desde"] ?>" disabled>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="inputEmail3" class="col-sm-3 control-label">Folio Hasta:</label>
+                                                            <div class="col-md-3 col-md-offset-1">
+                                                                <input class="form-control"  value="<?= $qFolio["Folio_Hasta"]; ?>" disabled>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div> -->
+                                                <div class="col-sm-12">
+                                                            <label for="inputEmail3" class="control-label">Folio Desde:</label>
+                                                            <?= $qFolio["Folio_Desde"] ?>
+                                                </div>
+                                                <div class="col-sm-12">
+                                                            <label for="inputEmail3" class="control-label">Folio Hasta:</label>
+                                                            <?= $qFolio["Folio_Hasta"]; ?>
+                                                </div>
+                                                
+                                            <?php endif; ?> 
+                            
+                       
+                                        </div>
+                                        <hr>      
+                                                
+                                        <div class="row" id="Historial">         
+                                            <div class="col-sm-12"> 
+                                                <a href="#historial" data-toggle="modal" data-target="#historial" title="Historial" role="button" onclick="uf_ver_historia_bloque(<?= $idArchivo; ?>,<?= $rProcesos->idTipoProceso;  ?>)"><span class="glyphicon glyphicon-search"></span>Ver  Historial  Estatus del Bloque</a>
+                                            </div>
+                                        </div>
+                                        
+                                        
+                                        <div class="row"> 
+                                             <div class="col-sm-12"> 
+                                                <?php $Estatus = $rProcesos->Estatus ; ?>
+                                                <?php switch ($Estatus) {
+
+                                                    case -10:   // Editable
+
+                                                ?>
+                                                    <?php  if ($recibe==1): ?>
+                                                        <li class="active">
+                                                            <a href="#" class="enlace-blue d-n" data-toggle="modal" data-target="#enviar_revision" role="button"  onclick="uf_enviar_revision(<?php echo $rProcesos->idTipoProceso; ?>, <?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span> Enviar Revisión</a>
+                                                        </li>
+                                                    <?php else: ?>
+                                                        <li><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
+                                                    <?php endif; ?>
+
+                                                <?php break;
+
+                                                      case 10: // Recibir
+
+                                                ?>
+
+                                                    <?php if ($recibe==1): ?>
+
+                                                        <?php if($preregistro_realizado == 0): ?>
+
+
+                                                            <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo ' Esperando Preregistro' ?></a></li>    
+                                                        <?php else: ?>
+
+
+                                                            <li class="active list-style d-n enlace-blue" id="enviar_revision_<?php echo $rProcesos->idTipoProceso; ?>">
+                                                                <a href="#" data-toggle="modal" data-target="#enviar_revision" role="button"  onclick="uf_enviar_revision(<?php echo $rProcesos->idTipoProceso; ?>, <?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span> Enviar Revisión</a>
+                                                            </li>
+                                                            <span class="label label-primary"><span class="glyphicon glyphicon-flag"></span><?=$addw_Estatus_Bloque[$Estatus]; ?></span>
+                                                            <!--<li class="list-style" id="Estatus-recibir"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>-->
+                                                        <?php endif; ?>
+                                                    <?php else: ?>
+                                                            
+                                                        <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li> 
+                                                    <?php endif; ?>
+
+
+                                                <?php break;
+
+                                                       case 20:
+
+                                                ?>
+
+                                                    <?php if ($reviso==1): ?>
+
+
+                                                        <li class="active list-style">
+                                                            <a class="enlace-blue" href="#" data-toggle="modal" data-target="#enviar_validar" role="button" onclick="uf_enviar_validar(<?php echo $rProcesos->idTipoProceso; ?>, <?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span>Enviar Validar</a>
+                                                        </li>
+
+                                                    <?php else: ?>
+                                                        <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
+                                                    <?php endif; ?>
+
+
+                                                <?php break;
+
+                                                    case 40:
+
+                                                ?>
+
+                                                    <?php  if ($Foliar==1): ?>
+
+                                                        <li class="active list-style">
+                                                            <a class="enlace-blue" href="#" data-toggle="modal" data-target="#enviar_digitalizar" role="button" onclick="uf_enviar_digitalizar(<?php echo $rProcesos->idTipoProceso; ?>, <?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span>Enviar Digitalizar</a>
+                                                        </li>
+                                                    <?php else: ?>
+                                                        <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
+                                                    <?php endif; ?>
+
+
+
+                                                <?php break;
+
+                                                    case 30:
+
+                                                ?>
+
+                                                    <?php if ($Validar==1):  ?>
+
+                                                        <li class="active list-style">
+                                                            <a class="enlace-blue" href="#" data-toggle="modal" data-target="#enviar_foliado" role="button" onclick="uf_enviar_foliado(<?php echo $rProcesos->idTipoProceso; ?>, <?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span>Enviar Foliado</a>
+                                                        </li> 
+                                                    <?php else:  ?>
+                                                        <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
+                                                    <?php endif; ?>
+
+
+                                                <?php break;
+                                                    case 50:
+
+                                                ?>
+
+                                                    <?php if ($digitalizar==1): ?>
+
+                                                        <li class="active list-style">
+                                                            <a class="enlace-blue" href="#" data-toggle="modal" data-target="#enviar_editar" role="button" onclick="uf_enviar_editar(<?php echo $rProcesos->idTipoProceso; ?>, <?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span>Enviar para Editarlo</a>
+                                                        </li>
+                                                    <?php else: ?>
+                                                        <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
+                                                    <?php endif; ?>
+
+
+
+
+                                                <?php break;
+
+                                                    case 60:
+
+                                                ?>
+
+                                                    <?php  if ($Editar==1): ?>
+
+                                                        <li class="active list-style">
+                                                            <a href="#" class="enlace-blue" data-toggle="modal" data-target="#enviar_integracion" role="button" onclick="uf_enviar_integracion(<?php echo $rProcesos->idTipoProceso; ?>, <?php echo $idArchivo; ?>)"><span class="glyphicon glyphicon-share-alt"></span>Enviar a Integración</a>
+                                                        </li>
+                                                    <?php else: ?>
+                                                        <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
+                                                    <?php endif; ?>
+
+
+
+                                                <?php break;
+
+                                                    case 70:
+
+                                                ?>
+
+
+                                                    <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
+
+
+
+
+                                                <?php break;  
+                                                    default:
+
+                                                ?>
+
+
+
+                                                    <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
+                                            <?php } ?>
+                                             </div>
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                                <?php $col = 9; ?>
+                            <?php endif; ?>
+                            <!-- Bloque de Captura de Documentos -->
+                            <div class="col-sm-<?= $col ?>"> 
+                                <div class="panel panel-primary plantilla">
+
+                                    <div class="panel-heading"> 
+                                        <a class="panel-title" id="panel-proceso-titulo-<?= $rProcesos->idTipoProceso;  ?>" data-toggle="collapse" data-parent="#panel-proceso-<?= $rProcesos->idTipoProceso;  ?>" href="#panel-element-proceso-<?= $rProcesos->idTipoProceso;  ?>">
+                                            <table>
+                                                <tr> <!-- #MAOC SubProcesos-->
+                                                    <td width="600" >
+                                                        <?= $rProcesos->Nombre ?>
+                                                    </td>
+
+                                                    <td width="200">
+                                                        <?php echo "Estatus: " . $addw_Estatus_Bloque[$rProcesos->Estatus]; ?>
+                                                        
+                                                    </td>
+
+                                                    
+                                                    <td width="400">
+                                                       <div id="numero_documentos_proceso_preregistrados_preregistro<?= $rProcesos->idTipoProceso?>">
+                                                            
+                                                        </div>
+                                                    </td>
+                                                  
+                                                    
+                                                   
+                                                    <td width="100">
+                                                       <div id="numero_documentos_proceso_recibidos<?= $rProcesos->idTipoProceso?>">
+                                                            <?php  /*
+                                                               
+                                                                    $qDocumentos_proceso_recibido = $this->datos_model->documentos_proceso_recibidos($idArchivo, $rProcesos->idTipoProceso);     
+                                                               
+
+                                                                    $qDocumentos_proceso_recibido_total = $this->datos_model->total_procesos($idArchivo, $rProcesos->idTipoProceso);
+                                                                    echo "Recibidos " . $qDocumentos_proceso_recibido->num_rows() . " de " . $qDocumentos_proceso_recibido_total->num_rows();*/
+
+                                                            ?>
+                                                        </div>
+                                                    </td>
+                                                   
+                                                    
+                                                    
+                                                    <td width="100">
+                                                       <div id="numero_documentos_proceso_revisados<?= $rProcesos->idTipoProceso?>">
+                                                            <?php  /*
+                                                               
+                                                                    $qDocumentos_proceso_revisados = $this->datos_model->listado_registros_revisados_por_tipo_proceso($idArchivo, $rProcesos->idTipoProceso);     
+                                                               
+
+                                                                    $qDocumentos_proceso_recibido_total = $this->datos_model->total_procesos($idArchivo, $rProcesos->idTipoProceso);
+                                                                    echo "Revisados " . $qDocumentos_proceso_revisados->num_rows() . " de " . $qDocumentos_proceso_recibido_total->num_rows();*/
+
+                                                            ?>
+                                                        </div>
+                                                    </td>
+                                                    
+
+
+
+
+                                                </tr> 
+                                            </table>
+                                        </a>
+                                       
+                                        
+                                        
+                                    </div>
+                                    
+                                    
+                                    <div id="panel-element-proceso-<?= $rProcesos->idTipoProceso;  ?>" class="panel-collapse collapse in">
+                                        <div class="panel-body"  id="panel-body-<?= $rProcesos->idTipoProceso;  ?>">
+                                            
+                                            
+                                            
+                                            <?php $qSubProcesos = $this->datos_model->subprocesos_de_archivo($idArchivo, $rProcesos->idTipoProceso); ?>
+                                            
+                                            <!-- SubProcesos -->
+                                            <?php if (isset($qSubProcesos)): ?>
+                                                <?php if ($qSubProcesos->num_rows() > 0): ?>
+                                                        <?php foreach ($qSubProcesos->result() as $rSubProcesos): ?>
+                                                            
+                                                            <div class="panel panel-success">
+
+                                                                <div class="panel-heading"> 
+                                                                    
+                                                                        <a class="panel-title" id="panel-proceso-titulo-<?= $rSubProcesos->id;  ?>" data-toggle="collapse" data-parent="#panelsub-proceso-<?= $rSubProcesos->id;  ?>" href="#panel-element-subproceso-<?= $rSubProcesos->id;  ?>">
+                                                                            <table>
+                                                                                <tr> <!-- #MAOC SubProcesos-->
+                                                                                    <td width="800" >
+                                                                                        <?= $rSubProcesos->Nombre ?>
+                                                                                    </td> 
+
+                                                                                   
+                                                                                    <td width="200">
+                                                                                        <div id="numero_documentos_subproceso_preregistrados<?= $rSubProcesos->id;  ?>">
+
+                                                                                           
+                                                                                        </div>
+
+                                                                                       
+
+
+                                                                                    </td>
+                                                                                    
+                                                                                    <?php if($preregistro==0): ?>
+                                                                                    <td width="200">
+                                                                                        <div id="numero_documentos_subproceso_recibidos<?= $rSubProcesos->id;  ?>">
+
+                                                                                            <?php    $qDocumentos_subproceso_recibido = $this->datos_model->documentos_subproceso($idArchivo, $rSubProcesos->id);     
+                                                                                          
+
+                                                                                            $qDocumentos_subproceso_recibido_total = $this->datos_model->total_subprocesos($idArchivo, $rSubProcesos->id);
+                                                                                            //echo "Recibidos " . $qDocumentos_subproceso_recibido->num_rows() . " de " . $qDocumentos_subproceso_recibido_total->num_rows();
+
+                                                                                            ?>
+                                                                                        </div>
+
+                                                                                       
+
+
+                                                                                    </td>
+                                                                                    <?php endif; ?>
+                                                                                    
+                                                                                    <?php if($preregistro == 0): ?>
+
+                                                                                    <td width="200">
+
+
+
+                                                                                        <div id="numero_documentos_subproceso_revisados<?= $rSubProcesos->id;  ?>">
+                                                                                             <?php    $qDocumentos_subproceso_recibido = $this->datos_model->listado_registros_revisados_por_sub_tipo_proceso($idArchivo, $rSubProcesos->id);     
+                                                                                          
+
+                                                                                            $qDocumentos_subproceso_recibido_total = $this->datos_model->total_subprocesos($idArchivo, $rSubProcesos->id);
+                                                                                            //echo "Revisados " . $qDocumentos_subproceso_recibido->num_rows() . " de " . $qDocumentos_subproceso_recibido_total->num_rows();
+
+                                                                                            ?>
+                                                                                        </div>
+
+
+                                                                                    </td> 
+                                                                                    <?php endif; ?>
+
+
+
+                                                                                </tr> 
+                                                                            </table>
+                                                                            
+                                                                        </a>
+                                                                   
+                                                                    
+                                                                    
+
+                                                                </div>
+                                                                
+                                                                <div id="panel-element-subproceso-<?= $rSubProcesos->id;  ?>" class="panel-collapse collapse" >
+                                                                    <div class="panel-body"  id="panel-body-<?= $rSubProcesos->id;  ?>">
+                                                                        
+
+    
+
+                                                                            <?php if ($rProcesos->Estatus < 30): ?>
+
+
+                                                                                <?php if ($preregistro == 1): ?>
+                                                                                    <?php ($rProcesos->Estatus < 20)? $disabled = "":  $disabled = "disabled='disabled'"?>
+                                                                                    <!-- Preregistro < 30 muestro los de la direccion , en mayor =  que 20 desabilito -->
+                                                                                    <?php $qDocumentos = $this->preregistro_model->traer_documentos_direccion($idArchivo, $rSubProcesos->id, $idDireccion_responsable); ?>
+                                                                                <!-- Preregistro > 30 muestro todo desabilitado -->
+
+                                                                                <?php else: //si no es preregistro?>
+                                                                                   
+                                                                                    <?php if ($recibe ==1): ?>
+                                                                                    <!--Recibe y Estatus 10 muestro con preregistro aceptado, Estaus >= 20 desabilito -->
+                                                                                    
+                                                                                        <?php ($rProcesos->Estatus < 20)? $disabled = "":  $disabled = "disabled='disabled'"?>
+                                                            
+                                                                                        <?php $qDocumentos = $this->preregistro_model->traer_documentos_recibidos_PRE_CID($idArchivo, $rSubProcesos->id); ?>
+
+                                                                                        
+
+                                                                                    
+
+
+                                                                                    <?php elseif ($reviso ==1):?>
+
+                                                                                        <?php ($rProcesos->Estatus == 20)? $disabled = "":  $disabled = "disabled='disabled'"?>
+                                                                        
+                                                                                        <?php $qDocumentos = $this->preregistro_model->traer_documentos_revisar($idArchivo, $rSubProcesos->id); ?>
+                                                                                    <?php endif; ?> 
+                                                                                <?php endif; ?> 
+
+                                                                                    
+                                                                            <?php else:  ?> 
+                                                                                <?php $qDocumentos = $this->preregistro_model->traer_documentos_finales($idArchivo, $rSubProcesos->id); //documentos  ya revisados ?>
+
+
+                                                                            <?php endif; ?> 
+
+                                                                            <?php if (isset($qDocumentos)): ?>
+                                                                                <?php if ($qDocumentos->num_rows() > 0): ?>
+                                                                                     
+                                                                                    <div class="table-responsive">
+                                                                                        <!--tabla documentos-->
+
+                                                                                        <table class="table table-condensed table-hover">
+                                                                                                
+                                                                                                <?php foreach ($qDocumentos->result() as $rRow): ?>
+
+                                                                                                    <tr>
+                                                                                                        <?php if ($rRow->idDocumento == 114): ?>
+                                                                                                            <?php include 'td_estimaciones.php'; ?>
+                                                                                                        <?php elseif ($rRow->idRAP): ?>
+                                                                                                            <?php include 'td_cid.php'; ?>
+
+                                                                                                        <?php else: ?>
+
+                                                                                                            <?php include 'td_cid_vacia.php'; ?>
+                                                                                                        <?php endif; ?>
+
+
+                                                                                                    </tr>
+
+
+                                                                                                          
+                                                                                                    
+
+
+                                                                                                     
+                                                                                                                <?php /*($rRow->preregistro_aceptado == 0)? $disabled = "":  $disabled = "disabled='disabled'"?>
+
+                                                                                                                <?php if ($rRow->Nombre == "11.1 ESTIMACIONES"): ?> 
+                                                                                                                    <?php include 'row_estimaciones.php'; ?>
+                                                                                                                <?php else: ?>
+                                                                                                                    <?php if ($rRow->idRAP > 0): ?> 
+                                                                                                                        <?php include 'row_documentos_preregistro.php'; ?>
+                                                                                                                    <?php else : ?>
+                                                                                                                        <?php include 'row_documentos_vacia.php'; ?>
+                                                                                                                    <?php endif; ?>
+
+                                                                                                                <?php endif;*/ ?>
+                                                                            
+                                                                                                                
+                                                                                                        
+                                                                                                   
+                                                                            
+                                                                                                <?php endforeach; ?>
+                                                                                        </table>
+                                                                                    </div>
+                                                                                <?php else: ?> 
+                                                                                    <?php echo "Error idArchivo = $idArchivo  SubProceso =  $rSubProcesos->id" ?>
+                                                                                <?php endif; ?>
+                                                                            <?php endif; ?>
+
+                                                                        
+                                                                                               
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                        <?php endforeach; ?>
+                                                <?php endif; ?>
+                                            <?php endif; ?> 
+                                            <!-- /SubProcesos -->
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                        <?php endforeach; ?>
+                <?php endif; ?>
+            <?php endif; ?> 
+            
+            
+
+
+           
+              
+            
                
                 
-   </div>        
+        </div> <!-- Container fluid principal -->       
            
-           
+         <!-- Dialog Model Modificar Observacion Documento -->
+        <div class="modal fade" id="mod-observacion-documento" role="dialog" aria-labelledby="myModalLabel-observacion_bloque" aria-hidden="true">
+            <div class="modal-dialog">
+                
+                <form class="form-horizontal" role="form">
+                <div class="modal-content">
+                    <div class="modal-header panel-danger">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
+                            Observaciones
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                                   
+                       
+                        
+                        <div class="form-group">
+                            <label for="observaciones" class="control-label col-sm-4">Agregar Observaciones</label>
+                            <div class="col-sm-12">
+                                <textarea class="form-control col-md-12" id="mod_motivo_observacion" name="mod_motivo_observacion" cols="70" rows="5"></textarea>
+                            </div>
+                         </div>
+                        
+                         <div class="checkbox">
+                            <label>
+                                <input type="checkbox" value="0" name="mod_tipo_observacion" id="mod_tipo_observacion">
+                                Solicitar respuesta
+                            </label>
+                        </div>
+                       
+                        
+                                                   
+                        
+                                                          
+                        
+                    </div>
+                    
+                    <div class="modal-footer">
+                        
+                        <input type="hidden" name="idCatalogo_mod_observacion" id="idCatalogo_mod_observacion" required value="0" class="form-control" >
+                        <input type="hidden" name="idArchivo_mod_observacion" id="idArchivo_mod_observacion" required value="0" class="form-control" >
+                        <input type="hidden" name="idTipoProceso_mod_observacion" id="idTipoProceso_mod_observacion" required value="0" class="form-control" >
+                        <input type="hidden" name="idSubTipoProceso_mod_observacion" id="idSubTipoProceso_mod_observacion" required value="0" class="form-control" >
+                        <input type="hidden" name="idDocumento_mod_observacion" id="idDocumento_mod_observacion" required value="0" class="form-control" >
+                        <input type="hidden" name="preregistro_mod_observacion" id="idDocumento_mod_observacion" required value="<?= $preregistro ?>" class="form-control" >
+                      
+                        
+                        
+                        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="activar_bloque_observacion()">Cancelar</button> 
+                        <a class="btn btn-primary" onclick="modificar_observaciones_documento()">Guardar</a>
+                    </div>
+                </div>
+               
+            </form>
+            </div>
+
+        </div>
+        <!--            Fin Dialog-->
+
       <!-- Modal ver observacion -->
         <div class="modal fade" id="modal-ver-observacion" role="dialog" aria-labelledby="modal-modificar-cat_myModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -4339,20 +3671,32 @@
                         </button>
                         <h4 class="modal-titlsamplee" id="modal-nuevo_documentomyModalLabel">Observaciones</h4>
                     </div>
-                    <form action="<?php echo site_url("observaciones/responder_observacion_documento"); ?>" method="post" name="forma1" target="_self" id="forma1" role="form" class="form-horizontal" method="post" enctype="multipart/form-data">
+                    <form action="<?php echo site_url("observaciones/actualizar_estado_observacion"); ?>" method="post" name="forma1" target="_self" id="forma1" role="form" class="form-horizontal" method="post" enctype="multipart/form-data">
                         <div class="modal-body">
                             
                             
                              <div class="form-group">
-                                        <label for="ordenTrabajo" class="col-sm-3 control-label">Documento: </label>	
+                                        <label for="ordenTrabajo" class="col-sm-3 control-label">Orden Trabajo: </label>    
                                         <div class="col-sm-7" name="OrdenTrabajo" id="OrdenTrabajo" style="padding-top: 7px;"> 
                                            
-                                        </div>
+                                         </div>
                             </div>  
+                            <div class="form-group">
+                                <label for="Contrato" class="col-sm-3 control-label">Contrato: </label>
+                                <div class="col-sm-7" name="Contrato" id="Contrato" style="padding-top: 7px;"> 
+                                    
+                                </div>
+                            </div>
                             
+                             <div class="form-group">
+                                <label for="Obra" class="col-sm-3 control-label">Obra: </label>
+                                <div class="col-sm-7"  name="Obra" id="Obra" style="padding-top: 7px;"> 
+                                   
+                                </div>
+                            </div>
                             
                             <div class="form-group">
-                                <label for="motivo" class="col-sm-3 control-label">Motivo: </label>
+                                <label for="Motivo" class="col-sm-3 control-label">Motivo: </label>
                                 <div class="col-sm-7" name="Motivo" id="Motivo" style="padding-top: 7px;"> 
                                       
                                 </div>
@@ -4371,14 +3715,15 @@
                                                                      
                         </div>
                         <div class="modal-footer">
-                            <input type="hidden" name="idCatalogo_observacion" id="idCatalogo_observacion" required value="" class="form-control" >
-                            					
+                            <input type="hidden" name="idCatalogo" id="idCatalogo" required value="0" class="form-control" >
+                            
+                            
+                            <button type="submit" class="btn btn-success">
+                                Marcar como visto y Guardar
+                            </button>                       
                             <button type="button" class="btn btn-danger" data-dismiss="modal">
                                 Cancelar
-                            </button>
-                            <button type="button" class="btn btn-success" onclick="responder_observaciones()">
-                                Enviar
-                            </button>	
+                            </button>                       
                         </div>
                     </form>                    
                 </div>
@@ -4476,7 +3821,7 @@
                          <div  id="presenta_subdocumentos" style='display:none;'><br>
                         
                             <div class="form-group">
-                                       <label for="idSubDocumento_mod" class="col-sm-3 control-label">Sub Documento</label>	
+                                       <label for="idSubDocumento_mod" class="col-sm-3 control-label">Sub Documento</label> 
                                         <div class="col-sm-7"> 
                                            <div class="form-control" id="subdocumento_mod"></div><input type="hidden" name="idSubDocumento_mod" id="idSubDocumento_mod" required value="0">
                                             </div>
@@ -4756,7 +4101,7 @@
               <!-- Dialog Model Enviar Bloque a Revisión -->
         <div class="modal fade" id="enviar_revision" role="dialog" aria-labelledby="myModalLabel-enviar_revision" aria-hidden="true">
             <div class="modal-dialog">
-            	<!--Forma-->
+                <!--Forma-->
                 <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/cambio_estatus/20"); ?>">
                 <div class="modal-content">
                     <div class="modal-header panel-danger">
@@ -4779,17 +4124,39 @@
                     </div>
                 </div>
                 <!--Forma-->
-        	</form>
+            </form>
+            </div>
+
+        </div>
+        <!--            Fin Dialog-->
+         <!-- Historial del Bloque  -->
+        <div class="modal fade" id="observaciones_estimaciones" role="dialog" aria-labelledby="myModalLabel-observaciones_bloque" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header panel-default">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel-historial">
+                            Observaciones
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        
+                                <div id="idObservacionesEstimaciones"></div>
+                                                                              
+                    </div>
+                    <div class="modal-footer">                            
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
             </div>
 
         </div>
         <!--            Fin Dialog-->
         
-        
         <!-- Dialog Model Enviar Bloque a Revisión -->
         <div class="modal fade" id="enviar_foliado" role="dialog" aria-labelledby="myModalLabel-enviar_foliado" aria-hidden="true">
             <div class="modal-dialog">
-            	<!--Forma-->
+                <!--Forma-->
                 <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/cambio_estatus_foliado/40"); ?>">
                 <div class="modal-content">
                     <div class="modal-header panel-danger">
@@ -4812,7 +4179,7 @@
                     </div>
                 </div>
                 <!--Forma-->
-        	</form>
+            </form>
             </div>
 
         </div>
@@ -4823,7 +4190,7 @@
         <!-- Dialog Model Enviar Bloque a Digitalizar -->
         <div class="modal fade" id="enviar_validar" role="dialog" aria-labelledby="myModalLabel-enviar_validar" aria-hidden="true">
             <div class="modal-dialog">
-            	<!--Forma-->
+                <!--Forma-->
                 <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/cambio_estatus_validar/30"); ?>">
                 <div class="modal-content">
                     <div class="modal-header panel-danger">
@@ -4846,329 +4213,13 @@
                     </div>
                 </div>
                 <!--Forma-->
-        	</form>
+            </form>
             </div>
 
         </div>
         <!--            Fin Dialog-->
 
-
-        
-        
-        
-        
-        <!-- Dialog Model Enviar Bloque a Digitalizar -->
-        <div class="modal fade" id="enviar_digitalizar" role="dialog" aria-labelledby="myModalLabel-enviar_digitalizar" aria-hidden="true">
-            <div class="modal-dialog">
-            	<!--Forma-->
-                <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/cambio_estatus_digitalizar/50"); ?>">
-                <div class="modal-content">
-                    <div class="modal-header panel-danger">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
-                            Enviar a Digitalizar
-                        </h4>
-                    </div>
-                    <div class="modal-body">
-                        <p class="text-justify"><b>El Bloque se Enviará para Digitalizar</b></p>                            
-                        <!--
-                        <textarea id="motivo" name="motivo" cols="70" rows="5"></textarea>                                     
-                        -->
-                    </div>
-                    <div class="modal-footer">                            
-                        <input type="hidden" name="idTipoProceso_digitalizar" id="idTipoProceso_digitalizar" required value="0" class="form-control" >
-                        <input type="hidden" name="idArchivo_digitalizar" id="idArchivo_digitalizar" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
-                        <button type="submit" class="btn btn-primary">Aceptar</button>
-                    </div>
-                </div>
-                <!--Forma-->
-        	</form>
-            </div>
-
-        </div>
-        <!--            Fin Dialog-->
-
-
-        
-        
-         <!-- Dialog Model Enviar Bloque a Editar -->
-        <div class="modal fade" id="enviar_editar" role="dialog" aria-labelledby="myModalLabel-enviar_editar" aria-hidden="true">
-            <div class="modal-dialog">
-            	<!--Forma-->
-                <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/cambio_estatus_editar/60"); ?>">
-                <div class="modal-content">
-                    <div class="modal-header panel-danger">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
-                            Enviar a Editado
-                        </h4>
-                    </div>
-                    <div class="modal-body">
-                        <p class="text-justify"><b>El Bloque se Enviará para Editarlo</b></p>                            
-                        <!--
-                        <textarea id="motivo" name="motivo" cols="70" rows="5"></textarea>                                     
-                        -->
-                    </div>
-                    <div class="modal-footer">                            
-                        <input type="hidden" name="idTipoProceso_editar" id="idTipoProceso_editar" required value="0" class="form-control" >
-                        <input type="hidden" name="idArchivo_editar" id="idArchivo_editar" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
-                        <button type="submit" class="btn btn-primary">Aceptar</button>
-                    </div>
-                </div>
-                <!--Forma-->
-        	</form>
-            </div>
-
-        </div>
-        <!--            Fin Dialog-->
-        
-        
-         <!-- Dialog Model Enviar Bloque a Integracion -->
-        <div class="modal fade" id="enviar_integracion" role="dialog" aria-labelledby="myModalLabel-enviar_integracion" aria-hidden="true">
-            <div class="modal-dialog">
-            	<!--Forma-->
-                <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/cambio_estatus_integrar/70"); ?>">
-                <div class="modal-content">
-                    <div class="modal-header panel-danger">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
-                            Enviar a Integrar
-                        </h4>
-                    </div>
-                    <div class="modal-body">
-                        <p class="text-justify"><b>El Bloque se Enviará para Integrarlo</b></p>                            
-                        <!--
-                        <textarea id="motivo" name="motivo" cols="70" rows="5"></textarea>                                     
-                        -->
-                    </div>
-                    <div class="modal-footer">                            
-                        <input type="hidden" name="idTipoProceso_integracion" id="idTipoProceso_integracion" required value="0" class="form-control" >
-                        <input type="hidden" name="idArchivo_integracion" id="idArchivo_integracion" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
-                        <button type="submit" class="btn btn-primary">Aceptar</button>
-                    </div>
-                </div>
-                <!--Forma-->
-        	</form>
-            </div>
-
-        </div>
-        <!--            Fin Dialog-->
-        
-         <!-- Dialog Model Enviar Bloque a concentracion -->
-        <div class="modal fade" id="enviar_concentracion" role="dialog" aria-labelledby="myModalLabel-enviar_concentracion" aria-hidden="true">
-            <div class="modal-dialog">
-            	<!--Forma-->
-                <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/cambio_estatus_concentrar/80"); ?>">
-                <div class="modal-content">
-                    <div class="modal-header panel-danger">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
-                            Enviar a Integrar
-                        </h4>
-                    </div>
-                    <div class="modal-body">
-                        <p class="text-justify"><b>El Bloque se Enviará para Concentración</b></p>                            
-                        <!--
-                        <textarea id="motivo" name="motivo" cols="70" rows="5"></textarea>                                     
-                        -->
-                    </div>
-                    <div class="modal-footer">                            
-                        <input type="hidden" name="idTipoProceso_concentracion" id="idTipoProceso_concentracion" required value="0" class="form-control" >
-                        <input type="hidden" name="idArchivo_concentracion" id="idArchivo_concentracion" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
-                        <button type="submit" class="btn btn-primary">Aceptar</button>
-                    </div>
-                </div>
-                <!--Forma-->
-        	</form>
-            </div>
-
-        </div>
-        <!--            Fin Dialog-->
-
-
-        
-        
-                 <!-- Dialog Model Enviar Bloque a Digitalizar -->
-        <div class="modal fade" id="enviar_finalizar" role="dialog" aria-labelledby="myModalLabel-enviar_finalizar" aria-hidden="true">
-            <div class="modal-dialog">
-            	<!--Forma-->
-                <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/cambio_estatus_finalizar/70"); ?>">
-                <div class="modal-content">
-                    <div class="modal-header panel-danger">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
-                            Enviar para Finalizar
-                        </h4>
-                    </div>
-                    <div class="modal-body">
-                        <p class="text-justify"><b>El Bloque se Enviará para Finalizarlo</b></p>                            
-                        <!--
-                        <textarea id="motivo" name="motivo" cols="70" rows="5"></textarea>                                     
-                        -->
-                    </div>
-                    <div class="modal-footer">                            
-                        <input type="hidden" name="idTipoProceso_finalizar" id="idTipoProceso_finalizar" required value="0" class="form-control" >
-                        <input type="hidden" name="idArchivo_finalizar" id="idArchivo_finalizar" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
-                        <button type="submit" class="btn btn-primary">Aceptar</button>
-                    </div>
-                </div>
-                <!--Forma-->
-        	</form>
-            </div>
-
-        </div>
-        <!--            Fin Dialog-->
-
-
-        
-        
-         <!-- Dialog Model Rechazar Bloque -->
-        <div class="modal fade" id="rechazar_bloque" role="dialog" aria-labelledby="myModalLabel-rechazar_bloque" aria-hidden="true">
-            <div class="modal-dialog">
-            	<!--Forma-->
-                <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/cambio_estatus_rechazar/-10"); ?>">
-                <div class="modal-content">
-                    <div class="modal-header panel-danger">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
-                            Rechaza Bloque
-                        </h4>
-                    </div>
-                    <div class="modal-body">
-                        <p class="text-justify"><b>Rechazar Bloque</b></p>                            
-                        
-                        <textarea id="motivo" name="motivo" cols="70" rows="5"></textarea>                                     
-                        
-                    </div>
-                    <div class="modal-footer">                            
-                        <input type="hidden" name="idTipoProceso_rechazar" id="idTipoProceso_rechazar" required value="0" class="form-control" >
-                        <input type="hidden" name="idArchivo_rechazar" id="idArchivo_rechazar" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
-                        <button type="submit" class="btn btn-primary">Aceptar</button>
-                    </div>
-                </div>
-                <!--Forma-->
-        	</form>
-            </div>
-
-        </div>
-        <!--            Fin Dialog-->
-
-
-        
-         <!-- Dialog Model Observaciones Bloque 
-        <div class="modal fade" id="observacion_bloque" role="dialog" aria-labelledby="myModalLabel-observacion_bloque" aria-hidden="true">
-            <div class="modal-dialog">
-            	
-                <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/agregar_observaciones_documento/"); ?>">
-                <div class="modal-content">
-                    <div class="modal-header panel-danger">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
-                            Observaciones
-                        </h4>
-                    </div>
-                    <div class="modal-body">
-                        
-                        <div class="form-group">
-                            <label for="observaciones" class="control-label col-sm-4">Agregar Observaciones</label>
-                            <div class="col-sm-10">
-                                <textarea class="form-control col-md-12" id="motivo" name="motivo" cols="70" rows="5"></textarea>
-                            </div>
-                         </div>
-                                                   
-                        
-                                                          
-                        
-                    </div>
-                    
-                    <div class="modal-footer">
-                        <input type="hidden" name="idSubTipoProceso_observacion" id="idSubTipoProceso_observacion" required value="0" class="form-control" >
-                        <input type="hidden" name="idTipoProceso_observacion" id="idTipoProceso_observacion" required value="0" class="form-control" >
-                        <input type="hidden" name="idArchivo_observacion" id="idArchivo_observacion" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
-                        <input type="hidden" name="idDocumento_observacion" id="idDocumento_observacion" required value="0" >
-                        <input type="hidden" name="idContrato_observacion" id="idContrato_observacion" required value="<?php echo $aArchivo['idContrato']?>" >
-                        <input type="hidden" name="idDireccion_observacion" id="idDireccion_observacion" required value="<?php echo $aArchivo['idDireccion']?>>" >
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
-                        <button type="submit" class="btn btn-primary">Aceptar</button>
-                    </div>
-                </div>
-               
-        	</form>
-            </div>
-
-        </div>
-        <!--            Fin Dialog-->
-        
-        
-        <!-- Dialog Model Observaciones Bloque -->
-        <div class="modal fade" id="observacion_bloque" role="dialog" aria-labelledby="myModalLabel-observacion_bloque" aria-hidden="true">
-            <div class="modal-dialog">
-            	
-                <form class="form-horizontal" role="form">
-                <div class="modal-content">
-                    <div class="modal-header panel-danger">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
-                            Observaciones
-                        </h4>
-                    </div>
-                    <div class="modal-body">
-                                   
-                       
-                        
-                        <div class="form-group">
-                            <label for="observaciones" class="control-label col-sm-4">Agregar Observaciones</label>
-                            <div class="col-sm-10">
-                                <textarea class="form-control col-md-12" id="motivo_observacion" name="motivo_observacion" cols="70" rows="5"></textarea>
-                            </div>
-                         </div>
-                        
-                         <div class="checkbox">
-                            <label>
-                                <input type="checkbox" value="0" name="tipo_observacion" id="tipo_observacion">
-                                Solicitar respuesta
-                            </label>
-                        </div>
-                       
-                        
-                                                   
-                        
-                                                          
-                        
-                    </div>
-                    
-                    <div class="modal-footer">
-                        
-                        <input type="hidden" name="idSubTipoProceso_observacion" id="idSubTipoProceso_observacion" required value="0" class="form-control" >
-                        <input type="hidden" name="idTipoProceso_observacion" id="idTipoProceso_observacion" required value="0" class="form-control" >
-                        <input type="hidden" name="idArchivo_observacion" id="idArchivo_observacion" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
-                        <input type="hidden" name="idDocumento_observacion" id="idDocumento_observacion" required value="0" >
-                        <input type="hidden" name="idContrato_observacion" id="idContrato_observacion" required value="<?php echo $aArchivo['idContrato']?>" >
-                        <input type="hidden" name="idDireccion_observacion" id="idDireccion_observacion" required value="" >
-                        <input type="hidden" name="tipo_usuario_observacion" id="tipo_usuario_observacion" required value="<?php echo $preregistro ?>" >
-                        <input type="hidden" name="dir_respuesta_observacion" id="dir_respuesta_observacion" required value="" >
-                        <input type="hidden" name="usuario_preregistro" id="usuario_preregistro" required value="" >
-                        
-                        
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
-                        <a class="btn btn-primary" onclick="agregar_observaciones_documento()">Aceptar</a>
-                    </div>
-                </div>
-               
-        	</form>
-            </div>
-
-        </div>
-        <!--            Fin Dialog-->
-        
-        
-        <!-- Dialog Model Observaciones Bloque -->
+          <!-- Dialog Model Observaciones Bloque -->
         <div class="modal fade" id="observacion_estimacion" role="dialog" aria-labelledby="myModalLabel-observacion_bloque" aria-hidden="true">
             <div class="modal-dialog">
             	
@@ -5227,73 +4278,264 @@
             </div>
 
         </div>
-        <!--            Fin Dialog-->
+    <!--            Fin Dialog-->
         
         
-        <!-- Dialog Model Modificar Observacion Documento -->
-        <div class="modal fade" id="mod-observacion-documento" role="dialog" aria-labelledby="myModalLabel-observacion_bloque" aria-hidden="true">
+        
+        
+        <!-- Dialog Model Enviar Bloque a Digitalizar -->
+        <div class="modal fade" id="enviar_digitalizar" role="dialog" aria-labelledby="myModalLabel-enviar_digitalizar" aria-hidden="true">
             <div class="modal-dialog">
-            	
-                <form class="form-horizontal" role="form">
+                <!--Forma-->
+                <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/cambio_estatus_digitalizar/50"); ?>">
                 <div class="modal-content">
                     <div class="modal-header panel-danger">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                         <h4 class="modal-title" id="myModalLabel-espera_solicitud">
-                            Observaciones
+                            Enviar a Digitalizar
                         </h4>
                     </div>
                     <div class="modal-body">
-                                   
-                       
-                        
-                        <div class="form-group">
-                            <label for="observaciones" class="control-label col-sm-4">Agregar Observaciones</label>
-                            <div class="col-sm-10">
-                                <textarea class="form-control col-md-12" id="mod_motivo_observacion" name="mod_motivo_observacion" cols="70" rows="5"></textarea>
-                            </div>
-                         </div>
-                        
-                         <div class="checkbox">
-                            <label>
-                                <input type="checkbox" value="0" name="mod_tipo_observacion" id="mod_tipo_observacion">
-                                Solicitar respuesta
-                            </label>
-                        </div>
-                       
-                        
-                                                   
-                        
-                                                          
-                        
+                        <p class="text-justify"><b>El Bloque se Enviará para Digitalizar</b></p>                            
+                        <!--
+                        <textarea id="motivo" name="motivo" cols="70" rows="5"></textarea>                                     
+                        -->
                     </div>
-                    
-                    <div class="modal-footer">
-                        
-                        <input type="hidden" name="idCatalogo_mod_observacion" id="idCatalogo_mod_observacion" required value="0" class="form-control" >
-                        <input type="hidden" name="idArchivo_mod_observacion" id="idArchivo_mod_observacion" required value="0" class="form-control" >
-                        <input type="hidden" name="idTipoProceso_mod_observacion" id="idTipoProceso_mod_observacion" required value="0" class="form-control" >
-                        <input type="hidden" name="idSubTipoProceso_mod_observacion" id="idSubTipoProceso_mod_observacion" required value="0" class="form-control" >
-                        <input type="hidden" name="idDocumento_mod_observacion" id="idDocumento_mod_observacion" required value="0" class="form-control" >
-                        <input type="hidden" name="preregistro_mod_observacion" id="idDocumento_mod_observacion" required value="<?= $preregistro ?>" class="form-control" >
-                      
-                        
-                        
-                        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="activar_bloque_observacion()">Cancelar</button> 
-                        <a class="btn btn-primary" onclick="modificar_observaciones_documento()">Guardar</a>
+                    <div class="modal-footer">                            
+                        <input type="hidden" name="idTipoProceso_digitalizar" id="idTipoProceso_digitalizar" required value="0" class="form-control" >
+                        <input type="hidden" name="idArchivo_digitalizar" id="idArchivo_digitalizar" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
+                        <button type="submit" class="btn btn-primary">Aceptar</button>
                     </div>
                 </div>
-               
-        	</form>
+                <!--Forma-->
+            </form>
+            </div>
+
+        </div>
+        <!--            Fin Dialog-->
+
+
+        
+        
+         <!-- Dialog Model Enviar Bloque a Editar -->
+        <div class="modal fade" id="enviar_editar" role="dialog" aria-labelledby="myModalLabel-enviar_editar" aria-hidden="true">
+            <div class="modal-dialog">
+                <!--Forma-->
+                <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/cambio_estatus_editar/60"); ?>">
+                <div class="modal-content">
+                    <div class="modal-header panel-danger">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
+                            Enviar a Editado
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-justify"><b>El Bloque se Enviará para Editarlo</b></p>                            
+                        <!--
+                        <textarea id="motivo" name="motivo" cols="70" rows="5"></textarea>                                     
+                        -->
+                    </div>
+                    <div class="modal-footer">                            
+                        <input type="hidden" name="idTipoProceso_editar" id="idTipoProceso_editar" required value="0" class="form-control" >
+                        <input type="hidden" name="idArchivo_editar" id="idArchivo_editar" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
+                        <button type="submit" class="btn btn-primary">Aceptar</button>
+                    </div>
+                </div>
+                <!--Forma-->
+            </form>
             </div>
 
         </div>
         <!--            Fin Dialog-->
         
         
-        <!-- Dialog Model Modificar Observacion Documento -->
-        <div class="modal fade" id="mod-observacion-estimacion" role="dialog" aria-labelledby="myModalLabel-observacion_bloque" aria-hidden="true">
+         <!-- Dialog Model Enviar Bloque a Integracion -->
+        <div class="modal fade" id="enviar_integracion" role="dialog" aria-labelledby="myModalLabel-enviar_integracion" aria-hidden="true">
             <div class="modal-dialog">
-            	
+                <!--Forma-->
+                <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/cambio_estatus_integrar/70"); ?>">
+                <div class="modal-content">
+                    <div class="modal-header panel-danger">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
+                            Enviar a Integrar
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-justify"><b>El Bloque se Enviará para Integrarlo</b></p>                            
+                        <!--
+                        <textarea id="motivo" name="motivo" cols="70" rows="5"></textarea>                                     
+                        -->
+                    </div>
+                    <div class="modal-footer">                            
+                        <input type="hidden" name="idTipoProceso_integracion" id="idTipoProceso_integracion" required value="0" class="form-control" >
+                        <input type="hidden" name="idArchivo_integracion" id="idArchivo_integracion" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
+                        <button type="submit" class="btn btn-primary">Aceptar</button>
+                    </div>
+                </div>
+                <!--Forma-->
+            </form>
+            </div>
+
+        </div>
+        <!--            Fin Dialog-->
+        
+         <!-- Dialog Model Enviar Bloque a concentracion -->
+        <div class="modal fade" id="enviar_concentracion" role="dialog" aria-labelledby="myModalLabel-enviar_concentracion" aria-hidden="true">
+            <div class="modal-dialog">
+                <!--Forma-->
+                <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/cambio_estatus_concentracion/80"); ?>">
+                <div class="modal-content">
+                    <div class="modal-header panel-danger">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
+                            Enviar a Integrar
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-justify"><b>La OT se Enviará para Concentración</b></p>                            
+                        <!--
+                        <textarea id="motivo" name="motivo" cols="70" rows="5"></textarea>                                     
+                        -->
+                    </div>
+                    <div class="modal-footer">                            
+                        
+                        <input type="hidden" name="idArchivo_concentracion" id="idArchivo_concentracion" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
+                        <button type="submit" class="btn btn-primary">Aceptar</button>
+                    </div>
+                </div>
+                <!--Forma-->
+            </form>
+            </div>
+
+        </div>
+        <!--            Fin Dialog-->
+
+
+        
+        
+                 <!-- Dialog Model Enviar Bloque a Digitalizar -->
+        <div class="modal fade" id="enviar_finalizar" role="dialog" aria-labelledby="myModalLabel-enviar_finalizar" aria-hidden="true">
+            <div class="modal-dialog">
+                <!--Forma-->
+                <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/cambio_estatus_finalizar/70"); ?>">
+                <div class="modal-content">
+                    <div class="modal-header panel-danger">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
+                            Enviar para Finalizar
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-justify"><b>El Bloque se Enviará para Finalizarlo</b></p>                            
+                        <!--
+                        <textarea id="motivo" name="motivo" cols="70" rows="5"></textarea>                                     
+                        -->
+                    </div>
+                    <div class="modal-footer">                            
+                        <input type="hidden" name="idTipoProceso_finalizar" id="idTipoProceso_finalizar" required value="0" class="form-control" >
+                        <input type="hidden" name="idArchivo_finalizar" id="idArchivo_finalizar" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
+                        <button type="submit" class="btn btn-primary">Aceptar</button>
+                    </div>
+                </div>
+                <!--Forma-->
+            </form>
+            </div>
+
+        </div>
+        <!--            Fin Dialog-->
+
+
+        
+        
+         <!-- Dialog Model Rechazar Bloque -->
+        <div class="modal fade" id="rechazar_bloque" role="dialog" aria-labelledby="myModalLabel-rechazar_bloque" aria-hidden="true">
+            <div class="modal-dialog">
+                <!--Forma-->
+                <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/cambio_estatus_rechazar/-10"); ?>">
+                <div class="modal-content">
+                    <div class="modal-header panel-danger">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
+                            Rechaza Bloque
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-justify"><b>Rechazar Bloque</b></p>                            
+                        
+                        <textarea id="motivo" name="motivo" cols="70" rows="5"></textarea>                                     
+                        
+                    </div>
+                    <div class="modal-footer">                            
+                        <input type="hidden" name="idTipoProceso_rechazar" id="idTipoProceso_rechazar" required value="0" class="form-control" >
+                        <input type="hidden" name="idArchivo_rechazar" id="idArchivo_rechazar" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
+                        <button type="submit" class="btn btn-primary">Aceptar</button>
+                    </div>
+                </div>
+                <!--Forma-->
+            </form>
+            </div>
+
+        </div>
+        <!--            Fin Dialog-->
+
+
+        
+         <!-- Dialog Model Observaciones Bloque 
+        <div class="modal fade" id="observacion_bloque" role="dialog" aria-labelledby="myModalLabel-observacion_bloque" aria-hidden="true">
+            <div class="modal-dialog">
+                
+                <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/agregar_observaciones_documento/"); ?>">
+                <div class="modal-content">
+                    <div class="modal-header panel-danger">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title" id="myModalLabel-espera_solicitud">
+                            Observaciones
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        
+                        <div class="form-group">
+                            <label for="observaciones" class="control-label col-sm-4">Agregar Observaciones</label>
+                            <div class="col-sm-10">
+                                <textarea class="form-control col-md-12" id="motivo" name="motivo" cols="70" rows="5"></textarea>
+                            </div>
+                         </div>
+                                                   
+                        
+                                                          
+                        
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <input type="hidden" name="idSubTipoProceso_observacion" id="idSubTipoProceso_observacion" required value="0" class="form-control" >
+                        <input type="hidden" name="idTipoProceso_observacion" id="idTipoProceso_observacion" required value="0" class="form-control" >
+                        <input type="hidden" name="idArchivo_observacion" id="idArchivo_observacion" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
+                        <input type="hidden" name="idDocumento_observacion" id="idDocumento_observacion" required value="0" >
+                        <input type="hidden" name="idContrato_observacion" id="idContrato_observacion" required value="<?php echo $aArchivo['idContrato']?>" >
+                        <input type="hidden" name="idDireccion_observacion" id="idDireccion_observacion" required value="<?php echo $aArchivo['idDireccion']?>>" >
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
+                        <button type="submit" class="btn btn-primary">Aceptar</button>
+                    </div>
+                </div>
+               
+            </form>
+            </div>
+
+        </div>
+        <!--            Fin Dialog-->
+        
+        
+        <!-- Dialog Model Observaciones Bloque -->
+        <div class="modal fade" id="observacion_bloque" role="dialog" aria-labelledby="myModalLabel-observacion_bloque" aria-hidden="true">
+            <div class="modal-dialog">
+                
                 <form class="form-horizontal" role="form">
                 <div class="modal-content">
                     <div class="modal-header panel-danger">
@@ -5308,14 +4550,14 @@
                         
                         <div class="form-group">
                             <label for="observaciones" class="control-label col-sm-4">Agregar Observaciones</label>
-                            <div class="col-sm-10">
-                                <textarea class="form-control col-md-12" id="mod_motivo_observacion_estimacion" name="mod_motivo_observacion_estimacion" cols="70" rows="5"></textarea>
+                            <div class="col-sm-12">
+                                <textarea class="form-control col-md-12" id="motivo_observacion" name="motivo_observacion" cols="70" rows="5"></textarea>
                             </div>
                          </div>
                         
                          <div class="checkbox">
                             <label>
-                                <input type="checkbox" value="0" name="mod_tipo_observacion_estimacion" id="mod_tipo_observacion_estimacion">
+                                <input type="checkbox" value="0" name="tipo_observacion" id="tipo_observacion" >
                                 Solicitar respuesta
                             </label>
                         </div>
@@ -5329,18 +4571,23 @@
                     
                     <div class="modal-footer">
                         
-                        <input type="hidden" name="idCatalogo_mod_observacion_estimacion" id="idCatalogo_mod_observacion_estimacion" required value="0" class="form-control" >
-                      
-                        <input type="hidden" name="preregistro_mod_observacion_estimacion" id="idDocumento_mod_observacion_estimacion" required value="<?= $preregistro ?>" class="form-control" >
-                      
+                        <input type="hidden" name="idSubTipoProceso_observacion" id="idSubTipoProceso_observacion" required value="0" class="form-control" >
+                        <input type="hidden" name="idTipoProceso_observacion" id="idTipoProceso_observacion" required value="0" class="form-control" >
+                        <input type="hidden" name="idArchivo_observacion" id="idArchivo_observacion" required value="<?php echo $aArchivo['id'] ?>" class="form-control" >
+                        <input type="hidden" name="idDocumento_observacion" id="idDocumento_observacion" required value="0" >
+                        <input type="hidden" name="idContrato_observacion" id="idContrato_observacion" required value="<?php echo $aArchivo['idContrato']?>" >
+                        <input type="hidden" name="idDireccion_observacion" id="idDireccion_observacion" required value="<?php echo $aArchivo['idDireccion']?>" >
+                        <input type="hidden" name="tipo_usuario_observacion" id="tipo_usuario_observacion" required value="<?php echo $preregistro ?>" >
+                        <input type="hidden" name="dir_respuesta_observacion" id="dir_respuesta_observacion" required value="" >
+                        <input type="hidden" name="usuario_preregistro" id="usuario_preregistro" required value="" >
                         
                         
-                        <button type="button" class="btn btn-default" data-dismiss="modal" >Cancelar</button> 
-                        <a class="btn btn-primary" onclick="modificar_observaciones_estimacion()">Guardar</a>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button> 
+                        <a class="btn btn-primary" onclick="agregar_observaciones_documento()">Aceptar</a>
                     </div>
                 </div>
                
-        	</form>
+            </form>
             </div>
 
         </div>
@@ -5350,7 +4597,7 @@
          <!-- Dialog Model Observaciones por Archivo -->
         <div class="modal fade" id="observacion_bloque_archivo" role="dialog" aria-labelledby="myModalLabel-observacion_bloque" aria-hidden="true">
             <div class="modal-dialog">
-            	<!--Forma-->
+                <!--Forma-->
                 <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/agregar_observaciones_por_archivo/" . $aArchivo['id']); ?>">
                 <div class="modal-content">
                     <div class="modal-header panel-danger">
@@ -5381,7 +4628,7 @@
                     </div>
                 </div>
                 <!--Forma-->
-        	</form>
+            </form>
             </div>
 
         </div>
@@ -5390,7 +4637,7 @@
          <!-- Dialog Model Observaciones de Documentos por Archivo -->
         <div class="modal fade" id="observacion_bloque_archivo_documento" role="dialog" aria-labelledby="myModalLabel-observacion_bloque" aria-hidden="true">
             <div class="modal-dialog">
-            	<!--Forma-->
+                <!--Forma-->
                 <form class="form-horizontal" role="form" method="post" action="<?php echo site_url("archivo/agregar_observaciones_por_archivo/" . $aArchivo['id']); ?>">
                 <div class="modal-content">
                     <div class="modal-header panel-danger">
@@ -5421,7 +4668,7 @@
                     </div>
                 </div>
                 <!--Forma-->
-        	</form>
+            </form>
             </div>
 
         </div>
@@ -5559,31 +4806,6 @@
         <!--            Fin Dialog-->
         
         
-         <!-- Historial del Bloque  -->
-        <div class="modal fade" id="observaciones_estimaciones" role="dialog" aria-labelledby="myModalLabel-observaciones_bloque" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header panel-default">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title" id="myModalLabel-historial">
-                            Observaciones
-                        </h4>
-                    </div>
-                    <div class="modal-body">
-                        
-                                <div id="idObservacionesEstimaciones"></div>
-                                                                              
-                    </div>
-                    <div class="modal-footer">                            
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-        <!--            Fin Dialog-->
-        
-        
         
         <!-- Dialogo Agregar Ubicacion -->
         <div class="modal fade" id="modal-agregar-ubicacion-fisica" role="dialog" aria-labelledby="modal-agregar-ubicacion-fisica_myModalLabel" aria-hidden="true">
@@ -5602,7 +4824,7 @@
 
                                 
                                 <div class="form-group">
-                                        <label for="idUbicacionFisica" class="col-sm-3 control-label">Ubicación Física</label>	
+                                        <label for="idUbicacionFisica" class="col-sm-3 control-label">Ubicación Física</label>  
                                          <div class="col-sm-7"> 
                                              <div class="form-control" id="nomubicacionfisica"></div>
                                              <input type="hidden" name="idUbicacionFisica" id="idUbicacionFisica" required value="0">
@@ -5612,43 +4834,44 @@
                                         </div>
                                 </div>  
                                 
-                                <div class="d-n">
-                                    <div class="form-group">
-                                        <label for="caja_ubicacion" class="control-label col-sm-3">Caja:</label>
-                                        <div class="col-sm-7">
-                                            <input type="text" id="txtCaja" name="txtCaja" value="" class="form-control input-sm" />          
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="documento_ubicacion" class="control-label col-sm-3">Documentos:</label>
-                                        <div class="col-sm-7">
-                                            <input type="text" id="documento_ubicacion" name="documento_ubicacion" value="" class="form-control input-sm" />          
-                                        </div>
-                                    </div>
-
-                                    <input type="hidden" name="idArchivo" id="idArchivo" required value="<?= $idArchivo; ?>">
-
-
-                                    <div class="form-group">
-                                        <label for="folioInicial" class="control-label col-sm-3">No. Folio Inicial:</label>
-                                        <div class="col-sm-7">
-                                            <input type="number" id="txtFolioInicial" name="txtFolioInicial" value="" class="form-control input-sm"/>          
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="folioFinal" class="control-label col-sm-3">No. Folio Final:</label>
-                                        <div class="col-sm-7">
-                                            <input type="number" id="txtFolioFinal" name="txtFolioFinal" value="" class="form-control input-sm" />          
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="noHojas" class="control-label col-sm-3">No. de Hojas:</label>
-                                        <div class="col-sm-7">
-                                            <input type="number" id="noHojas" name="noHojas" value="" class="form-control input-sm"/>          
-                                        </div>
+                                <!--
+                                <div class="form-group">
+                                    <label for="caja_ubicacion" class="control-label col-sm-3">Caja:</label>
+                                    <div class="col-sm-7">
+                                        <input type="text" id="txtCaja" name="txtCaja" value="" class="form-control input-sm" />          
                                     </div>
                                 </div>
+
+                                <div class="form-group">
+                                    <label for="documento_ubicacion" class="control-label col-sm-3">Documentos:</label>
+                                    <div class="col-sm-7">
+                                        <input type="text" id="documento_ubicacion" name="documento_ubicacion" value="" class="form-control input-sm" />          
+                                    </div>
+                                </div>
+                               
+                                <input type="hidden" name="idArchivo" id="idArchivo" required value="<?= $idArchivo; ?>">
+                                    
+                                
+                                <div class="form-group">
+                                    <label for="folioInicial" class="control-label col-sm-3">No. Folio Inicial:</label>
+                                    <div class="col-sm-7">
+                                        <input type="number" id="txtFolioInicial" name="txtFolioInicial" value="" class="form-control input-sm"/>          
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="folioFinal" class="control-label col-sm-3">No. Folio Final:</label>
+                                    <div class="col-sm-7">
+                                        <input type="number" id="txtFolioFinal" name="txtFolioFinal" value="" class="form-control input-sm" />          
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="noHojas" class="control-label col-sm-3">No. de Hojas:</label>
+                                    <div class="col-sm-7">
+                                        <input type="number" id="noHojas" name="noHojas" value="" class="form-control input-sm"/>          
+                                    </div>
+                                </div>
+                                
+                                -->
 
                                 
                                
@@ -5685,14 +4908,14 @@
                             </button>
                             <h4 class="modal-titlsamplee" id="modal-nuevo_subdocumentomyModalLabel">Modificar Ubicación Física</h4>
                         </div>
-                        <form action="<?php echo site_url("archivo/modificar_ubicacion_fisica"); ?>" method="post" name="forma1" target="_self" id="forma1" role="form" class="form-horizontal" method="post" enctype="multipart/form-data">
+                        <form id="form-modificar-ubicacion" name="form-modificar-ubicacion" target="_self" id="forma1" role="form" class="form-horizontal" method="post" enctype="multipart/form-data">
                             <div class="modal-body">
 
 
 
                                 
                                 <div class="form-group">
-                                        <label for="UbicacionFisica_mod" class="col-sm-3 control-label">Ubicación Física</label>	
+                                        <label for="UbicacionFisica_mod" class="col-sm-3 control-label">Ubicación Física</label>    
                                          <div class="col-sm-7"> 
                                              
                                              <input type="text" id="txtnom_mod" name="txtnom_mod" value="" class="form-control input-sm" required/> 
@@ -5704,42 +4927,7 @@
                                 </div>  
                                 
                                 
-                                <div class="form-group">
-                                    <label for="caja_ubicacion" class="control-label col-sm-3">Caja:</label>
-                                    <div class="col-sm-7">
-                                        <input type="text" id="txtCaja_mod" name="txtCaja_mod" value="" class="form-control input-sm" />          
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="documento_ubicacion" class="control-label col-sm-3">Documentos:</label>
-                                    <div class="col-sm-7">
-                                        <input type="text" id="documento_ubicacion_mod" name="documento_ubicacion_mod" value="" class="form-control input-sm" />          
-                                    </div>
-                                </div>
-                               
-                                <input type="hidden" name="idArchivo_mod" id="idArchivo_mod" required value="<?= $idArchivo; ?>">
-                                    
                                 
-                                <div class="form-group">
-                                    <label for="folioInicial" class="control-label col-sm-3">No. Folio Inicial:</label>
-                                    <div class="col-sm-7">
-                                        <input type="number" id="txtFolioInicial_mod" name="txtFolioInicial_mod" value="" class="form-control input-sm" />          
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="folioFinal" class="control-label col-sm-3">No. Folio Final:</label>
-                                    <div class="col-sm-7">
-                                        <input type="number" id="txtFolioFinal_mod" name="txtFolioFinal_mod" value="" class="form-control input-sm" />          
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="noHojas" class="control-label col-sm-3">No. de Hojas:</label>
-                                    <div class="col-sm-7">
-                                        <input type="number" id="noHojas_mod" name="noHojas_mod" value="" class="form-control input-sm" />          
-                                    </div>
-                                </div>
-
                                 
                                
                                
@@ -5753,8 +4941,10 @@
                             <div class="modal-footer">
                                 <input type="hidden" name="idRel_mod" id="idRel_mod" required value="" class="form-control" >
                                 <input type="hidden" name="idUbi_anterior" id="idUbi_anterior" required value="" class="form-control" >
+                                <input type="hidden" name="idUbi_Archivo" id="idUbi_Archivo" required value="<?= $idArchivo ?>" class="form-control" >
+                                <input type="hidden" name="idUbi_Proceso" id="idUbi_Proceso" required value="" class="form-control" >
                                 
-                                <button type="submit" class="btn btn-success">
+                                <button type="submit" class="btn btn-success" >
                                     Guardar
                                 </button>                     
                                 <button type="button" class="btn btn-danger" data-dismiss="modal">
@@ -5815,7 +5005,7 @@
         
             
             
-          <!--Cambiar Ubicacion Fisica Tabla -->    
+        <!--Cambiar Ubicacion Fisica Tabla -->    
         <div class="modal fade" id="modal-cambiar-ubicacionfisica" role="dialog" aria-labelledby="myModalLabel-modal-cambiar-ubicacionfisica" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <!--Forma-->
@@ -5853,8 +5043,8 @@
             <div class="modal-dialog modal-lg">
                 <!--Forma-->
 
-                <div class="modal-content">
-                    <div class="modal-header panel-title">
+                <div class="modal-content width-modal">
+                    <div class="modal-header panel-title width-modal">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
                         <h4 class="modal-title" id="cambiar-concepto">Ubicación Física</h4>
                     </div>
@@ -5921,6 +5111,9 @@
 
 
         
+       
+            
+    
        
             
             

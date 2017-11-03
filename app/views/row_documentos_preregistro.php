@@ -11,176 +11,7 @@
             </h5>
             
             
-            <?php /*
-            <div class="panel panel-warning">
-
-
-
-
-                <div class="panel-heading"> 
-                     <a class="panel-title" data-toggle="collapse" data-parent="#panel-documentos-<?php echo $rRow->idDocumento;  ?>" href="#panel-element-documentos-<?php echo $rRow->idDocumento;  ?>">
-                          <?php echo $rRow->Nombre;  ?>
-
-                      </a> 
-                    <div> <small> <?php echo "RESPONSABLE: ". $addw_direciones[$rRow->responsable_documento];  ?> </small></div>
-                    <?php if($preregistro == 0): ?>
-        
-    
-                        <div> <small> <?php echo "PREREGISTRÓ: ". $addw_direciones[$rRow->direccion_preregistra];  ?> </small> </div>
-                    <?php endif; ?>
-                    
-                </div>
-
-
-
-                <div id="panel-element-documentos-<?php echo $rRow->idDocumento;  ?>" class="panel-collapse collapse">
-                    <?php if($preregistro != 1)    {
-                                              $tabla="saaDocumentosAnexos_".$aArchivo['idEjercicio'];
-                                              
-                                              $qEstimaciones = $this->ferfunc->get_subreg_distinct($tabla, "idRel_Archivo_Documento =" . $rDocumentos->id, " Numero_Estimacion, Es_Estimacion, Es_Prorroga " );
-
-                                              if (isset($qEstimaciones)) {
-                                                  if ($qEstimaciones->num_rows() > 0) {
-                                                      foreach ($qEstimaciones->result() as $rRowEstimaciones) {
-
-                                           ?>
-                                              
-                                                      <?php  
-                                              
-                                             
-                                                      $strEstimacion_in="  ";
-                                                      if ($rRowEstimaciones->Numero_Estimacion==$Numero_Estimacion){
-                                                          $strEstimacion_in=" in ";
-                                                      }
-                                                      ?>        
-                                               <div class="panel-group col-md-12" id="panel-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>">
-                                                   <div class="panel panel-default">
-                                                       <div class="panel-heading">
-                                                       <?php if($rRowEstimaciones->Es_Prorroga == 1){  ?>
-                                                           <a class="panel-title" data-toggle="collapse" data-parent="#panel-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>" href="#panel-element-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>">
-                                                               Prorr-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>
-                                                           </a>
-                                                       <?php }else if($rRowEstimaciones->Es_Estimacion == 1){  ?>
-                                                           <a class="panel-title" data-toggle="collapse" data-parent="#panel-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>" href="#panel-element-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>">
-                                                               Est-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>
-                                                           </a>
-                                                       <?php }else{  ?>
-                                                           <a class="panel-title" data-toggle="collapse" data-parent="#panel-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>" href="#panel-element-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>">
-
-                                                           </a>
-                                                       <?php } ?>
-                                                       </div>
-                                                       <?php if($rRowEstimaciones->Es_Prorroga != 1 && $rRowEstimaciones->Es_Estimacion != 1){ ?>
-                                                           <div id="panel-element-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>" class="panel-collapse collapse in">
-                                                       <?php }else{ ?>
-                                                           <div id="panel-element-estimacion-<?php echo $rRowEstimaciones->Numero_Estimacion;  ?>" class="panel-collapse collapse <?php  echo $strEstimacion_in; ?>">
-                                                       <?php } ?>    
-                                                           <div class="panel-body">
-                                                               <div class="row clearfix"> 
-                                                                   <!-- Panel de Control-->
-                                                                   <div class="col-md-12 column">
-
-                                                                           <?php
-                                                                           $qDocumentosAnexos = $this->ferfunc->get_subreg($tabla,array("idRel_Archivo_Documento" => $rRowDocumentos->id,"Numero_Estimacion"=>$rRowEstimaciones->Numero_Estimacion));
-
-                                                                            if (isset($qDocumentosAnexos)) {
-                                                                                if ($qDocumentosAnexos->num_rows() > 0) { ?>
-                                                                                   <table class="table table-striped table-bordered table-hover text-center">
-                                                                                       <tr>
-                                                                                           <!--th>
-                                                                                               Tipo Documento
-                                                                                           </th-->
-                                                                                           <th class="col-md-6">
-                                                                                               Accion
-                                                                                           </th>
-                                                                                            <th class="col-md-3">
-                                                                                               Nombre de Archivo
-                                                                                           </th>
-
-
-
-                                                                                           <th class="col-md-3">
-
-                                                                                           </th>
-
-
-                                                                                       </tr>
-                                                                               <?php foreach ($qDocumentosAnexos->result() as $rRow_anexos) { ?>
-
-                                                                               <tr>
-                                                                                   <!--td>
-                                                                                       <?php
-                                                                                       echo $rRow_anexos->Documento;
-                                                                                       ?>        
-                                                                                   </td-->
-                                                                                    <td>
-                                                                                       <a href="<?=site_url('archivo/verDoc/'.$rRow_anexos->id.'/'.$aArchivo['idEjercicio'])?>" class="btn btn-default"  role="button" ><span class="glyphicon glyphicon-eye-open"></span> Ver</a>
-                                                                                       <a href="<?=site_url('archivo/descargarDoc/'.$rRow_anexos->id.'/'.$aArchivo['idEjercicio'])?>" class="btn btn-default"  role="button" ><span class="glyphicon glyphicon-download"></span> Descargar</a>
-                                                                                       <a href="<?=site_url('archivo/delete_doc_anexo/'.$rRow_anexos->id.'/'.$aArchivo['idEjercicio'])?>" title="Eliminar" onclick="return confirm('¿Confirma Que Quiere Eliminar el Documento Anexo?');" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span></a>
-                                                                                   </td>
-                                                                                   <td>
-                                                                                       <?php
-                                                                                       echo $rRow_anexos->nombrearchivo;
-                                                                                       ?>
-                                                                                   </td>
-
-
-
-                                                                                   <td>
-
-                                                                                        <?php if ($rRow_anexos->idSubDocumento>0){ ?>
-                                                                                                <?php 
-
-                                                                                                $qSubDocumento = $this->ferfunc->get_subreg_distinct('saaSubDocumentos', "id =" . $rRow_anexos->idSubDocumento, " id,Nombre" );
-
-                                                                                                if ($qSubDocumento->num_rows()>0){
-                                                                                                    $aSubDocumento=$qSubDocumento->row_array();
-                                                                                                    echo $aSubDocumento['Nombre']; 
-
-                                                                                                }
-
-                                                                                                ?>
-                                                                                       <?php } ?>
-                                                                                   </td>
-
-
-
-
-                                                                               </tr>
-
-
-                                                                               <?php }
-                                                                                    ?>
-                                                                                   </table>
-                                                                               <?php  
-                                                                               }
-                                                                           }
-                                                                           ?>   
-
-
-
-                                                                       </div>
-                                                               </div>
-                                                           </div>
-                                                       </div>
-                                                   </div>
-
-                                               </div>
-                                          <?php
-                                                  //  }
-                                          
-                                              
-                                         
-                                                      }
-                                                  }
-                                              }
-                                          }
-                                          ?>
-                </div>
-            </div>
-            /*/
-            
-            ?>
+           
 
 
         </div> <!-- row-title -->
@@ -285,8 +116,32 @@
             </a>
 
             <a href="#" id="btn-agregar-obs"  data-toggle="modal" title="Agregar observaciones" data-target="#observacion_bloque" role="button" class="btn btn-warning btn-sm" onclick="uf_agregar_observaciones(<?php echo $rRow->idTipoProceso .' , ' . $rRow->idSubTipoProceso . ' , ' .$rRow->idDocumento . ' , ' .$idDireccion_responsable . ' , ' .$idusuario; ?>)">
-                <span class="glyphicon glyphicon-list"></span>
+                <span class="glyphicon glyphicon-comment"></span>
             </a>
+            <?php if($digitalizar == 1): ?>
+                <!--<a href="#" id="btn-digitalizar"  title="Digitalizar"  class="btn btn-success btn-sm" onclick="digitalizar()">
+                    <span class="glyphicon glyphicon-barcode"></span>
+                </a>-->
+                <a class="btn btn-success btn-sm"  title="Digitalizar Documento"  onclick="nuevo_doc_anexo(<?= $idArchivo; ?>, <?= $rRow->idRAD; ?>,<?= $rRow->idTipoProceso; ?>,<?= $rRow->idSubTipoProceso;?>, <?= $rRow->idDocumento; ?>)" >
+                    <span class="glyphicon glyphicon-barcode"></span>
+                </a>
+                <?php
+                 $tabla="saaDocumentosAnexos_".$aArchivo['idEjercicio'];
+                                              
+                    $qEstimaciones = $this->ferfunc->get_subreg_distinct($tabla, "idRel_Archivo_Documento =" . $rRow->idRAD, " Numero_Estimacion, Es_Estimacion, Es_Prorroga " );
+
+                        if (isset($qEstimaciones)) {
+                            if ($qEstimaciones->num_rows() > 0) {
+                ?>
+                            <a href="#" id="ver-documentos"  title="Ver Documento"  class="btn btn-info btn-sm" onclick="ver_documento()">
+                                <span class="glyphicon glyphicon-eye"></span>
+                            </a>
+                <?php       }
+                        }
+                        
+                        
+                ?>
+            <?php endif; ?>
 
         </div> <!-- row-acciones -->
 

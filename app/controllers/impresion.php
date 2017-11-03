@@ -14,150 +14,7 @@ class Impresion extends MY_Controller {
     }
         
     public function etiqueta_transferencia($pdf= 0){
-        /*
-        if ($pdf == 1) {
-            $this->load->library('mpdf'); 
-            $mpdf = new mPDF('','', 0, '', 15, 15, 16, 16, 9, 9, 'L');
-            
-         
-            $output = $this->load->view('v_etiqueta_transferencia');
-            $mpdf->WriteHTML($output);
-            $mpdf->Output();
-        } else {
-            //$this->load->view('v_reporte_orden_trabajo', $data);
-           $this->load->view('v_etiqueta_transferencia');
-        }*/
-        /*$html = '
-        <html>
-            <head>
-                <style>
-                    body{
-                        font-size: 7pt;
-                        font-family: "Arial";
-                    }
-                    .normal {
-                       text-transform: uppercase;
-                    }
-                    .normal th, .normal td {
-                      border: 1px solid #000;
-                    }
-                    .titulo{
-                        background: #691726;
-                        color: #FFF;
-                        padding:2px;
-                        text-transform: uppercase;
-                    }
-                </style>
-            </head>
-            <body>
-        <table width="756" heigth="453">
-            <thead>
-            
-                <tr>
-                    <th colspan="3" rowspan="3"><img src="' . site_url('assets/logo_chico.png') .'"  width="100" style="margin-bottom:10px"/></th> 
-                    <th colspan="6" align="center"></th>
-
-                </tr>
-                <tr>
-
-                    <th colspan="6"  align="center"><span style="vertical-align: bottom; font-size: 10pt; font-weigth:bold;">SECRETARÍA DE INFRAESTRUCTURA Y OBRA PÚBLICA<span></th>
-
-                </tr>
-                <tr>
-
-                    <th colspan="6"  align="center"></th>
-
-                </tr>
-                <tr>
-
-                    <th colspan="9"  align="center"></th>
-
-                </tr>
-                <tr class="normal">
-                
-                    <th colspan="2" align="end" class="titulo">Dirección General:</th>
-                    <th colspan="3" align="start">Dirección General Administrativa</th>
-                    <th colspan="2" align="end" class="titulo">Caja: </th>
-                    <th colspan="2" align="start">1/2</th>
-
-                </tr>
-                <tr class="normal">
-
-                    <th colspan="2" align="end" class="titulo">Dirección Área:</th>
-                    <th colspan="3" align="start">Dirección Recursos Humanos</th>
-                    <th colspan="2" align="end" class="titulo">Año: </th>
-                    <th colspan="2" align="start">2014</th>
-
-                </tr>
-                
-                <tr>
-
-                    <th colspan="9"  align="center" class="titulo">Expedientes</th>
-
-                </tr>
-                <tr>
-                    <th colspan="1"  align="center" class="titulo">Carpeta</th>
-                    <th colspan="4"  align="center" class="titulo">Descripción</th>
-                    <th colspan="2"  align="center" class="titulo">Clasificador</th>
-                    <th colspan="2"  align="center" class="titulo">OT</th>
-                </tr>
-                
-            </thead>
-            <tbody class="normal">
-                <tr> 
-                    <td colspan="1"  align="center">1</td>
-                    <td colspan="4"  align="center">Bloque uno proyecto Mascota</td>
-                    <td colspan="2"  align="center">1S.3</td>
-                    <td colspan="2"  align="center">Lp0001-15</td>
-                </tr>
-                <tr> 
-                    <td colspan="1"  align="center">2</td>
-                    <td colspan="4"  align="center">Bloque uno proyecto Mascota</td>
-                    <td colspan="2"  align="center">1S.3</td>
-                    <td colspan="2"  align="center">Lp0001-15</td>
-                </tr>
-                <tr> 
-                    <td colspan="1"  align="center">3</td>
-                    <td colspan="4"  align="center">Bloque uno proyecto Mascota</td>
-                    <td colspan="2"  align="center">1S.3</td>
-                    <td colspan="2"  align="center">Lp0001-15</td>
-                </tr>
-                <tr> 
-                    <td colspan="1"  align="center">4</td>
-                    <td colspan="4"  align="center">Bloque uno proyecto Mascota</td>
-                    <td colspan="2"  align="center">1S.3</td>
-                    <td colspan="2"  align="center">Lp0001-15</td>
-                </tr>
-                <tr> 
-                    <td colspan="1"  align="center">5</td>
-                    <td colspan="4"  align="center">Bloque uno proyecto Mascota</td>
-                    <td colspan="2"  align="center">1S.3</td>
-                    <td colspan="2"  align="center">Lp0001-15</td>
-                </tr>
-                <tr> 
-                    <td colspan="1"  align="center">6</td>
-                    <td colspan="4"  align="center">Bloque uno proyecto Mascota</td>
-                    <td colspan="2"  align="center">1S.3</td>
-                    <td colspan="2"  align="center">Lp0001-15</td>
-                </tr>
-                <tr> 
-                    <td colspan="1"  align="center">7</td>
-                    <td colspan="4"  align="center">Bloque uno proyecto Mascota</td>
-                    <td colspan="2"  align="center">1S.3</td>
-                    <td colspan="2"  align="center">Lp0001-15</td>
-                </tr>
-                
-            </tbody>   
-                
-                
-
-
-
-            </table>
-            </body>
-        </html>
-        ';
-        */
+        
         $html = '
         <html>
             <head>
@@ -1706,9 +1563,8 @@ class Impresion extends MY_Controller {
         
     }
     
-    public function  reporte_preregistro($id, $idDireccion ,$pdf = 1){
-       
-        
+    
+    public function transferencia_preregistro($id, $pdf = 1){
         $this->load->model('impresiones_model');
         $this->load->model('modalidad_model');
         $this->load->model('datos_model');
@@ -1721,8 +1577,8 @@ class Impresion extends MY_Controller {
         $addwDirecciones = $this->direcciones_model->addw_catDireccion();
         $aSubDocumentos = $this->subdocumentos_model->addw_subDocumentos();
         //Rel archivo documento por archivo
-        $qStatus = $this->impresiones_model->datos_reporte_preregistro ($id, $idDireccion);
-        $qEstimaciones_archivo = $this->impresiones_model->estimaciones_de_archivo($id);
+        $qStatus = $this->impresiones_model->datos_reporte_estatus_archivo ($id, $this->session->userdata('idDireccion_responsable'));
+        /*$qEstimaciones_archivo = $this->impresiones_model->estimaciones_de_archivo($id);
         echo 'Entro';
         if (isset($qEstimaciones_archivo)){
             if ($qEstimaciones_archivo->num_rows() > 0){
@@ -1730,13 +1586,15 @@ class Impresion extends MY_Controller {
 
                 foreach ($qEstimaciones_archivo->result() as $estimaciones){
 
-                        echo 'hay tipo';
-                        $estimaciones_archivo=$this->impresiones_model->get_estimaciones_archivo_preregistro($estimaciones->id,  $this->session->userdata('id'));
+                        echo 'hay tipo id est '. $estimaciones->id;
+                        $estimaciones_archivo=$this->impresiones_model->get_estimaciones_archivo_preregistro($estimaciones->id_Rel_Archivo_Documento,  $this->session->userdata('id'));
+                        //$estimaciones_archivo=$this->impresiones_model->get_estimaciones_archivo($estimaciones->id);
                         if ($estimaciones_archivo->num_rows() > 0){
-                                            echo 'Rows'. $estimaciones_archivo->num_rows();
+                                            echo 'Rows controller'. $estimaciones_archivo->num_rows();
+                                            $estimaciones_usuario= 1;
 
                                             foreach ($estimaciones_archivo->result() as $estimaciones_a){
-                                                echo $estimaciones_a->idSubDocumento;
+                                                //echo $estimaciones_a->idSubDocumento;
                                             }
                         }
                         $hay_estimaciones =1;
@@ -1748,6 +1606,13 @@ class Impresion extends MY_Controller {
                 $hay_estimaciones =-1;
                 echo $estimaciones_archivo;
             }
+        
+        }*/
+        $qEstimaciones_archivo = $this->impresiones_model->estimaciones_direccion($id, $this->session->userdata('idDireccion_responsable'));
+        if ($qEstimaciones_archivo->num_rows() > 0){
+            $hay_estimaciones =1;
+        }else {
+            $hay_estimaciones =-1;
         }
         $qArchivo = $this->datos_model-> get_Archivo_id($id);
         $qObra = $this->impresiones_model->datos_obra ($id);
@@ -1773,7 +1638,7 @@ class Impresion extends MY_Controller {
         $data = array(
         	
         	'qStatus' => $qStatus,
-                'estimaciones_archivo' =>$estimaciones_archivo,
+                'estimaciones_archivo' =>$qEstimaciones_archivo,
                 'aSubDocumentos'=> $aSubDocumentos ,
                 'OrdenTrabajo' => $OrdenTrabajo,
                 'Obra' =>  $Obra,
@@ -1784,11 +1649,15 @@ class Impresion extends MY_Controller {
                 'addwModalidad' =>$addwModalidad,
                 'addwEjercicio' => $addwEjercicio,
                 'rArchivo' => $rArchivo,
-                'rDireccion_responsable' =>$idDireccion,
+                'rDireccion_responsable' =>$this->session->userdata('idDireccion_responsable'),
                 'addwDireccion' => $addwDirecciones,
                 'hay_estimaciones'=>$hay_estimaciones
             
         	);
+        
+                
+                
+                
         
         //$pdf = 0;
         if ($pdf == 1) {
@@ -1811,6 +1680,311 @@ class Impresion extends MY_Controller {
         } 
           
         
+        
+    }
+
+    public function  reporte_preregistro($id,$pdf = 1){
+       
+        
+        $this->load->model('impresiones_model');
+        $this->load->model('modalidad_model');
+        $this->load->model('datos_model');
+        $this->load->model('direcciones_model');
+        $this->load->model('subdocumentos_model');
+        
+        $estimaciones_archivo = "";
+        $addwModalidad= $this->modalidad_model->addw_modalidades();
+        $addwEjercicio = $this->impresiones_model->addw_ejercicio();
+        $addwDirecciones = $this->direcciones_model->addw_catDireccion();
+        $aSubDocumentos = $this->subdocumentos_model->addw_subDocumentos();
+        $direccion = $this->session->userdata('idDireccion_responsable');
+        $usuario = $this->session->userdata('id');
+        $hojas = 0;
+        
+        //** SUBDOCUMENTOS de Direccion "Estimaciones"
+        $qSubDocumentos = $this->impresiones_model->get_subdocumentos($id, $direccion);
+        
+        if ($qSubDocumentos->num_rows() > 0){
+            
+            
+            foreach ($qSubDocumentos->result() as $rSubDocumento) {
+                $hojas = $hojas +  $rSubDocumento->noHojas;
+            }
+                
+               
+            
+            $idRAD_estimaciones = $this->impresiones_model->idRAD_estimaciones($id);
+            
+             if (isset($idRAD_estimaciones)){
+                
+                if ($idRAD_estimaciones->num_rows() > 0){
+                    
+                    foreach ($idRAD_estimaciones->result() as $estimaciones){
+                        //Verificar si la direccion marco las estimaciones
+                        
+                        
+                        $preregistro = $this->impresiones_model->buscar_preregistro($estimaciones->idRel_Archivo_Documento, $direccion);
+                        
+                        if ($preregistro->num_rows() == 0 ){
+                            echo 'Prere 0';
+                            //Preregistrar
+                            $data = array(
+                                'id_Rel_Archivo_Documento' => $estimaciones->idRel_Archivo_Documento,
+                                'idArchivo'                => $id,
+                                'idDireccion_responsable'  => $direccion,
+                                'idUsuario_preregistra'    => $usuario,
+                                'tipo_documento'           => 4,
+                                'fecha_preregistro'        => date('Y-m-d H:i:s'),
+                                );
+                            echo $this->impresiones_model->preregistra_estimaciones($data);
+                        }
+                        
+                        
+                    }
+                }
+             }
+        }
+        
+        
+        //**DOCUMENTOS 
+        $qStatus = $this->impresiones_model->datos_reporte_preregistro ($id, $direccion);
+       
+        /*
+        if (isset($qStatus)) {
+            if ($qStatus->num_rows() > 0) {
+                $i=0;
+                foreach ($qStatus->result() as $rStatus) {
+                    $i++;
+                    //si no es estimacion
+                    if ($rStatus->tipo_documento != 4){
+                        echo ' ' . $rStatus->tipo_documento;
+                    }else {
+                        echo 'Estimaciones ';
+                        echo ' ' . $hojas;
+                        if (isset($qSubDocumentos)) {
+                            if ($qSubDocumentos->num_rows() > 0) {
+                                $i=0;
+                                foreach ($qSubDocumentos->result() as $rSubDocumento) {
+                                    echo $rSubDocumento->Nombre;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        */ 
+        
+        
+        $qArchivo = $this->datos_model-> get_Archivo_id($id);
+        $qObra = $this->impresiones_model->datos_obra ($id);
+        $rObra = $qObra->row_array();
+        $rArchivo = $qArchivo->row_array();
+        
+        
+        
+        if (isset($rObra))
+        {
+                $Contrato =  $rObra['Contrato'];
+                $OrdenTrabajo = $rObra['OrdenTrabajo'];
+                $Obra = $rObra['Obra'];
+                $Modalidad = $rObra['idModalidad'];
+                $Ejercicio = $rObra['idEjercicio'];
+                $Normatividad = $rObra['Normatividad'];
+                //echo $rObra->Contrato . $rObra->OrdenTrabajo;
+                //exit();
+                
+        } 
+        
+        $data = array(
+        	
+        	'qStatus' => $qStatus,
+                'qSubDocumentos' =>$qSubDocumentos,
+                'aSubDocumentos'=> $aSubDocumentos ,
+                'OrdenTrabajo' => $OrdenTrabajo,
+                'Obra' =>  $Obra,
+                'Contrato' => $Contrato,
+                'Modalidad' => $Modalidad,
+                'Ejercicio' => $Ejercicio,
+                'Normatividad' => $Normatividad,
+                'addwModalidad' =>$addwModalidad,
+                'addwEjercicio' => $addwEjercicio,
+                'rArchivo' => $rArchivo,
+                'rDireccion_responsable' =>$direccion,
+                'addwDireccion' => $addwDirecciones,
+                'hojas' =>$hojas,
+            
+        	);
+       
+      
+        //$pdf = 0;
+        if ($pdf == 1) {
+            $this->load->library('mpdf');
+            //$mpdf = new mPDF('utf-8', 'Letter');
+            //$mpdf = new mPDF('utf-8', 'Legal');
+            $mpdf = new mPDF('utf-8');
+            
+            $output = $this->load->view('v_reporte_preregistro', $data, true);
+            $mpdf->WriteHTML($output);
+            $mpdf->Output();
+        } else {
+            $this->load->view('v_reporte_preregistro', $data);
+        } 
+          
+      
+        
+        
+    }
+    
+    public function  reporte_preregistro_cid($id,$pdf = 1){
+       
+        
+        $this->load->model('impresiones_model');
+        $this->load->model('modalidad_model');
+        $this->load->model('datos_model');
+        $this->load->model('direcciones_model');
+        $this->load->model('subdocumentos_model');
+        
+        $estimaciones_archivo = "";
+        $addwModalidad= $this->modalidad_model->addw_modalidades();
+        $addwEjercicio = $this->impresiones_model->addw_ejercicio();
+        $addwDirecciones = $this->direcciones_model->addw_catDireccion();
+        $aSubDocumentos = $this->subdocumentos_model->addw_subDocumentos();
+        $direccion = $this->session->userdata('idDireccion_responsable');
+        $usuario = $this->session->userdata('id');
+        $hojas = 0;
+        
+        //** SUBDOCUMENTOS de Direccion "Estimaciones"
+        $qSubDocumentos = $this->impresiones_model->get_subdocumentos_archivo($id);
+        
+        if ($qSubDocumentos->num_rows() > 0){
+            
+            
+            foreach ($qSubDocumentos->result() as $rSubDocumento) {
+                $hojas = $hojas +  $rSubDocumento->noHojas;
+            }
+                
+               
+            
+            $idRAD_estimaciones = $this->impresiones_model->idRAD_estimaciones($id);
+            
+             if (isset($idRAD_estimaciones)){
+                
+                if ($idRAD_estimaciones->num_rows() > 0){
+                    
+                    foreach ($idRAD_estimaciones->result() as $estimaciones){
+                        //Verificar si la direccion marco las estimaciones
+                        
+                        
+                        $preregistro = $this->impresiones_model->buscar_preregistro_archivo($estimaciones->idRel_Archivo_Documento);
+                        
+                        if ($preregistro->num_rows() == 0 ){
+                            echo 'Prere 0';
+                            //Preregistrar
+                            $data = array(
+                                'id_Rel_Archivo_Documento' => $estimaciones->idRel_Archivo_Documento,
+                                'idArchivo'                => $id,
+                                'idDireccion_responsable'  => $this->session->userdata('id'),
+                                'idUsuario_preregistra'    => $usuario,
+                                'tipo_documento'           => 4,
+                                'fecha_preregistro'        => date('Y-m-d H:i:s'),
+                                );
+                            echo $this->impresiones_model->preregistra_estimaciones($data);
+                        }
+                        
+                        
+                    }
+                }
+             }
+        }
+        
+        
+        //**DOCUMENTOS 
+        $qStatus = $this->impresiones_model->datos_reporte_preregistro_cid ($id);
+       
+        /*
+        if (isset($qStatus)) {
+            if ($qStatus->num_rows() > 0) {
+                $i=0;
+                foreach ($qStatus->result() as $rStatus) {
+                    $i++;
+                    //si no es estimacion
+                    if ($rStatus->tipo_documento != 4){
+                        echo ' ' . $rStatus->tipo_documento;
+                    }else {
+                        echo 'Estimaciones ';
+                        echo ' ' . $hojas;
+                        if (isset($qSubDocumentos)) {
+                            if ($qSubDocumentos->num_rows() > 0) {
+                                $i=0;
+                                foreach ($qSubDocumentos->result() as $rSubDocumento) {
+                                    echo $rSubDocumento->Nombre;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        */ 
+        
+        
+        $qArchivo = $this->datos_model-> get_Archivo_id($id);
+        $qObra = $this->impresiones_model->datos_obra ($id);
+        $rObra = $qObra->row_array();
+        $rArchivo = $qArchivo->row_array();
+        
+        
+        
+        if (isset($rObra))
+        {
+                $Contrato =  $rObra['Contrato'];
+                $OrdenTrabajo = $rObra['OrdenTrabajo'];
+                $Obra = $rObra['Obra'];
+                $Modalidad = $rObra['idModalidad'];
+                $Ejercicio = $rObra['idEjercicio'];
+                $Normatividad = $rObra['Normatividad'];
+                //echo $rObra->Contrato . $rObra->OrdenTrabajo;
+                //exit();
+                
+        } 
+        
+        $data = array(
+        	
+        	'qStatus' => $qStatus,
+                'qSubDocumentos' =>$qSubDocumentos,
+                'aSubDocumentos'=> $aSubDocumentos ,
+                'OrdenTrabajo' => $OrdenTrabajo,
+                'Obra' =>  $Obra,
+                'Contrato' => $Contrato,
+                'Modalidad' => $Modalidad,
+                'Ejercicio' => $Ejercicio,
+                'Normatividad' => $Normatividad,
+                'addwModalidad' =>$addwModalidad,
+                'addwEjercicio' => $addwEjercicio,
+                'rArchivo' => $rArchivo,
+                'rDireccion_responsable' =>$direccion,
+                'addwDireccion' => $addwDirecciones,
+                'hojas' =>$hojas,
+            
+        	);
+       
+      
+        //$pdf = 0;
+        if ($pdf == 1) {
+            $this->load->library('mpdf');
+            //$mpdf = new mPDF('utf-8', 'Letter');
+            //$mpdf = new mPDF('utf-8', 'Legal');
+            $mpdf = new mPDF('utf-8');
+            
+            $output = $this->load->view('v_reporte_preregistro', $data, true);
+            $mpdf->WriteHTML($output);
+            $mpdf->Output();
+        } else {
+            $this->load->view('v_reporte_preregistro', $data);
+        } 
+          
+      
         
         
     }
@@ -1968,6 +2142,31 @@ class Impresion extends MY_Controller {
         
         
         
+    }
+    
+    public function v_etiqueta_concentracion($id, $pdf = 1){
+        $this->load->model('impresiones_model');
+        $qListado =  $this->impresiones_model->traer_datos($id);
+        $data = array(
+            'qListado' => $qListado,
+        );
+        
+        echo $qListado->num_rows();
+        echo 'ok';
+        //$pdf = 0;
+        if ($pdf == 1) {
+            $this->load->library('mpdf');
+           
+            $mpdf = new mPDF('utf-8');
+            
+            
+            $output = $this->load->view('v_etiqueta_concentracion', $data, true);
+            $mpdf->WriteHTML($output);
+            $mpdf->Output();
+        } else {
+            $this->load->view('v_etiqueta_concentracion', $data);
+        } 
+          
     }
     
     

@@ -193,6 +193,17 @@ class Rel_archivo_documento_model extends CI_Model {
         return $query;
     }
     
+    public function listado_registros_preregistrados_por_sub_tipo_proceso_PRE_CID($idArchivo,$idSubTipoProceso) {
+        $sql = 'SELECT  `saaRel_Archivo_Preregistro`.* , saaRel_Archivo_Documento.`idTipoProceso`
+                FROM `saaRel_Archivo_Preregistro`
+                INNER JOIN saaRel_Archivo_Documento
+                ON `saaRel_Archivo_Preregistro`.id_Rel_Archivo_Documento = saaRel_Archivo_Documento.id
+                 WHERE saaRel_Archivo_Documento.idArchivo=? AND  saaRel_Archivo_Documento.idSubTipoProceso=?
+                 AND `saaRel_Archivo_Preregistro`.eliminacion_logica = 0';
+        $query = $this->db->query($sql, array($idArchivo,$idSubTipoProceso));
+        return $query;
+    }
+    
     public function listado_registros_preregistrados_por_tipo_proceso($idArchivo,$idTipoProceso) {
         $sql = 'SELECT  `saaRel_Archivo_Preregistro`.* , saaRel_Archivo_Documento.`idTipoProceso`
                 FROM `saaRel_Archivo_Preregistro`
@@ -200,6 +211,17 @@ class Rel_archivo_documento_model extends CI_Model {
                 ON `saaRel_Archivo_Preregistro`.id_Rel_Archivo_Documento = saaRel_Archivo_Documento.id
                  WHERE saaRel_Archivo_Documento.idArchivo=? AND  saaRel_Archivo_Documento.idTipoProceso=?
                  AND `saaRel_Archivo_Preregistro`.eliminacion_logica = 0 AND saaRel_Archivo_Preregistro.preregistro_aceptado=1';
+        $query = $this->db->query($sql, array($idArchivo,$idTipoProceso));
+        return $query;
+    }
+    
+     public function listado_registros_preregistrados_por_tipo_proceso_PRE_CID($idArchivo,$idTipoProceso) {
+        $sql = 'SELECT  `saaRel_Archivo_Preregistro`.* , saaRel_Archivo_Documento.`idTipoProceso`
+                FROM `saaRel_Archivo_Preregistro`
+                INNER JOIN saaRel_Archivo_Documento
+                ON `saaRel_Archivo_Preregistro`.id_Rel_Archivo_Documento = saaRel_Archivo_Documento.id
+                WHERE saaRel_Archivo_Documento.idArchivo=? AND  saaRel_Archivo_Documento.idTipoProceso=?
+                AND `saaRel_Archivo_Preregistro`.eliminacion_logica = 0';
         $query = $this->db->query($sql, array($idArchivo,$idTipoProceso));
         return $query;
     }

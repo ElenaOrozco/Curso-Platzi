@@ -7,7 +7,8 @@ class archivo_model extends CI_Model {
 
     var $table = "listado_736";  
     var $select_column = "*";  
-    var $order_column = array(null, "OrdenTrabajo" , "Obra", null, null);  
+    var $order_column = array(null, "OrdenTrabajo" , "Contrato", "Obra", "Descripcion", "Normatividad" ,null, "idEjercicio" , null, "Direccion", "Supervisor", 
+        null, null, null, null, null, "Contratista, null");  
     
     public function __construct() {
         parent::__construct();
@@ -22,11 +23,35 @@ class archivo_model extends CI_Model {
            if(isset($_POST["search"]["value"]))  
            {  
                 $this->db->like("OrdenTrabajo", $_POST["search"]["value"]);  
-                $this->db->or_like("Obra", $_POST["search"]["value"]);  
+                $this->db->or_like("Obra", $_POST["search"]["value"]); 
+                $this->db->or_like("Contrato", $_POST["search"]["value"]); 
+                $this->db->or_like("Descripcion", $_POST["search"]["value"]);
+                $this->db->or_like("Supervisor", $_POST["search"]["value"]); 
+                $this->db->or_like("Contratista", $_POST["search"]["value"]); 
+                
            }  
            if(isset($_POST["order"]))  
            {  
-                $this->db->order_by($this->order_column[$_POST['order']['0']['column']], $_POST['order']['0']['dir']);  
+                $this->db->order_by($this->order_column[$_POST['order']['0']['column']], 
+                        $_POST['order']['0']['dir'],
+                        $_POST['order']['0']['dir'],
+                        $_POST['order']['0']['dir'], 
+                        $_POST['order']['0']['dir'], 
+                        $_POST['order']['0']['dir'],
+                        $_POST['order']['0']['dir'],
+                        $_POST['order']['0']['dir'],
+                        $_POST['order']['0']['dir'],
+                        $_POST['order']['0']['dir'],
+                        $_POST['order']['0']['dir'],
+                        $_POST['order']['0']['dir'],
+                        $_POST['order']['0']['dir'],
+                        $_POST['order']['0']['dir'],
+                        $_POST['order']['0']['dir'],
+                        $_POST['order']['0']['dir'],
+                        $_POST['order']['0']['dir']
+                       
+                        
+                        );  
            }  
            else 
            {  

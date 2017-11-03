@@ -66,10 +66,8 @@
                         }, 
  
                        "columnDefs":[  
-                            {  
-                                "targets":[0], 
-                                "orderable":false,  
-                            },  
+                            {"targets":[0,6, 8,11,12,13,14,16],  "orderable":false},
+                           
                        ]
                   });  
              }); 

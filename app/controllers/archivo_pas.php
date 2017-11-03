@@ -186,6 +186,7 @@ class Archivo extends MY_Controller {
   
     public function fetch_archivos(){  
            $this->load->model('archivo_model');  
+           $Modalidades = $this->datos_model->get_Modalidades_select();
            $fetch_data = $this->archivo_model->make_datatables();  
            
            $data = array();  
@@ -664,7 +665,7 @@ class Archivo extends MY_Controller {
 
     public function preregistrar($id_archivo = null, $idDireccion, $idProceso = 1, $idSubProceso = 1, $idDocumento = 1, $Numero_Estimacion = "") {
         
-        if ($id_archivo != 0) {
+       if ($id_archivo != 0) {
             
             $data['usuario'] = $this->session->userdata('nombre');
             $data['idusuario'] = $this->session->userdata('id');
@@ -681,8 +682,9 @@ class Archivo extends MY_Controller {
             $data["aArchivo"] = $this->datos_model->datos_Archivo($id_archivo)->row_array();
             //
             $data["aUsuarios"] = $this->datos_model->get_usuarios();
-            $data["qProcesos"] = $this->datos_model->get_procesos();
-            $data["NoProcesos_archivo"] = $this->datos_model->get_procesos_archivo( $id_archivo)->num_rows();
+            //$data["qProcesos"] = $this->datos_model->get_procesos();
+            $data["qProcesos"] = $this->datos_model->procesos_de_archivo($id_archivo);
+            $data["NoProcesos_archivo"] = $this->datos_model->get_procesos_archivo($id_archivo)->num_rows();
             $data["NoProcesos_archivo_integracion"] = $this->datos_model->get_procesos_archivo_integracion( $id_archivo)->num_rows();
             $data["qBloques"] = $this->datos_model->get_bloques();
             $data["Ejercicios"] = $this->datos_model->get_Ejercicio_select();
@@ -711,11 +713,8 @@ class Archivo extends MY_Controller {
             
             $data["integracion"]=$this->session->userdata('integracion');
             $data["preregistro"]=$this->session->userdata('preregistro');
-            //direccion que entregó los documentos
-            $data["idDireccion_responsable"]=$idDireccion;
-            //echo 'id ' .$idDireccion;
-            //exit();
-            $data["idDireccion_preregistra"]=$this->session->userdata('idDireccion_responsable');
+            
+            $data["idDireccion_responsable"]=$this->session->userdata('idDireccion_responsable');
             
             $data["idArea_ubicacion_trabajo"]=$this->session->userdata('idArea_ubicacion_trabajo');
             
@@ -727,9 +726,11 @@ class Archivo extends MY_Controller {
             
             $this->load->model("direcciones_model");
             $data["addw_direciones"] = $this->direcciones_model->addw_direccion();
-             $data["addw_catDireccion"] = $this->direcciones_model->addw_catDireccion();
-            
+            $data["addw_catDireccion"] = $this->direcciones_model->addw_catDireccion();
+            $data["Direcciones"] = $this->direcciones_model->listado_catDirecciones();
+
             $this->load->model("estimaciones_model");
+            $this->load->model("preregistro_model");
 
             
             
@@ -6319,6 +6320,7 @@ class Archivo extends MY_Controller {
     
      public function filtrar_archivos_736($filtro, $tipofiltro){
         $this->load->model('datos_model');
+        $Modalidades = $this->datos_model->get_Modalidades_select();
         $tabla ="";
         if ($tipofiltro == 1){ //Filtro por estatus
             $qFiltro = $this->datos_model->filtrar_archivos_736($filtro);
@@ -6410,7 +6412,7 @@ class Archivo extends MY_Controller {
                         <tbody>
          ';
          
-         
+                               
                                 if (isset($qFiltro)) {
                                     if ($qFiltro->num_rows() > 0) {
                                         $i = 0;
@@ -6419,6 +6421,11 @@ class Archivo extends MY_Controller {
                                                 $finiquitada = 'NO';
                                             }else {
                                                 $finiquitada = 'SI';
+                                            }
+                                             if(isset($rFiltro->idModalidad)){
+                                                $Modalidad = $Modalidades[$rFiltro->idModalidad];
+                                            } else {
+                                                $Modalidad = "NO DEFINIDA";
                                             }
                                            $tabla.= "<tr>";
                                                 $tabla.=  "<td><a href='". site_url('archivo/cambios/' . $rFiltro->id) ."' class='btn btn-xs btn-success'><span class='glyphicon glyphicon-pencil'></span></a></td> " ;
@@ -6430,7 +6437,7 @@ class Archivo extends MY_Controller {
                                                 $tabla.= "<td class='sinwarp'>" . $rFiltro->Descripcion . "</td>";
                                                
                                                 $tabla.= "<td class='sinwarp'>" . $rFiltro->Normatividad . "</td>";
-                                                $tabla.= "<td class='sinwarp'>" . $rFiltro->idModalidad . "</td>";
+                                                $tabla.= "<td class='sinwarp'>" . $Modalidad . "</td>";
                                                 $tabla.= "<td class='sinwarp'>" . $rFiltro->idEjercicio . "</td>";
                                                 $tabla.= "<td class='sinwarp'>" . $rFiltro->EstatusObra . "</td>";
                                                 $tabla.= "<td class='sinwarp'>" . $rFiltro->Direccion . "</td>";

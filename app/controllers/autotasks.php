@@ -273,7 +273,29 @@ class Autotasks extends CI_Controller {
         
     }
 
-    
+    public function ubi_concentracion(){
+        $this->load->model('concentracion_model');
+        
+        $ubicaciones = $this->concentracion_model->listado();
+       
+        foreach ($ubicaciones->result() as $row ){
+            
+            $data = array (
+                
+                'idUbicacion' => $row->id,
+            );
+            
+            $Nombre = $row->Nombre;
+         
+            
+            $retorno = $this->concentracion_model->update_ubi($data, $Nombre);
+            
+            echo $retorno['retorno'] .'-'. $retorno['query'];
+            
+            
+        }
+        
+    }
     
 }    
 
