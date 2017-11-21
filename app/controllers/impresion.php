@@ -11,6 +11,140 @@ class Impresion extends MY_Controller {
         date_default_timezone_set("America/Mexico_City");
         @set_time_limit(0);
         @ini_set('memory_limit', '-1');
+        $this->load->model('impresiones_model');
+    }
+    
+    public function reporte_relacion_obras_2017($pdf=1){
+            $this->load->model('impresiones_model');
+            
+            
+            /* id Direcciones que entregan 
+            idDireccion_responsable  Nombre                                                      Abreviatura  
+            -----------------------  ----------------------------------------------------------  -------------
+                                  1  DIRECCIÓN GENERAL DE OBRAS PÚBLICAS                         DGOP         
+                                  7  DIRECCIÓN GENERAL JURÍDICA                                  DGJ          
+                                  3  DIRECCION GENERAL DE INFRAESTRUCTURA CARRETERA              DGIC         
+                                 14  DIRECCIÓN DE CONTROL PRESUPUESTAL                           DCP          
+                                 16  DIRECCIÓN DE LOGISTICA Y DESARROLLO                         DLD          
+                                 12  DIRECCIÓN GENERAL DE GESTION Y FOMENTO DE INFRAESTRUCTURA   DGGFI  
+             * 
+             * 
+             * 
+             *              */
+            $DCP = 14;
+            $DLD = 16;
+            $DIS = 15;
+            $DGJ = 7;
+            $DGOP = 1;
+            $DGIC  =3;
+            $DGGFI  = 12;
+            
+            $qDireccionesEjecutoras = $this->impresiones_model->get_ejecutoras();
+            
+            
+            
+            if (isset($qDireccionesEjecutoras)){
+                if ($qDireccionesEjecutoras->num_rows() > 0) {
+                    $i = 0;
+                    foreach ($qDireccionesEjecutoras->result() as $rDirecciones) {
+                       
+                        
+                        $retorno[$i]['Ejecutora'] = $rDirecciones->Direccion;
+                        
+                        
+                        $qArchivos = $this->impresiones_model->get_archivos_entregados_ejecutoras($rDirecciones->Direccion);
+                        $j = 0;
+                        foreach ($qArchivos->result() as $rArchivo) {
+                            /*echo $rArchivo->OrdenTrabajo .'<br>';   
+                            echo $rArchivo->Obra .'<br>'; 
+                            echo $rArchivo->ImporteContratado .'<br>'; 
+                            echo "DCP " .$this->impresiones_model->get_entregados($rArchivo->idArchivo, $DCP) ->num_rows;
+                            echo "DLD " .$this->impresiones_model->get_entregados($rArchivo->idArchivo, $DLD) ->num_rows;
+                            
+                            
+                            $entregadosDCP = $this->impresiones_model->get_entregados($DCP) ->num_rows;
+                            $entregadosDLD = $this->impresiones_model->get_entregados($DLD) ->num_rows;
+                            $entregadosDIS = $this->impresiones_model->get_entregados($DIS) ->num_rows;
+                            $entregadosDGJ = $this->impresiones_model->get_entregados($DGJ) ->num_rows;
+                            $entregadosDGOP = $this->impresiones_model->get_entregados($DGOP)->num_rows;
+                            */
+                            
+                            $entregados = array(
+                                    "Ot"   => $rArchivo->OrdenTrabajo,
+                                    "Contrato" => $rArchivo->Contrato,
+                                    "Obra" => $rArchivo->Obra,
+                                    "Modalidad" => $rArchivo->Modalidad,
+                                    "Normatividad" => $rArchivo->Normatividad,
+                                    "Direccion" => $rArchivo->Direccion,
+                                    "ImporteContratado" => $rArchivo->ImporteContratado,
+                                    "DCP"  => $this->impresiones_model->get_entregados($rArchivo->idArchivo, $DCP) ->num_rows(),
+                                    "DLD"  => $this->impresiones_model->get_entregados($rArchivo->idArchivo, $DLD) ->num_rows(),
+                                    "DIS"  => $this->impresiones_model->get_entregados($rArchivo->idArchivo, $DIS) ->num_rows(),
+                                    "DGJ"  => $this->impresiones_model->get_entregados($rArchivo->idArchivo, $DGJ) ->num_rows(),
+                                    "DGOP" => $this->impresiones_model->get_entregados($rArchivo->idArchivo,$DGOP)->num_rows(),
+                                    "DGIC" => $this->impresiones_model->get_entregados($DGIC, $rArchivo->idArchivo) ->num_rows(),
+                                    "DGGFI" => $this->impresiones_model->get_entregados($DGGFI,$rArchivo->idArchivo) ->num_rows(),
+
+                                );
+                            
+                            $retorno[$i]['detalle'] = $entregados;
+                            $j++;
+                            
+                        }
+                        
+                        $i++;
+                        
+                    }
+                    
+                }
+            }
+            $data = array(
+        	
+        	'retorno' => $retorno,
+                //'aDirecciones' =>$aDirecciones,
+                
+            ); 
+            
+            //$pdf=0;
+            if ($pdf == 1) {
+                $this->load->library('mpdf');
+                //$mpdf = new mPDF('utf-8', 'Letter');
+                //$mpdf = new mPDF('utf-8', 'Legal');
+                $mpdf = new mPDF('utf-8');
+                /*$url = site_url('assets/logo_chico.png');
+                $footer= 
+                        '
+                        <div style="text-align:center; font-family:mono;font-size:7pt;font-weight:bold;font-style:italic;">
+                            <p > {PAGENO} de {nbpg} </p>
+                        </div>
+                        ';
+                $header = '<div>
+                                <div style="text-align:center; width = 33%;">
+                                    <img src="'. $url . '" width="200px"  height="70" />
+                                </div>
+                                <div style="text-align:center;width = 33%;">
+                               
+                                </div>
+                                <div style="text-align:center;width = 33%;">
+                                
+                                </div>
+                           </div>';
+                $mpdf->SetHTMLHeader($header);
+                //$mpdf->SetHTMLHeader($headerE,'E');
+                //$mpdf->setFooter('Folio T-0002 ||{PAGENO} de {nbpg}') ;
+
+                $mpdf->setHTMLFooter($footer) ;
+
+               */
+                //$mpdf->WriteHTML($html);
+                $output = $this->load->view('reporte_relacion_obras_2017', $data, true);
+                $mpdf->WriteHTML($output);
+                $mpdf->Output();
+            } else {
+                $this->load->view('reporte_relacion_obras_2017', $data);
+            }
+            
+             
     }
         
     public function etiqueta_transferencia($pdf= 0){
@@ -284,636 +418,72 @@ class Impresion extends MY_Controller {
     }
 
 
-    public function pruebas ($pdf=0){
+    public function transferencia ($id, $pdf=1){
         
-           
-     
         
-                $html = '
-                <html>
-                    <head>
-                        <style>
-                            body{
-                                font-size: 7pt;
-                                font-family: "Arial";
-                            }
-                            .normal {
-                               text-transform: uppercase;
-                            }
-                            .normal th, .normal td{
-                              border: 1px  solid  #424242;
-                              padding:5px;
-                            }
-                            
-                            
-                            .titulo{
-                                background: #9e2138;
-                                color: #FFF;
-                                padding:2px;
-                                text-transform: uppercase;
-                            }
-                            .upper {
-                                text-transform: uppercase;
-                            }
-                            .p-box{
-                                display: inline-block;
-                                width: 20%;
-                            }
-                        </style>
-                    </head>
-                    <body>
-
-                        <table width="100%">
-                            <tr>
-                                <td colspan="1" width="200" rowspan="3"><img src="' . site_url('assets/logo_chico.png') .'" width="150px"  height="70" /></td> 
-                                <td colspan="4"></td> 
-                                
-                            </tr>
-                            <tr>
-
-                                <td colspan="4" ></td> 
-
-                            </tr>
-                            <tr>
-
-                                <td colspan="4" ></td> 
-
-                            </tr>
-                            <tr>
-
-                                <td colspan="5"  align="center"><span style="vertical-align: bottom; text-align="center" font-weigth:bold; font-size:9pt;">INVENTARIO DE TRANSFERENCIA<span></td>
-
-                            </tr>
-                        </table>
-
-
-
-
-
-                        <table class="normal" width="100%" border="1">
-
-                            <thead>
-
-                                <tr>
-                                    <th colspan="1" class="titulo" style="text-align: right;">Direccion General: </th>
-                                    <th colspan="3" style="text-align: lefth;" class="upper">Obras públicas </th>
-                                    <th colspan="1" class="titulo" style="text-align: right;">Fecha de Registro:</th>
-                                    <th colspan="1" style="text-align: lefth;">12/02/1017 </th>
-                                    <th colspan="1" class="titulo" style="text-align: right;">Folio:</th>
-                                    <th colspan="2" style="text-align: lefth;"><span style="font-weight: bold;">T-0002</span></th>
-
-
-
-                                </tr>
-                                <tr>
-                                    <th colspan="1" class="titulo" style="text-align: right;">Direccion Área: </th>
-                                    <th colspan="3" style="text-align: lefth;" class="upper">Obras General públicas </th>
-                                    <th colspan="1" class="titulo" style="text-align: right;">Fecha de Transferencia: </th>
-                                    <th colspan="1" style="text-align: lefth;">19/02/1017 </th>
-                                    <th colspan="1" class="titulo" style="text-align: right;">Cajas: </th>
-                                    <th colspan="2" style="text-align: lefth;"><span>6</span></th>
-
-
-
-                                </tr>
-                            </thead>
-
-
-                        </table>
-
-                        <table width="100%" class="normal" border="1">
-
-
-                            <tbody>
-
-                                <tr>
-                                    <td colspan="1" class="titulo" rowspan="2" align="center" >NO</td>
-                                    <td colspan="1" class="titulo" rowspan="2" align="center">CAJA</td>
-                                    <td colspan="1" class="titulo" rowspan="2" align="center">CARPETA</td>
-                                    <td colspan="1" class="titulo" rowspan="2" align="center">DESCRIPCIÓN</td>
-                                    <td colspan="1" class="titulo" rowspan="2" align="center">CLASIFICADOR</td>
-                                    <td colspan="1" class="titulo" rowspan="2" align="center">OT</td>
-                                    <td colspan="1" class="titulo" rowspan="2" align="center">AÑO</td>
-                                    <td colspan="1" class="titulo" rowspan="2" align="center">FOJAS</td>
-                                    <td colspan="3" class="titulo" align="center">VALOR</td>
-                                    <td colspan="3" class="titulo" align="center">DESTINO</td>
-                                    <td colspan="2" class="titulo" align="center">OBSERVACIÓN</td>
-
-                                </tr>
-
-                                <tr>
-                                    <td colspan="1" class="titulo" align="center">ADM</td>
-                                    <td colspan="1" class="titulo" align="center">LEG</td>
-                                    <td colspan="1" class="titulo" align="center">CON</td>
-                                    <td colspan="1" class="titulo" align="center">BAJ </td>
-                                    <td colspan="1" class="titulo" align="center">MUE</td>
-                                    <td colspan="1" class="titulo" align="center">HIS</td>
-                                    <td colspan="2" class="titulo" align="center">Reservado</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">Proyecto de ciudad judicial, sala de juicios orales</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="1">2</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">2</td>
-                                    <td colspan="1">Proyecto de ciudad judicial, sala de juicios orales, detalle de comunicaciones</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">200</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2"></td>
-                                </tr>
-                               <tr>
-                                    <td colspan="1">3</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">3</td>
-                                    <td colspan="1">Proyecto de ciudad judicial, sala de juicios orales, detalle sin especificar</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">99</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">Construcción de Especificación col. Puerta del Sol</td>
-                                    <td colspan="1">SIOP/1S1.3/LP028/15</td>
-                                    <td colspan="1">LP028/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">135</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">Construcción de Especificación col. Puerta del Sol, detalles tecnicos</td>
-                                    <td colspan="1">SIOP/1S1.3/LP028/15</td>
-                                    <td colspan="1">LP028/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr class="evenrow">
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr class="evenrow">
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr class="evenrow">
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr class="evenrow">
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="1">3</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">3</td>
-                                    <td colspan="1">Proyecto de ciudad judicial, sala de juicios orales, detalle sin especificar</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">99</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">Construcción de Especificación col. Puerta del Sol</td>
-                                    <td colspan="1">SIOP/1S1.3/LP028/15</td>
-                                    <td colspan="1">LP028/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">135</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">Construcción de Especificación col. Puerta del Sol, detalles tecnicos</td>
-                                    <td colspan="1">SIOP/1S1.3/LP028/15</td>
-                                    <td colspan="1">LP028/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr class="evenrow">
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr class="evenrow">
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr class="evenrow">
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr class="evenrow">
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="1">3</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">3</td>
-                                    <td colspan="1">Proyecto de ciudad judicial, sala de juicios orales, detalle sin especificar</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">99</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">Construcción de Especificación col. Puerta del Sol</td>
-                                    <td colspan="1">SIOP/1S1.3/LP028/15</td>
-                                    <td colspan="1">LP028/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">135</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">Construcción de Especificación col. Puerta del Sol, detalles tecnicos</td>
-                                    <td colspan="1">SIOP/1S1.3/LP028/15</td>
-                                    <td colspan="1">LP028/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr class="evenrow">
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr class="evenrow">
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr class="evenrow">
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr class="evenrow">
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">proyecto de ciudad judicial, sala de juicios orales</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">235</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="1">3</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">3</td>
-                                    <td colspan="1">Proyecto de ciudad judicial, sala de juicios orales, detalle sin especificar</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">SIOP/1S1.3/LP001/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">99</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">1</td>
-                                    <td colspan="1">Construcción de Especificación col. Puerta del Sol</td>
-                                    <td colspan="1">SIOP/1S1.3/LP028/15</td>
-                                    <td colspan="1">LP028/15</td>
-                                    <td colspan="1">2015</td>
-                                    <td colspan="1">135</td>
-                                    <td colspan="1">xx</td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1">x</td>
-                                    <td colspan="1">x </td>
-                                    <td colspan="1"></td>
-                                    <td colspan="1"></td>
-                                    <td colspan="2">Reservado</td>
-                                </tr>
-
-
-
-                            </tbody>
-                             
-
-                        </table>
-
-                        <table width="100%">
-                                <tr>
-                                    <td width="100%" colspan="5" height="80px"></td>
-                                </tr>
-                                
-                                <tr>
-
-                                    <td width="20%" style="border-top: 1px solid #000; font-size:8pt" ></td>
-                                    <td  width="20%" > </td>
-                                    <td  width="20%" style="border-top: 1px solid #000; font-size:8pt">Gracia Ramirez Ruíz</td>
-                                    <td  width="20%"  > </td>
-                                    <td  width="20%" style="border-top: 1px solid #000; font-size:8pt"></td>
-
-                                </tr> 
-                                <tr>
-
-                                    <td width="20%" style="font-size:8pt" >Responsable Oficina Generadora</td>
-                                    <td  width="20%" > </td>
-                                    <td  width="20%" style="font-size:8pt">Responsable Archivo Concentración</td>
-                                    <td  width="20%"  > </td>
-                                    <td  width="20%" style="font-size:8pt">Responsable Área de depósito</td>
-
-                                </tr> 
-
-
-                        </table>
-
-                    </body>
-                </html>
-
-
-        ';
+        $this->load->model('impresiones_model');
         
-        $this->load->library('mpdf');
-        $mpdf=new mPDF('c','A4','','',42,15,67,67,20,15); 
+        $cabecera = $this->impresiones_model->get_cabecera($id)->row_array();
+        $no_cajas = $this->impresiones_model->get_no_cajas($id)->num_rows();
+        $detalles = $this->impresiones_model->get_detalles($id);
 
-        //$mpdf=new mpdf('c','A4','','',42,15,67,67,20,15); 
-         // ('L','','','','',10,10,TOP,BOTTOM,18,12
-        $mpdf->AddPage('L','','','','',25,25,5,25,18,12);
-
-
-
-       // $mpdf->mirrorMargins = 1;
-
-
-        $footer= 
-                '
-                <div style="text-align:center; font-family:mono;font-size:7pt;font-weight:bold;font-style:italic;">
-                  
-                     
-                        <p >Folio T-0002 - {PAGENO} de {nbpg} </p>
-                  
-                   
-
-                </div>
-                <div style="font-family:mono;font-size:7pt;font-weight:bold;font-style:italic; width:100%; border-top: 1px solid #000">
-                  * IMPORTANTE: SOLO SE ACEPTARAN DOCUMENTOS EN SOBRE AMARILLO O COCIDOS <br>
-                  
-
-                </div>';
-
-        //$mpdf->SetHTMLHeader($header);
-        //$mpdf->SetHTMLHeader($headerE,'E');
-        //$mpdf->setFooter('Folio T-0002 ||{PAGENO} de {nbpg}') ;
-
-        $mpdf->setHTMLFooter($footer) ;
+        $data = array(
+            'cabecera' => $cabecera,
+            'no_cajas' => $no_cajas,
+            'detalles' => $detalles,
+                
+            ); 
+         
         
-        //$mpdf->setFooter('Folio T-0002 ||{PAGENO} de {nbpg}') ;
-        $mpdf->WriteHTML($html);
+                
+                
+        if ($pdf == 1) {
+            $this->load->library('mpdf');
+            $mpdf=new mPDF('c','A4','','',42,15,67,67,20,15); 
 
-        $mpdf->Output('mpdf.pdf','I');
+            //$mpdf=new mpdf('c','A4','','',42,15,67,67,20,15); 
+             // ('L','','','','',10,10,TOP,BOTTOM,18,12
+            $mpdf->AddPage('L','','','','',25,25,5,25,18,12);
+             $footer= 
+                     '
+                     <div style="text-align:center; font-family:mono;font-size:7pt;font-weight:bold;font-style:italic;">
+
+
+                             <p >Folio '. $cabecera['folio'] . ' - {PAGENO} de {nbpg} </p>
+
+
+
+                     </div>
+                     <div style="font-family:mono;font-size:7pt;font-weight:bold;font-style:italic; width:100%; border-top: 1px solid #000">
+                       * IMPORTANTE: SOLO SE ACEPTARAN DOCUMENTOS EN SOBRE AMARILLO O COSIDOS <br>
+
+
+                     </div>';
+
+             //$mpdf->SetHTMLHeader($header);
+             //$mpdf->SetHTMLHeader($headerE,'E');
+             //$mpdf->setFooter('Folio T-0002 ||{PAGENO} de {nbpg}') ;
+
+            $mpdf->setHTMLFooter($footer) ;
+
+            $output = $this->load->view('v_pant_transferencia_impresion', $data, true);
+            $mpdf->WriteHTML($output);
+            $mpdf->Output();
+            
+             
+            // $mpdf->mirrorMargins = 1;
+
+
+            
+             //$mpdf->setFooter('Folio T-0002 ||{PAGENO} de {nbpg}') ;
+            // $mpdf->WriteHTML($html);
+
+            // $mpdf->Output('mpdf.pdf','I');
+        } else {
+            $this->load->view('v_pant_transferencia_impresion', $data);
+        }      
+        
+       
     
          
     }

@@ -7117,7 +7117,7 @@ class Archivo extends MY_Controller {
         $this->load->model('rel_archivo_documento_model');
         $this->load->model('rel_archivo_preregistro_model');
         $this->load->model('preregistro_model');
-        
+        $estimaciones= 0;
         
         $strRetorno = ""; 
         

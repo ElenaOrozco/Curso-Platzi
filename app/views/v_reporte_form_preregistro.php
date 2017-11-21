@@ -3312,6 +3312,21 @@
                                                     <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
                                             <?php } ?>
                                              </div>
+                                            <?php if ($Editar ==1 ) { ?>
+                                                <div class="col-sm-12">
+                                                    <div  class="align-end m-b" id="div-agregar-documentos-<?php echo $rProcesos->idTipoProceso ?>">
+
+
+                                                         <div class="btn-documentos">         
+                                                                 <a href="#" id="btn-agregar-documentos"  class="btn btn-success btn-sm"  data-toggle="modal" data-target="#modal-agregar-documentos" title="Agregar Documentos" role="button" onclick="uf_agregar_documentos(<?php echo $idArchivo; ?>,<?= $rProcesos->idTipoProceso ?>)">
+                                                                    <span class="glyphicon glyphicon-plus-sign"></span> Agregar Documentos
+                                                                </a>
+
+                                                         </div>     
+
+                                                     </div>
+                                                </div>
+                                        <?php } ?>
                                         </div>
                                         
                                     </div>

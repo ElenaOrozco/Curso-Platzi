@@ -9,7 +9,77 @@ class Impresiones_model extends CI_Model {
         parent::__construct();
     }
     
+    public function get_cabecera($id){
+        $this->db->where('id', $id); 
+        return $this->db->get('saaTransferencia');
+    }
     
+    public function get_no_cajas($id){
+        $this->db->where('idTransferencia', $id);
+        return $this->db->get('saaTransferencia_Caja');
+    }
+    
+    public function get_detalles($id){
+        
+        
+        $this->db->select("d.*, a.OrdenTrabajo, a.Obra, a.idEjercicio");
+        $this->db->from('saaTransferencia AS t');
+        $this->db->join('saaTransferencia_Caja AS c', 'c.idTransferencia = t.id');
+        $this->db->join('saaTransferencia_Detalle AS d', 'c.id = d.idCaja');
+        $this->db->join('saaArchivo AS a', 'a.id = d.ot');
+        $this->db->where('t.id', $id); 
+        
+        return $this->db->get();
+                
+    }
+
+    public function get_ejecutoras(){
+        
+         
+        $this->db->select("Direccion");
+        $this->db->distinct();
+        $this->db->from('saaRel_Archivo_Preregistro AS p');
+        $this->db->join('saaArchivo AS a', 'p.idArchivo = a.id');
+        $this->db->where('idEjercicio', 2017); 
+        $this->db->where('p.preregistro_aceptado', 1); 
+        return $this->db->get();
+    }
+    
+    //No de archivos entregados por de ejecutoras por direccion
+    public function get_entregados($archivo, $Direccion){
+        
+        $this->db->select("id");
+        $this->db->where('idArchivo', $archivo);
+        $this->db->where('idDireccion_responsable', $Direccion); 
+        return $this->db->get("saaRel_Archivo_Preregistro");
+    }
+
+    //Archivos entregados por Ejecutoras
+    public function get_archivos_entregados_ejecutoras($Direccion){
+        
+        
+        $sql = "SELECT DISTINCT p.idArchivo, 
+                        a.OrdenTrabajo,
+                        a.Contrato,
+                        a.Obra,
+                        m.Modalidad,
+                        a.idModalidad,
+                        a.Normatividad,
+                        a.Direccion, 
+                        a.ImporteContratado
+                        FROM `saaRel_Archivo_Preregistro` AS p
+                        INNER JOIN saaArchivo AS a
+                        ON  p.idArchivo = a.id
+                        INNER JOIN `catDirecciones` AS d
+                        ON d.id = p.idDireccion_responsable
+                        INNER JOIN `saaModalidad` AS m ON a.idModalidad = m.id
+                        WHERE idEjercicio =2017 AND p.preregistro_aceptado =1
+                        AND a.Direccion = ?
+                        ORDER BY ImporteContratado DESC";
+        $query = $this->db->query($sql, array($Direccion));
+        return $query;
+    }
+
     public function addw_direccionesEjecutoras() {
         $sql = 'SELECT DISTINCT Direccion, idDireccion FROM `saaArchivo` ';
         $query = $this->db->query($sql);
@@ -1168,11 +1238,12 @@ WHERE (`memMemorias`.`id` =?);';
                                 ON saaRel_Archivo_Documento.idDocumento = saaDocumentos.id
                                 WHERE `saaRel_Archivo_Preregistro`.idArchivo= ? AND `saaRel_Archivo_Preregistro`.idDireccion_responsable =?
                                 AND `saaRel_Archivo_Preregistro`.`eliminacion_logica`=0
-                                ORDER BY idTipoProceso, Nombre ASC
+                                ORDER BY  Ordenar ASC
                                             ';
         $query = $this->db->query($sql, array($id, $idDireccion_responsable));
         return $query;
     }
+    
     
     public function  datos_reporte_preregistro_cid ($id){
        /*$query = $this->db->get_where("saaArchivo", array("id" => $id));

@@ -26,6 +26,9 @@
                                 <li>
                                     <a href="<?php echo site_url("concentracion/"); ?>" title="Concentración">Concentración</a>
                                 </li>
+                                <li>
+                                    <a href="<?php echo site_url("transferencia/"); ?>" title="Concentración">Transferencias</a>
+                                </li>
                            
                                 
                             </ul>
@@ -70,6 +73,10 @@
                                 </li>
                                  <li>
                                     <a  href="<?php echo site_url("impresion/reporte_listado_contratistas"); ?>" target="_blank" >Contratistas (736 Obras)</a>
+                                    
+                                </li>
+                                <li>
+                                    <a  href="<?php echo site_url("impresion/reporte_relacion_obras_2017/"); ?>" target="_blank" >Relación de Obras Ejercicio Fiscal 2017</a>
                                     
                                 </li>
                                 

@@ -129,7 +129,7 @@ class Concentracion extends MY_Controller {
        
        
         
-        
+        /*
         
         $data=array();
         
@@ -138,9 +138,7 @@ class Concentracion extends MY_Controller {
         //echo $ingresosOT->num_rows;
         $data["ingresosOT"] = $ingresosOT->num_rows();
        
-        
-        
-        /*
+        */
         
         /*
              //trae ubicaciones 
@@ -164,7 +162,7 @@ class Concentracion extends MY_Controller {
 
             ($idUbicaciones->num_rows >0)? $retorno = $this->concentracion_model->alta_concentracion($data_ingreso): $retorno = -1;
 
-           */
+           /*
           
         $data_ingreso = array (
             "data_cabecera"     => array(
@@ -184,20 +182,22 @@ class Concentracion extends MY_Controller {
 
         //var_dump($idIngreso);
         //echo $idIngreso;
-        
-        $data["resultado"] = $idIngreso;
-        if ($idIngreso != -1) {
+        */
+        /*    
+            
+        $data["resultado"] = $retorno;
+        if ($retorno != -1) {
             $data["tabla"] = $this->retornar_ubicaciones($idIngreso, $ingresosOT);
         } 
-        $data["ejemplo"] = 'Ejemplo ';
+        
         header('Cache-Control: no-cache, must-revalidate');
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
         header('Content-type: application/json');
         echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);   
         
         
+        */
         
-        /*
         
         if ( $legajos == 1 ){
             //trae ubicaciones, busca primero si hay vacias
@@ -232,32 +232,71 @@ class Concentracion extends MY_Controller {
         
         $data=array();
         
-        $data["resultado"] = $retorno;
-        if ($retorno == 1) {
-            $data["tabla"] = $this->retornar_ubicaciones($idUbicaciones);
+        
+        if ($retorno != -1) {
+            
+            $data["tabla"] = $this->retornar_ubicaciones($retorno);
+            $retorno = 1;
         } 
+        $data["resultado"] = $retorno;
         
         
-        $data["tabla"] = 'hola';
         header('Cache-Control: no-cache, must-revalidate');
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
         header('Content-type: application/json');
         echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);  
-       */
+       
        
     }
     
     
     
-    public function retornar_ubicaciones($idIngreso, $ingresosOT){
-        
-        
-        
-        $tabla = '';
-        
-        
+    public function retornar_ubicaciones($idIngreso){
         
         $registros = $this->concentracion_model->traer_relaciones($idIngreso);
+        
+        $tabla = '';
+        $tabla .=    '<table id="example" class="table table-condensed table-striped">
+                        <thead>
+                            <tr>
+                                <th>Acción</th>
+                                <th>Ubicación</th>
+                                <th>Bloques</th>
+                                <th>No Caja</th>
+                                <th>Folio Inicial</th>
+                                <th>Folio Final</th>
+                                <th>No Hojas</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>';
+                        foreach ($registros->result() as $row){
+                            $tabla .=    '  <tr>
+                                                <td id="row-nombre" name="row-nombre"> 
+                                                    <button type="button" class="btn btn-success btn-xs" data-toggle="modal" data-target="#modal-cambiar-ubicacionfisica-mod" onclick="uf_ver_ubicaciona_libre_mod('. $row->id .')">
+                                                        <span class="glyphicon glyphicon-plus"></span> 
+                                                    </button>
+                                                </td>
+                                                <td>
+                                                    <input type="text"  id="row-nombre'. $row->id . '" name="row-nombre'. $row->id . '" class="form-control" value="'. $row->Nombre .'" required  />
+                                                    <input type="hidden"  id="idUbicacion_mod'. $row->id . '" name="idUbicacion_mod'. $row->id . '" class="form-control" value="'. $row->idUbicacion .'" required onchange="actualizar_ubicacion('. $row->id . ')" />
+                                                </td>
+                                                <td><input type="text"  id="Bloques'. $row->id . '" name="Bloques'. $row->id . '" class="form-control" placeholder="Bloques" value="" required onchange="actualizar_bloques('. $row->id . ')" /></td>
+                                                <td><input type="text"  id="No_Caja'. $row->id . '" name="No_Caja'. $row->id . '" class="form-control" placeholder="No Caja" value="" required onchange="actualizar_cajas('. $row->id . ')"/></td>
+                                                <td><input type="text"  id="Folio_Inicial'. $row->id . '" name="Folio_Inicial'. $row->id . '" class="form-control" placeholder="Folio Inicial" value="" required onchange="actualizar_folio_inicial('. $row->id . ')"/></td>
+                                                <td><input type="text"  id="Folio_Final'. $row->id . '" name="Folio_Final'. $row->id . '" class="form-control" placeholder="Folio Final" value="" required onchange="actualizar_folio_final('. $row->id . ')"/></td>
+                                                <td><input type="text"  id="No_Hojas'. $row->id . '" name="No_Hojas'. $row->id . '" class="form-control" placeholder="No Hojas" value="" required onchange="actualizar_hojas('. $row->id . ')"/></td>
+
+                                            </tr>';
+
+                        }
+                                       
+        $tabla .=      '</tbody>
+                    </table>';
+        
+         return $tabla;
+        
+       /* $registros = $this->concentracion_model->traer_relaciones($idIngreso);
         
        
        
@@ -298,7 +337,7 @@ class Concentracion extends MY_Controller {
                                 <td><input type="text"  id="No_Hojas'. $row->id . '" name="No_Hojas'. $row->id . '" class="form-control" placeholder="No Hojas" value="" required onchange="actualizar_hojas('. $row->id . ')"/></td>
 
                             </tr>';*/
-            
+            /*
         }
         if ($ingresosOT->num_rows() > 0){
             foreach ($ingresosOT->result() as $row){
@@ -323,7 +362,7 @@ class Concentracion extends MY_Controller {
                     </table>';
         
          return $tabla;
-    
+     */
         
     }
     
@@ -366,7 +405,15 @@ class Concentracion extends MY_Controller {
         
     }
 
-    
+     public function actualizar_ubicacion($id) {
+         
+        $data=array(
+            'idUbicacion'=> $this->input->post('ubicacion'),  
+        );
+        echo  $this->concentracion_model->actualizar_ubicacion($id, $data);
+        
+       
+    }
 
     public function actualizar_bloques($id) {
          
@@ -519,47 +566,56 @@ class Concentracion extends MY_Controller {
         echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);  
     }
     
-    public function ver_ubicaciones_libres_mod(){
+    public function ver_ubicaciones_libres_mod($idRegistro){
         $ubicaciones = $this->concentracion_model->traer_ubicaciones();
         $limite_i = 0;
         $limite_f = 17;
-        $i= 0;
-        
+        $j_i = 0;
+        $j_f = 15;
+        $i= 0; 
+        $j= 0;
         $no_ubicaciones = 4;
-        $tabla =    '<table class="table table-bordered table-condensed" id="t_ubicaciones">';
+        $tabla =    '<table class="table table-hover table-condensed" id="t_ubicaciones">';
        
-                   
+                 
         foreach ($ubicaciones->result() as $row) {
            //echo  $row->Nombre. 'No Ubicacion-' .$no_ubicaciones .'Vuelta -' . $j .'<br>';
             if ( $row->Estatus == 0){
-                $color = "rgba(12, 86, 12, 0.25)";
+                $click='uf_agregar_ubicacion_fisica_mod('.$idRegistro.','.$row->id .',"'.$row->Nombre. '")';
+                $estilo = "background:#cde7f9;color:#000;";
+                $Ubicaciones_disponibles='<a href="#" style= '.$estilo.' onclick='.$click.'>' . $row->Nombre . '</a>';
+                
             } else if ($row->Estatus == -1){
-                $color = "rgba(255, 255, 0, 0.13)";
+                $estilo = "background:#fbf1bc;color:#000;";
+                $Ubicaciones_disponibles= '<a  style= '.$estilo. '>'. $row->Nombre . '</a>';
             }else {
-                $color = "rgba(255, 0, 0, 0.21)";
+                
+                $estilo = "background:#D8D8D8;color:#000";
+                $Ubicaciones_disponibles= '<a  style= '.$estilo. '>'. $row->Nombre . '</a>';
             }
             
-            //ubicaciones predefinidas
-            if ($no_ubicaciones > 0){
-                $color = "blue";
-                $no_ubicaciones = $no_ubicaciones -1;
-            }
             
-            if ( $i == $limite_i)
-            {
+            
+            if ( $i == $limite_i){
                 $tabla .= '<tr>'; 
             }
-           
-            $tabla .=  '<td  style="background:' . $color . '" id="idUC'. $row->id .'">
-                            <label>
-                            <span>' . $row->Nombre . '</span>
-                            </lable>
-                            <input type="checkbox" name="idUC[]" id="idUChecked" class="ubicaciones" required value="'. $row->id .' " onchange="seleccionar_ubicacion(this, '. $row->id .')">    
-                        </td>';
-            $i++;
             
-            if ( $i == $limite_f)
-            {
+            
+                
+                    $tabla .=  '<td   id="idUC'. $row->id .'">';
+                
+                    $tabla .=  $Ubicaciones_disponibles ;
+                    
+                   
+
+                
+                    $tabla .=  ' </td>';
+                    
+                    
+             
+            
+            $i++;
+            if ( $i == $limite_f){
                 $tabla .= '</tr>'; 
                 $i=0;
             }

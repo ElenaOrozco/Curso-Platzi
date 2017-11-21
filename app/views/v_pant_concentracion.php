@@ -47,7 +47,10 @@
                 position: inherit !important;
             }
             .btn-xs {
-                padding: 5px !important;
+                
+            }
+            btn-c {
+               padding: 5px !important; 
             }
             .title-primary{
                 color: #883b61;
@@ -97,7 +100,9 @@
             #ubicaciones:checked {
                 color:red;
             }
-            
+            .select2-hidden-accessible{
+                display: none;
+            }
             
         </style>
         
@@ -514,12 +519,12 @@
 
             }
             
-            function uf_ver_ubicaciona_libre_mod() {
+            function uf_ver_ubicaciona_libre_mod(idRegistro) {
                       
                        
                 $.ajax({
                    type:"POST",
-                   url:"<?php echo site_url('concentracion/ver_ubicaciones_libres_mod'); ?>/",
+                   url:"<?php echo site_url('concentracion/ver_ubicaciones_libres_mod'); ?>/"+ idRegistro,
                    success: function(data) {
 
                         $('#idUbicacionFisica_libre_mod').html(data["tabla"]); 
@@ -528,6 +533,21 @@
                        
             }
             
+            function actualizar_ubicacion(id){
+                console.log('Actualizando')
+                console.log($("#idUbicacion_mod"+id).val())
+                $.post( "<?php echo site_url('concentracion/actualizar_ubicacion') ?>/" + id, 
+                        { ubicacion: $("#idUbicacion_mod"+id).val() })
+                        .done(function( data ) {
+                            if (data == 1){
+                                $("#idUbicacion_mod"+id).css("border-color", "green");
+                                actualizar_tabla();
+                            }else {
+                                $("#idUbicacion_mod"+id).css("border-color", "red");
+                            }
+                });
+
+            }
             function actualizar_bloques(id){
                 
                 $.post( "<?php echo site_url('concentracion/actualizar_bloques') ?>/" + id, 
@@ -606,19 +626,14 @@
                 $("#btn-Enviar").css("display", "block");
             }
             
-            
-            function seleccionar_ubicacion(elemento, id){
-                console.log(elemento)
-               
-                if(elemento.checked){
-                     console.log("checked")
-                    $("#idUC"+id).css("color", "blue")
-                }else {
-                     console.log("cnocked")
-                     $("#idUC"+id).css("color", "green")
-                }
-            }
-
+            function uf_agregar_ubicacion_fisica_mod(idRegistro, id,nombre)
+            {
+                console.log(id + "N: "  +nombre)
+                $("#idUbicacion_mod"+idRegistro).val(id);
+                $("#row-nombre"+idRegistro).val(nombre);
+                $("#modal-cambiar-ubicacionfisica-mod").modal('hide');
+                actualizar_ubicacion(idRegistro)
+            } 
 
             
            
@@ -694,9 +709,9 @@
                                                           <!--<a href="#" id="btn-agregar-ubi"  class="btn btn-xs btn-success" data-toggle="modal" data-target="#modal-agregar-ubicacion-fisica" role="button" onclick="uf_agregar_ubicacion()">
                                                               <span class="glyphicon glyphicon-pencil"></span> 
                                                           </a>--->
-                                                            <button type="button" class="btn btn-success btn-xs" data-toggle="modal" data-target="#modal-modificar-ubicacion" onclick="uf_modificar_ubicacion(<?php echo $rRow->idR; ?>)"><span class="glyphicon glyphicon-pencil"></span> </button>
-                                                            <a href="<?php echo site_url('impresion/v_etiqueta_concentracion') . '/'. $rRow->idR ?>" class="btn btn-default btn-xs" target="_blank">
-                                                                <span class="glyphicon glyphicon-print"></span>
+                                                            <button type="button" class="btn btn-success btn-sm btn-c" data-toggle="modal" data-target="#modal-modificar-ubicacion" onclick="uf_modificar_ubicacion(<?php echo $rRow->idR; ?>)"><i class="fa fa-pencil" aria-hidden="true"></i></span> </button>
+                                                            <a href="<?php echo site_url('impresion/v_etiqueta_concentracion') . '/'. $rRow->idR ?>" class="btn btn-default btn-sm" target="_blank">
+                                                                <i class="fa fa-print" aria-hidden="true"></i></span>
                                                             </a>
                                                         </td>
                                                         <td><?= $rRow->Nombre  ?></td>
@@ -741,7 +756,7 @@
                             <div class="modal-body">
 
                                 
-                                <div class="form-group">
+                                        <div class="form-group">
                                                 <label for="orden_trabajo" class="col-sm-3 control-label">OT:</label>
                                                 <div class="col-sm-8">
                                                     <input type="hidden" id="orden_trabajo" name="orden_trabajo"  class="form-control" value="" required />
@@ -763,6 +778,7 @@
                                                     <input type="number" min="1" id="legajos" name="legajos" class="form-control" placeholder="Legajos" value="" required />
                                                 </div>
                                         </div>
+                                        <!--
 
                                         <div class="form-group">
                                             <label for="UbicacionFisica_mod" class="col-sm-3 control-label">Ubicación Física</label>	
@@ -777,7 +793,7 @@
 
 
                                         </div> 
-                                
+                                        -->
                                         <hr>
                                         <div class="form-group">
                                                 <label for="fecha_ingreso" class="col-sm-3 control-label">Ingreso (CID):</label>

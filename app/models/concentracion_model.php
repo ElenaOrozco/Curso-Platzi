@@ -19,18 +19,19 @@ class concentracion_model extends CI_Model {
                 $this->db->select("id,OrdenTrabajo");
                 $this->db->order_by("OrdenTrabajo", "ASC");
                 $query2 = $this->db->get_where("saaArchivo",array("id" => $id),100);
-                
-                //$query2 = $this->db->query('SELECT * FROM archivos_concentracion 
-                        //WHERE `saaArchivo`.id = ' .$id .'AND `saaHistorialBloque`.`Estatus`=80');
-                 $query2 = $this->db->get_where("saaArchivo",array("id" => $id),100);
+               
 
             }else{
-
+                $where = "OrdenTrabajo LIKE '%$term%'
+                            AND NOT (idEjercicio = 2013
+                            OR idEjercicio = 2014
+                            OR idEjercicio = 2015)";
 
                 $this->db->select("id,OrdenTrabajo");
-                $this->db->like("OrdenTrabajo",$term);
-                $this->db->order_by("OrdenTrabajo", "ASC");
-                $query2 = $this->db->get("saaArchivo",100);                    
+                $this->db->where($where);
+               
+                
+                $query2 = $this->db->get("saaArchivo",100);                        
             }
 
             if ($query2->num_rows() > 0){
@@ -185,8 +186,7 @@ class concentracion_model extends CI_Model {
     
     public function listado(){
         $this -> db -> select ( '*' ); 
-       
-        $query  =  $this -> db -> get ('saaUbi_Concentracion');
+        $query  =  $this -> db -> get ('transferencias');
         return $query;
     }
     
@@ -211,7 +211,7 @@ class concentracion_model extends CI_Model {
     }
     
     public function alta_concentracion($data_ingreso){
-        $legajos = $data_ingreso['legajos'];
+        /*$legajos = $data_ingreso['legajos'];
         $ubicaciones =  $data_ingreso['ubicaciones_necesarias'];
         
         $data = array();
@@ -246,7 +246,9 @@ class concentracion_model extends CI_Model {
         } else {
             return $idIngreso;
         }
-        /*$legajos = $data_ingreso['legajos'];
+        /*/
+        
+        $legajos = $data_ingreso['legajos'];
         $idUbicaciones = $data_ingreso['idUbicaciones'];
         $data = array();
         $i = 0;
@@ -292,18 +294,24 @@ class concentracion_model extends CI_Model {
         
         if  ( $this -> db -> trans_status ()  ===  FALSE ) 
         { 
-                // genera un error ... o usa la función log_message () para registrar tu error 
+            // genera un error ... o usa la función log_message () para registrar tu error 
             return -1;
         } else {
-            return 1;
+            return $idIngreso;
         }
-         * */
+        
         
     }
     
     public function traer_relaciones($idIngreso){
-        $this->db->where('idIngreso', $idIngreso);
-        $query = $this->db->get('saaConcentracion_Registros');
+        
+ 
+                
+        $this -> db -> select ( 'r.*, t.Nombre' );
+        $this -> db -> from ( 'saaConcentracion_Registros as r' ); 
+        $this -> db -> join ( 'saaConcentracion_UbicacionesTipos as t' ,  't.idRegistro = r.id' );         
+        $this->db->where('r.idIngreso', $idIngreso);
+        $query = $this->db->get( );
         return $query;
         
       
@@ -319,10 +327,52 @@ class concentracion_model extends CI_Model {
     
     }
     
+    public function actualizar_ubicacion($id, $data){
+        
+        
+        $this -> db -> trans_start (); 
+        
+        //Traer la ubicacion anterior
+        $this -> db -> select ( 'idUbicacion' ); 
+        $this -> db -> where ( 'id' , $id); 
+        $Ubicacion_anterior =  $this -> db -> get ('saaConcentracion_Registros')->row_array();
+        
+        $anterior =  $Ubicacion_anterior['idUbicacion'];
+        //Poner en cero  la ubicacion anterior
+        $data_ubi = array (
+            'Estatus' => 0,
+        );
+        $this -> db -> where ('id', $anterior);
+        $this -> db -> update ('saaConcentracion_UbicacionesTipos', $data_ubi);
+        
+        
+        //Marcar como ocupada la nueva ubicacion
+        $data_ubi['Estatus'] = 1;
+        $this -> db -> where ('id', $data['idUbicacion']);
+        $this -> db -> update ('saaConcentracion_UbicacionesTipos', $data);
+
+
+        //Registrar la nueva ubicacion
+        $this -> db -> where ('id', $id);
+        $this -> db -> update ('saaConcentracion_Registros', $data);
+        
+       
+        
+        $this -> db -> trans_complete ();
+        
+        if  ( $this -> db -> trans_status ()  ===  FALSE ) 
+        { 
+            // genera un error ... o usa la función log_message () para registrar tu error 
+            return -1;
+        } else {
+            return 1;
+        }
+       
+    
+    }
+    
     public function traer_ubicaciones(){
-        $this -> db -> select ( '*' );
-        $this -> db -> where ('Estatus', 0);
-        $this -> db -> limit ( 300 );  
+        
         return $this -> db -> get ( 'saaConcentracion_UbicacionesTipos' );
     }
     

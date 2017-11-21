@@ -2470,6 +2470,8 @@
                                                     <li class="list-style"><a class="btn-primary" href="#"><span class="glyphicon glyphicon-flag"></span><?php echo $addw_Estatus_Bloque[$Estatus]; ?></a></li>
                                             <?php } ?>
                                              </div>
+                                            
+                                            
                                         </div>
                                         
                                     </div>
