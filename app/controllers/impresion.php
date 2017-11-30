@@ -420,18 +420,24 @@ class Impresion extends MY_Controller {
 
     public function transferencia ($id, $pdf=1){
         
+        /*
+         * 1. IMPRIMIR INVENTARIO
+         * 2. POR CADA CADA IMPRIMIR EL NO DE ETIQUETAS
+         */
+        
         
         $this->load->model('impresiones_model');
-        
+        $no_etiquetas = 3;
         $cabecera = $this->impresiones_model->get_cabecera($id)->row_array();
-        $no_cajas = $this->impresiones_model->get_no_cajas($id)->num_rows();
+        $no_cajas = $this->impresiones_model->get_no_cajas($id);
         $detalles = $this->impresiones_model->get_detalles($id);
-
+        $aDireccion = $this->impresiones_model->get_direccion($cabecera['idDireccion'])->row_array();
+        $direccion = $aDireccion['Nombre'];
         $data = array(
             'cabecera' => $cabecera,
-            'no_cajas' => $no_cajas,
+            'no_cajas' => $no_cajas->num_rows(),
             'detalles' => $detalles,
-                
+            'direccion' => $direccion,    
             ); 
          
         
@@ -441,8 +447,8 @@ class Impresion extends MY_Controller {
             $this->load->library('mpdf');
             $mpdf=new mPDF('c','A4','','',42,15,67,67,20,15); 
 
-            //$mpdf=new mpdf('c','A4','','',42,15,67,67,20,15); 
-             // ('L','','','','',10,10,TOP,BOTTOM,18,12
+           
+            // 1. IMPRIMIR INVENTARIO
             $mpdf->AddPage('L','','','','',25,25,5,25,18,12);
              $footer= 
                      '
@@ -468,6 +474,62 @@ class Impresion extends MY_Controller {
 
             $output = $this->load->view('v_pant_transferencia_impresion', $data, true);
             $mpdf->WriteHTML($output);
+            
+            //2. POR CADA CADA IMPRIMIR EL NO DE ETIQUETAS
+            $data_etiqueta = array();
+           
+            $i = 0;
+            foreach ($no_cajas->result() as $rowCaja){
+                for ( $j = 0; $j < $no_etiquetas ; $j++){
+                    
+                    
+                    //cabecera
+                    
+                    $caja = $this->impresiones_model->get_detalles_nocaja($rowCaja->id);
+                    //$anio = $this->impresiones_model->get_detalles_anio($rowCaja->id);
+                    $data_etiqueta['direccion'] = $direccion;
+                    $data_etiqueta['caja'] = $caja['No_Caja'] . '/'. $no_cajas->num_rows() ;
+                    //$data_etiqueta['anio'] = 
+                    $data_etiqueta['folio'] = $cabecera['folio'];
+                            
+                            
+                    //traer detalle de la caja
+                    $data_etiqueta['detalle'] = $this->impresiones_model->get_detalles_caja($rowCaja->id);
+                    
+                    //generar vista
+                    $output = $this->load->view('v_pant_transferencia_impresion_etiqueta', $data_etiqueta, true);
+                    
+                    if ($i == 0 ){
+                        $mpdf->AddPage('P','','','','',25,25,5,25,18,12);
+                       
+                    }
+                    
+                    $i++;
+                    if ($i == 2){
+                        $i = 0;
+                    }
+                    $mpdf->WriteHTML($output);
+                    $mpdf->WriteHTML('<div style="margin-bottom:30px;"></div>');
+                    //$mpdf->WriteHTML('<tocentry content="150mm square" /><p>Pegar esta etiqueta al frente de la caja y laterales</p>');
+                     $footer= 
+                     '
+                     <div style="text-align:center; font-family:mono;font-size:7pt;font-weight:bold;font-style:italic;">
+
+
+                            <p>Pegar esta etiqueta al frente de la caja y laterales</p>
+
+
+
+                     </div>
+                     ';
+
+           
+                    $mpdf->setHTMLFooter($footer) ;
+                }
+            }
+            
+
+           
             $mpdf->Output();
             
              
@@ -481,7 +543,33 @@ class Impresion extends MY_Controller {
             // $mpdf->Output('mpdf.pdf','I');
         } else {
             $this->load->view('v_pant_transferencia_impresion', $data);
-        }      
+            foreach ($no_cajas->result() as $rowCaja){
+                for ( $j = 0; $j <= $no_etiquetas ; $j++){
+                    
+                    
+                    //cabecera
+                    
+                    $caja = $this->impresiones_model->get_detalles_nocaja($rowCaja->id);
+                    //$anio = $this->impresiones_model->get_detalles_anio($rowCaja->id);
+                    $data_etiqueta['direccion'] = $direccion;
+                    $data_etiqueta['caja'] = $caja['No_Caja'] . '/'. $no_cajas->num_rows() ;
+                    //$data_etiqueta['anio'] = 
+                    $data_etiqueta['folio'] = $cabecera['folio'];
+                            
+                            
+                    //traer detalle de la caja
+                    $data_etiqueta['detalle'] = $this->impresiones_model->get_detalles_caja($rowCaja->id);
+                    
+                    //generar vista
+                    $this->load->view('v_pant_transferencia_impresion_etiqueta', $data_etiqueta, true);
+                    
+                   
+                }
+            }
+            
+        }   
+        
+        
         
        
     

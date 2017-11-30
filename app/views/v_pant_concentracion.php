@@ -103,6 +103,9 @@
             .select2-hidden-accessible{
                 display: none;
             }
+            #s2id_identificador{
+                width: 100%;
+            }
             
         </style>
         
@@ -159,6 +162,53 @@
                     ],
                 });
             
+                $("#identificador").select2({
+                    placeholder: "Ingresa Identificador",
+                    ajax: {
+                        url: '<?php echo site_url("transferencia/identificador_json"); ?>',
+                        dataType: 'json',
+                        quietMillis: 100,
+                        type: 'POST',
+                        data: function (term, page) {
+                            return {
+                                term: term, //search term
+                                page_limit: 100 // page size                               
+                            };
+                        },
+                        results: function (data, page) {
+                           
+                            return { results: data.results };
+                        }
+                    },
+                    initSelection: function(element, callback) {
+                        var idInicial = $("#identificador").val();
+                        return $.post( '<?php echo site_url("transferencia/identificador_json"); ?>', { id: idInicial }, function( data ) {
+                           
+                            return callback(data.results[0]);
+                           
+                        }, "json");
+                     
+                    }
+                });
+                
+                $("#identificador").on("change", function(){
+                    ot =  $("#orden_trabajo").val() 
+                    id = $("#identificador").val()
+                    cambiar_identificador(ot, id)
+                })
+                
+                function cambiar_identificador(idArchivo, id){
+                
+                
+                    $.post("<?php echo site_url('transferencia/editarIdentificador'); ?>/", 
+                                { identificador : id, ot: idArchivo },
+                                function(data) {
+                                    console.log(data)
+                                    $("#select2-chosen-1").css("background", "#d9e4da")
+                                }
+                    ); 
+                
+                }
                 
                 
               
@@ -225,8 +275,8 @@
                            
                             if (validacion ()){
                                 $.post("<?php echo site_url("concentracion/asignar_ubicacion"); ?>",$("#formdata").serialize(),function(res){
-                                    console.log(res)
-                                    alert (res.ingresosOT)
+                                    
+                                    
                                     if(res.resultado != -1){
                                         $("#btn-Enviar").css("display", "none")
                                         $("#tabla-ubi").html(res.tabla);
@@ -479,10 +529,23 @@
                     }
                     
                     
-                    if (data.identificador != ""){
-                      
-                        $("#identificador").val( data.identificador ); 
-                    } 
+                    
+                    if (data.identificador != null && data.identificador != ""){
+                        console.log("hay identificador")
+                        
+                        
+                        $.post( "<?php echo site_url("transferencia/traer_identificador"); ?>",{ id:data.identificador }, function( data ) {
+                            console.log( data); 
+                            
+                            $("#identificador").val(data.id);
+                            $("#select2-chosen-1").html(data.identificador+"-"+data.Nombre+"-"+data.Nombres+"-"+data.Nombresub+"-"+data.Nombresubsub)
+                            $("#select2-chosen-1").css("background", "#fcf8e3")
+                            
+                            
+                        }, "json");
+                    }
+                        
+                        
                 }, "json");
                 
             
@@ -507,7 +570,7 @@
                         $("#No_Hojas_mod").val(data.No_Hojas);
                         $("#Folio_Inicial_mod").val(data.Folio_Inicial);
                         $("#Folio_Final_mod").val(data.Folio_Final);
-                        $("#identificador_mod").val(data.identificado);
+                        $("#identificador_mod").val(data.clasificador);
                       
 
                         
@@ -689,7 +752,7 @@
                                             <td>Acción</td>
                                             <td>Posición</td>
                                             <td>OT</td>
-                                            <td>Identificador</td>
+                                            <td>Clasificador</td>
                                             <td>Bloque</td>
                                             <td>No de Caja</td>
                                             <td>Folio Inicial</td>
@@ -716,7 +779,7 @@
                                                         </td>
                                                         <td><?= $rRow->Nombre  ?></td>
                                                         <td><?= $rRow->OrdenTrabajo  ?></td>
-                                                        <td><?= $rRow->identificado  ?></td>
+                                                        <td><?= $rRow->clasificador  ?></td>
                                                         <td><?= $rRow->Bloques ?></td>
                                                         <td><?= $rRow->No_caja  ?></td>
                                                         <td><?= $rRow->Folio_Inicial  ?></td>
@@ -805,7 +868,8 @@
                                         <div class="form-group">
                                                 <label for="identificador" class="col-sm-3 control-label">Identificador:</label>
                                                 <div class="col-sm-8">
-                                                    <input type="text" id="identificador" name="identificador" class="form-control" placeholder="Identificador" value="" required onchange="cambiar_identificador()" />
+                                                    <input type="hidden" id="identificador" name="identificador"  value="" required />
+                                                                        
                                                 </div>
                                         </div>
                                         <div class="form-group">
@@ -904,7 +968,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                        <label for="identificador" class="col-sm-3 control-label">Identificador:</label>
+                                        <label for="identificador" class="col-sm-3 control-label">Clasificador:</label>
                                         <div class="col-sm-8">
                                             <input type="text" id="identificador_mod" name="identificador_mod" class="form-control" placeholder="Identificador" value="" required o disabled />
                                         </div>

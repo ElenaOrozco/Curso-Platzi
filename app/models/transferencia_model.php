@@ -14,7 +14,42 @@ class transferencia_model extends CI_Model {
         $this->db->where('id', $id);
         $this->db->update('saaTransferencia_Detalle', $data); 
         $af = $this->db->affected_rows();
+        $this->log_save(array('Tabla' => 'saaTransferencia_Detalle', 'Data' => $data, 'id' => $id));
      
+        return ( $af > 0 )?  1 : -1;
+        
+    }
+    
+    public function marcar_revisada($data, $id){
+        $this->db->where('id', $id);
+        $this->db->update('saaTransferencia', $data); 
+        $af = $this->db->affected_rows();
+        $this->log_save(array('Tabla' => 'saaTransferencia', 'Data' => $data, 'id' => $id));
+     
+        return ( $af > 0 )?  1 : -1;
+    }
+    
+    public function ver_datos($id){
+        
+        $cajas = $this->get_cajas($id)->num_rows();
+        $carpetas = $this->get_detalles_transferencia($id)->num_rows();
+        
+        $data = array(
+           'cajas' => $cajas,
+           'carpetas' => $carpetas,
+        );
+        
+        return $data;
+        
+    }
+
+    
+
+    public function editar_identificador($data, $id){
+        $this->db->where('id', $id);
+        $this->db->update('saaArchivo', $data); 
+        $af = $this->db->affected_rows();
+        $this->log_save(array('Tabla' => 'saaArchivo', 'Data' => $data, 'id' => $id));
         return ( $af > 0 )?  1 : -1;
         
     }
@@ -30,6 +65,7 @@ class transferencia_model extends CI_Model {
             $id =  $data[$i]['id'];
             $this->db->where('id', $id);
             $this->db->update('saaTransferencia_Detalle', $data[$i]['detalles']); 
+            $this->log_save(array('Tabla' => 'saaTransferencia_Detalle', 'Data' => $data[$i]['detalles'], 'id' => $id));
         }
         
         /*
@@ -45,6 +81,87 @@ class transferencia_model extends CI_Model {
         
         return ( $this -> db -> trans_status ()  ===  FALSE )? -1 : 1;
     }
+    
+    public function listado_identificadores(){
+        
+        $this->db->select(" seccion.*, 
+                    serie.id AS ids,
+                    serie.`Codigo` AS Codigos,
+                    serie.Nombre AS Nombres,
+                    sub.id AS idsub,
+                    sub.`Codigo`  AS Codigosub,
+                    sub.Nombre AS Nombresub,
+                    subsub.id AS idsubsub,
+                    subsub.Codigo AS Codigosubsub,
+                    subsub.Nombre AS Nombresubsub"); 
+        $this->db->from("saaSeccion as seccion"); 
+        $this->db->join("saaSerie as serie", "seccion.id = serie.idSeccion", "left"); 
+        $this->db->join("saaSubserie as sub", "serie.id = sub.idSerie", "left"); 
+        $this->db->join("saaSubSubserie as subsub", "sub.id = subsub.idSubserie", "left"); 
+        return $this->db->get();   
+    }
+    
+    public function listado_serie(){
+        return $this->db->get('saaSerie');  
+    }
+    
+    public function listado_subserie(){
+        return $this->db->get('saaSubserie');  
+    }
+    
+    
+    public function update_subserie($id, $like){
+        
+        //$where = "Codigo LIKE '%$like%'";
+        
+        $this -> db -> set ( 'idSerie' ,  $id ); 
+        $this -> db -> like ('Codigo', $like ); 
+        $this -> db -> update ( 'saaSubserie' ); 
+        
+        $aff = $this->db->affected_rows();
+       
+        if ($aff < 1) {
+            return array("retorno" => "-1", "query" => $like.'-'.$id );
+        } else {
+            return array("retorno" => "1", "query" => $like.'-'.$id );
+        }
+    }
+    
+    
+    public function update_archivo($like, $data){
+        
+        
+        
+        $this->db->where('identificado', $like);
+        $this->db->update('saaArchivo', $data);
+        
+        $aff = $this->db->affected_rows();
+        
+        if ($aff < 1) {
+            return array("retorno" => "-1", "query" => $like.'-'.$data['identificado'] );
+        } else {
+            return array("retorno" => "1", "query" => $like.'-'.$data['identificado'] );
+        }
+    }
+    
+    
+    public function update_subsubserie($id, $like){
+        
+        //$where = "Codigo LIKE '%$like%'";
+        
+        $this -> db -> set ( 'idSubserie' ,  $id ); 
+        $this -> db -> like ('Codigo', $like ); 
+        $this -> db -> update ( 'saaSubSubserie' ); 
+
+        $aff = $this->db->affected_rows();
+       
+        if ($aff < 1) {
+            return array("retorno" => "-1", "query" => $like.'-'.$id  );
+        } else {
+            return array("retorno" => "1", "query" => $like.'-'.$id );
+        }
+    }
+
 
     public function get_transferencia($idTransferencia){
         $this->db->where("id", $idTransferencia); 
@@ -64,6 +181,17 @@ class transferencia_model extends CI_Model {
       
         return $this->db->get();
     }
+    
+    public function get_detalles_transferencia($id){
+         $this->db->select("d.*, a.OrdenTrabajo, a.Obra, a.idEjercicio");
+        $this->db->from('saaTransferencia AS t');
+        $this->db->join('saaTransferencia_Caja AS c', 'c.idTransferencia = t.id');
+        $this->db->join('saaTransferencia_Detalle AS d', 'c.id = d.idCaja');
+        $this->db->join('saaArchivo AS a', 'a.id = d.ot');
+        $this->db->where('t.id', $id); 
+        
+        return $this->db->get();
+    }
 
     public function alta_transferencia($data){
        
@@ -80,7 +208,7 @@ class transferencia_model extends CI_Model {
         
         $this->db->where('id', $idTransferencia);
         $this->db->update('saaTransferencia', $data_folio); 
-        
+        $this->log_save(array('Tabla' => 'saaTransferencia', 'Data' => $data_folio, 'id' => $idTransferencia));
         /*Crear caja
         $data_caja = array( "idTransferencia" => $idTransferencia,);
         $this -> db -> insert('saaTransferencia_Caja', $data_caja); 
@@ -98,13 +226,47 @@ class transferencia_model extends CI_Model {
         $this -> db -> insert('saaTransferencia_Caja', $data);  
         $idCaja = $this-> db-> insert_id ();
         $af = $this->db->affected_rows();
-     
+        $registro = $this->db->insert_id();
+        
+        if (!empty($registro)) {
+                $this->log_new(array('Tabla' => 'saaTransferencia_Caja', 'Data' => $data, 'id' => $registro));
+        }
         return ( $af > 0 )?  $idCaja : -1;
        
     }
     
-    function eliminarFila($idDetalle){
+    public function  listado_cuca(){
+        $this->db->select(" c.*, s.Nombre, serie.`Nombre` AS Nombres,
+                            sub.`Nombre` AS Nombresub,
+                            subsub.`Nombre` AS Nombresubsub
+                              "); 
+        $this->db->from("saaTransferencia_Cuca as c"); 
+        $this->db->join("saaSeccion as s", "s.id = c.idSeccion"); 
+        $this->db->join("saaSerie as serie", "c.idSerie = serie.id", "left"); 
+        $this->db->join("saaSubserie as sub", "sub.id = c.idSubserie", "left"); 
+        $this->db->join("saaSubSubserie as subsub", "subsub.id = c.idSubSubserie", "left"); 
+        return $this->db->get();   
+    }
+    
+
+    public function insertar_cuca($data){
        
+        
+        $this -> db -> insert('saaTransferencia_Cuca', $data);  
+        $id = $this-> db-> insert_id ();
+        $af = $this->db->affected_rows();
+       
+        
+        if (!empty($id)) {
+                $this->log_new(array('Tabla' => 'saaTransferencia_Caja', 'Data' => $data, 'id' => $id));
+        }
+     
+        return ( $af > 0 )?  $id : -1;
+       
+    }
+    
+    function eliminarFila($idDetalle){
+        
         $this -> db -> trans_start (); 
         $this->db->where('id', $idDetalle);
         $this->db->delete('saaTransferencia_Detalle');
@@ -135,7 +297,11 @@ class transferencia_model extends CI_Model {
         $this -> db -> insert('saaTransferencia_Detalle', $data);  
         $idFila = $this-> db-> insert_id ();
         $af = $this->db->affected_rows();
-     
+        $registro = $this->db->insert_id();
+        
+        if (!empty($registro)) {
+                $this->log_new(array('Tabla' => 'saaTransferencia_Detalle', 'Data' => $data, 'id' => $registro));
+        }
         return ( $af > 0 )?  $idFila : -1;
        
     }
@@ -210,20 +376,41 @@ class transferencia_model extends CI_Model {
             if ($id > 0){
 
 
-                $this->db->select("id,Nombre,Codigo");
-                
-                $this->db->order_by("Nombre", "ASC");
-                $query2 = $this->db->get_where("saaSeccion",array("id" => $id),100);
+                $this->db->select(" c.*, s.Nombre, serie.`Nombre` AS Nombres,
+                            sub.`Nombre` AS Nombresub,
+                            subsub.`Nombre` AS Nombresubsub
+                              "); 
+                $this->db->from("saaTransferencia_Cuca as c"); 
+                $this->db->join("saaSeccion as s", "s.id = c.idSeccion"); 
+                $this->db->join("saaSerie as serie", "c.idSerie = serie.id", "left"); 
+                $this->db->join("saaSubserie as sub", "sub.id = c.idSubserie", "left"); 
+                $this->db->join("saaSubSubserie as subsub", "subsub.id = c.idSubSubserie", "left"); 
+                $this->db->where("c.id", $id);
+                $this->db->limit(100);
+                $query2 = $this->db->get();
                 
    
                
 
             }else{
-               
-                $this->db->select("id, Nombre,Codigo");
-                $this->db->like("Nombre",$term);
-                $this->db->order_by("Nombre", "ASC");
-                $query2 = $this->db->get("saaSeccion",100);                    
+                $where = "c.identificador like '%$term%'
+                        OR s.Nombre like '%$term%'
+                        
+                        OR serie.`Nombre` like '%$term%'
+                        OR sub.`Nombre` like '%$term%'
+                        OR subsub.`Nombre` like '%$term%'";
+                $this->db->select(" c.*, s.Nombre, serie.`Nombre` AS Nombres,
+                            sub.`Nombre` AS Nombresub,
+                            subsub.`Nombre` AS Nombresubsub
+                              "); 
+                $this->db->from("saaTransferencia_Cuca as c"); 
+                $this->db->join("saaSeccion as s", "s.id = c.idSeccion"); 
+                $this->db->join("saaSerie as serie", "c.idSerie = serie.id", "left"); 
+                $this->db->join("saaSubserie as sub", "sub.id = c.idSubserie", "left"); 
+                $this->db->join("saaSubSubserie as subsub", "subsub.id = c.idSubSubserie", "left"); 
+                $this->db->where($where);
+                $this->db->limit(100);
+                $query2 = $this->db->get();                    
             }
 
             if ($query2->num_rows() > 0){
@@ -231,7 +418,8 @@ class transferencia_model extends CI_Model {
 
                 foreach ($query2->result() as $row ){
                     $aRow["id"] = $row->id;
-                    $aRow["text"] = $row->Codigo. '-' .$row->Nombre;
+                    
+                    $aRow["text"] = $row->identificador. '-' .$row->Nombre. '-' .$row->Nombres. '-' .$row->Nombresub. '-' .$row->Nombresubsub;
                     $return_arr["results"][] = $aRow;
                 }
             }else{
@@ -248,10 +436,36 @@ class transferencia_model extends CI_Model {
     }
     
     public function traer_detalles($ot){
-        $this->db->select("Obra, idEjercicio");
+        $this->db->select("Obra, idEjercicio, identificado, OrdenTrabajo");
         $this->db->where('id', $ot);  
         return $this->db->get("saaArchivo")->row_array(); 
         
         
+    }
+    
+    public function traer_identificador($id){
+        $this->db->select(" c.*, s.Nombre, serie.`Nombre` AS Nombres,
+                            sub.`Nombre` AS Nombresub,
+                            subsub.`Nombre` AS Nombresubsub
+                              "); 
+        $this->db->from("saaTransferencia_Cuca as c"); 
+        $this->db->join("saaSeccion as s", "s.id = c.idSeccion"); 
+        $this->db->join("saaSerie as serie", "c.idSerie = serie.id", "left"); 
+        $this->db->join("saaSubserie as sub", "sub.id = c.idSubserie", "left"); 
+        $this->db->join("saaSubSubserie as subsub", "subsub.id = c.idSubSubserie", "left"); 
+        $this->db->where("c.id", $id);
+        return $this->db->get()->row_array(); 
+        
+        
+    }
+    
+    public function log_save($cambios) {
+            $this->load->model("control_usuarios_model");
+            return $this->control_usuarios_model->log_save($cambios);
+    }
+    
+    public function log_new($cambios) {
+            $this->load->model("control_usuarios_model");
+            return $this->control_usuarios_model->log_new($cambios);
     }
 }

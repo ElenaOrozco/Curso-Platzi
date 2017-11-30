@@ -56,7 +56,7 @@ class concentracion_model extends CI_Model {
     }
     
     public function detalles_archivo($ot){
-        $this->db->select("identificado, FechaExtincionDerechos");
+        $this->db->select("*");
         $this->db->where('id', $ot);  
         return $this->db->get("saaArchivo")->row_array(); 
         
@@ -91,6 +91,10 @@ class concentracion_model extends CI_Model {
         $aff = $this->db->affected_rows();
         $last_query = $this->db->last_query();
         $registro = $this->db->insert_id();
+        
+        if (!empty($registro)) {
+                $this->log_new(array('Tabla' => 'saaRel_ArchivoConcentracion_Ubicacion', 'Data' => $data, 'id' => $registro));
+        }
 
         if ($aff < 1) {
             if (empty($e)) {
@@ -110,7 +114,7 @@ class concentracion_model extends CI_Model {
         $this->db->where('id', $id);
         $this->db->update('saaArchivo', $data);
         $aff = $this->db->affected_rows();
-
+        $this->log_save(array('Tabla' => 'saaArchivo', 'Data' => $data, 'id' => $id));
         if($aff < 1) {
             return -1;
         } else {
@@ -122,6 +126,7 @@ class concentracion_model extends CI_Model {
         $this->db->where('id', $id);
         $this->db->update('saaArchivo', $data);
         $aff = $this->db->affected_rows();
+        $this->log_save(array('Tabla' => 'saaArchivo', 'Data' => $data, 'id' => $id));
 
         if($aff < 1) {
             return -1;
@@ -133,12 +138,23 @@ class concentracion_model extends CI_Model {
     
     
     public function listado_ubicaciones(){
-        $this -> db -> select ( '*' ); 
-        $this -> db -> from ( 'concentracion' ); 
-        $this -> db -> where ('idR IS NOT NULL');
-        $this -> db -> order_by ('idI DESC, id ASC');
+        $this -> db -> select ( 'c.*, ide.identificador' ); 
+        $this -> db -> from ( 'concentracion as c' ); 
+        $this -> db -> join ( 'saaTransferencia_Cuca as ide', 'c.identificado = ide.id '); 
+        $this -> db -> where ('c.idR IS NOT NULL');
+        $this -> db -> order_by ('c.idI DESC, c.id ASC');
         $query  =  $this -> db -> get ();
         return $query;
+
+    }
+    
+    public function get_identificador($id){
+        $this -> db -> select ( 'identificador' ); 
+        $this -> db -> from ( 'saaTransferencia_Cuca' );  
+        $this -> db -> where ('id', $id);
+       
+        $query  =  $this -> db -> get ();
+        return $query->row_array();
 
     }
     
@@ -151,11 +167,13 @@ class concentracion_model extends CI_Model {
     
     //Registros Concentracion
     public function datos_relacion_ubicacion($id){
-        
+        $this -> db -> select ( 'c.*, ide.identificador' ); 
+        $this -> db -> from ( 'concentracion as c' ); 
+        $this -> db -> join ( 'saaTransferencia_Cuca as ide', 'c.identificado = ide.id '); 
        
         $this -> db -> where ('idR', $id);
         
-        $query  =  $this -> db -> get ('concentracion');
+        $query  =  $this -> db -> get ();
         return $query;
 
     }
@@ -169,15 +187,19 @@ class concentracion_model extends CI_Model {
        
     }
     
-     public function buscar_vacias( $idArchivo ){
+     public function buscar_vacias( $identificador ){
+        
         $estatus = -1; 
-        $this -> db -> select ( 'u.id' );
-        $this -> db -> from ( 'saaConcentracion_Registros as r' ); 
-        $this -> db -> join ( 'saaRel_ArchivoConcentracion_Ubicacion as rel' ,  'rel.id = r.idRACU' ); 
-        $this -> db -> join ( 'saaUbicaciones_Concentracion as u' ,  'r.idUbicacion = u.id' ); 
-        $this -> db -> join ( 'saaArchivo as a' ,  'rel.idArchivo = a.id' );
-        $this -> db -> where('u.Estatus', $estatus); //   -1  Vacias
-        $this -> db -> where('rel.idArchivo', $idArchivo); 
+        $this -> db -> select ( 'ut.*, 
+                    r.idIngreso,
+                    i.idArchivo,
+                    a.identificado' );
+        $this -> db -> from ( 'saaConcentracion_UbicacionesTipos AS ut' ); 
+        $this -> db -> join ( 'saaConcentracion_Registros AS r' ,  'r.idUbicacion = ut.idUbicacion' ); 
+        $this -> db -> join ( 'saaConcentracion_Ingreso AS i' ,  'i.id = r.idIngreso' ); 
+        $this -> db -> join ( 'saaArchivo as a' ,  'a.id = i.idArchivo' );
+        $this -> db -> where('ut.Estatus', $estatus); //   -1  Vacias
+        $this -> db -> where('a.identificado', $identificador); 
         $this -> db -> limit (1);
         
         return $this -> db -> get (  );
@@ -201,7 +223,7 @@ class concentracion_model extends CI_Model {
 
         $aff = $this->db->affected_rows();
        
-       
+       $this->log_save(array('Tabla' => 'saaUbicaciones_Concentracion', 'Data' => $data, 'id' => $id));
 
         if ($aff < 1) {
             return array("retorno" => "-1", "query" => $str );
@@ -268,7 +290,14 @@ class concentracion_model extends CI_Model {
                 $data['idUbicacion'] = $row->id;
                 $data['idIngreso'] = $idIngreso;
                 $this -> db -> insert('saaConcentracion_Registros', $data);
+                
                 $idRegistro = $this-> db-> insert_id ();
+                
+               
+        
+                if (!empty($idRegistro)) {
+                        $this->log_new(array('Tabla' => 'saaRel_ArchivoConcentracion_Ubicacion', 'Data' => $data, 'id' => $idRegistro));
+                }
                 
                 //Marcar la ubicacion ocupada
                 $data_ubicacion = array(
@@ -322,7 +351,7 @@ class concentracion_model extends CI_Model {
         $this -> db -> where ('id', $id);
         $this -> db -> update ('saaConcentracion_Registros', $data);
         $aff = $this->db->affected_rows();
-        
+        $this->log_save(array('Tabla' => 'saaConcentracion_Registros', 'Data' => $data, 'id' => $id));
         return ($aff < 1)?  -1 :   1;
     
     }
@@ -344,7 +373,7 @@ class concentracion_model extends CI_Model {
         );
         $this -> db -> where ('id', $anterior);
         $this -> db -> update ('saaConcentracion_UbicacionesTipos', $data_ubi);
-        
+        $this->log_save(array('Tabla' => 'saaConcentracion_UbicacionesTipos', 'Data' => $data, 'id' => $id));
         
         //Marcar como ocupada la nueva ubicacion
         $data_ubi['Estatus'] = 1;
@@ -374,6 +403,17 @@ class concentracion_model extends CI_Model {
     public function traer_ubicaciones(){
         
         return $this -> db -> get ( 'saaConcentracion_UbicacionesTipos' );
+    }
+    
+    
+    public function log_save($cambios) {
+            $this->load->model("control_usuarios_model");
+            return $this->control_usuarios_model->log_save($cambios);
+    }
+    
+    public function log_new($cambios) {
+            $this->load->model("control_usuarios_model");
+            return $this->control_usuarios_model->log_new($cambios);
     }
     
     

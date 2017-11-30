@@ -130,7 +130,7 @@
                                                      Código:  
                                                 </td>
                                                 <td id="idresult">
-                                                    <?php echo 'SIOP.'.$row->identificado.'/'.$row->OrdenTrabajo.'/'.$row->legajos ?>
+                                                    <?= $row->clasificador ?>
                                                 </td> 
                                             </tr>
 

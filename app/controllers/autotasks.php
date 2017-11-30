@@ -297,5 +297,61 @@ class Autotasks extends CI_Controller {
         
     }
     
+     public function cuca(){
+        $this->load->model('transferencia_model');
+        
+        $cuca = $this->transferencia_model->listado_identificadores();
+       
+        foreach ($cuca->result() as $row ){
+            
+            $data = array (
+                
+                'idSeccion' => $row->id,
+                'idSerie'   => $row->ids,
+                'idSubserie' => $row->idsub,
+                'idSubSubserie' =>$row->idsubsub,
+                
+            );
+            
+            if (isset($row->Nombresubsub)) {   
+                $data['identificador'] = $row->Codigosubsub;   
+            } else if (isset($row->Nombresub)) {   
+                $data['identificador'] = $row->Codigosub;
+            } else{  
+                $data['identificador'] = $row->Codigos;
+            }
+
+            
+            $retorno = $this->transferencia_model->insertar_cuca($data);
+            
+            echo $retorno . '-'.$data['identificador'];
+            
+            
+        }
+        
+    }
+    
+    public function actualizar_identificadores(){
+        $this->load->model('transferencia_model');
+        
+        $cuca = $this->transferencia_model->listado_cuca();
+       
+        foreach ($cuca->result() as $row ){
+            
+            $like = $row->identificador;
+            $data=array(
+                'identificado' =>$row->id,
+            );
+            $retorno = $this->transferencia_model->update_archivo($like, $data);
+            
+            echo $retorno['retorno'] ."-" .$retorno['query']."<br>";
+            
+            
+        }
+        
+    }
+    
+    
+    
 }    
 

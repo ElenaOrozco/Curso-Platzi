@@ -112,6 +112,11 @@ class Concentracion extends MY_Controller {
         
         echo json_encode($retorno, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
     }
+    
+    function limpia_espacios($cadena){
+	$cadena = str_replace(' ', '', $cadena);
+	return $cadena;
+    }   
 
     public function asignar_ubicacion() {
         
@@ -120,7 +125,7 @@ class Concentracion extends MY_Controller {
         $vacias = 0;
         $idArchivo = $this->input->post('orden_trabajo');
         $legajos = $this->input->post('legajos');
-        
+        $idIdentificador = $this->input->post('identificador');
         
         $ingreso = $this->input->post('fecha_ingreso');
         
@@ -129,79 +134,11 @@ class Concentracion extends MY_Controller {
        
        
         
-        /*
-        
-        $data=array();
-        
-        // Ingresos de la misma OT 
-        $ingresosOT = $this->concentracion_model->get_ingresosOT($idArchivo);
-        //echo $ingresosOT->num_rows;
-        $data["ingresosOT"] = $ingresosOT->num_rows();
-       
-        */
-        
-        /*
-             //trae ubicaciones 
-            $idUbicaciones = $this->concentracion_model->get_idUbicaciones($ubicaciones_necesarias, 0 ); //Estatus = 0 las libres
-        
-        
-            $data_ingreso = array (
-                "data_cabecera"     => array(
-                        "idArchivo"     => $idArchivo,
-                        "fojas_utiles"  => $this->input->post('fojas_utiles'),
-                        "legajos"       => $legajos,
-                        "idUsuario"     => $this->session->userdata("id"),
-                        "ingreso_cid"   => $this->input->post("fecha_ingreso"),
-                        "fecha_alta"    => date("Y-m-d G:i:s"),
-                    ),
-                "legajos"           => $legajos,
-                "idUbicaciones"     => $idUbicaciones,
-
-            );
-
-
-            ($idUbicaciones->num_rows >0)? $retorno = $this->concentracion_model->alta_concentracion($data_ingreso): $retorno = -1;
-
-           /*
-          
-        $data_ingreso = array (
-            "data_cabecera"     => array(
-                    "idArchivo"     => $idArchivo,
-                    "fojas_utiles"  => $this->input->post('fojas_utiles'),
-                    "legajos"       => $legajos,
-                    "idUsuario"     => $this->session->userdata("id"),
-                    "ingreso_cid"   => $this->input->post("fecha_ingreso"),
-                    "fecha_alta"    => date("Y-m-d G:i:s"),
-                ),
-            "legajos"           => $legajos,
-            "ubicaciones_necesarias" => $ubicaciones_necesarias,
-
-        );
-
-        $idIngreso = $this->concentracion_model->alta_concentracion($data_ingreso);
-
-        //var_dump($idIngreso);
-        //echo $idIngreso;
-        */
-        /*    
-            
-        $data["resultado"] = $retorno;
-        if ($retorno != -1) {
-            $data["tabla"] = $this->retornar_ubicaciones($idIngreso, $ingresosOT);
-        } 
-        
-        header('Cache-Control: no-cache, must-revalidate');
-        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-        header('Content-type: application/json');
-        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);   
-        
-        
-        */
         
         
         if ( $legajos == 1 ){
             //trae ubicaciones, busca primero si hay vacias
-            $idUbicaciones = $this->buscar_vacias($idArchivo);
+            $idUbicaciones = $this->buscar_vacias($idIdentificador);
             $vacias = $idUbicaciones->num_rows();
             
             
@@ -213,9 +150,16 @@ class Concentracion extends MY_Controller {
             $idUbicaciones = $this->concentracion_model->get_idUbicaciones($ubicaciones_necesarias, 0 ); //Estatus = 0 las libres
         }
         
+        $iden = $this->concentracion_model->get_identificador($idIdentificador);
+        $ordenTrabajo = $this->concentracion_model->detalles_archivo($idArchivo);
+        
+        $cadena= 'SIOP'.'.'.$iden['identificador'].'/'.$ordenTrabajo['OrdenTrabajo'].'/'.$legajos;
+        $clasificador = $this->limpia_espacios($cadena);
+        
         $data_ingreso = array (
             "data_cabecera"     => array(
                     "idArchivo"     => $idArchivo,
+                    "clasificador"  => $clasificador,
                     "fojas_utiles"  => $this->input->post('fojas_utiles'),
                     "legajos"       => $legajos,
                     "idUsuario"     => $this->session->userdata("id"),
@@ -227,8 +171,10 @@ class Concentracion extends MY_Controller {
             
         );
         
+        
+        
          
-        ($idUbicaciones->num_rows >0)? $retorno = $this->concentracion_model->alta_concentracion($data_ingreso): $retorno = -1;
+        ($idUbicaciones->num_rows() >0)? $retorno = $this->concentracion_model->alta_concentracion($data_ingreso): $retorno = -1;
         
         $data=array();
         
@@ -239,6 +185,7 @@ class Concentracion extends MY_Controller {
             $retorno = 1;
         } 
         $data["resultado"] = $retorno;
+        
         
         
         header('Cache-Control: no-cache, must-revalidate');
@@ -367,8 +314,8 @@ class Concentracion extends MY_Controller {
     }
     
     
-    public function buscar_vacias($idArchivo){
-        return $this->concentracion_model->buscar_vacias($idArchivo);
+    public function buscar_vacias($idIdentificador){
+        return $this->concentracion_model->buscar_vacias($idIdentificador);
     }
     
     public function capturar_datos_archivo($data, $idArchivo){
@@ -516,7 +463,7 @@ class Concentracion extends MY_Controller {
                                     <td>Acción</td>
                                     <td>Posición</td>
                                     <td>OT</td>
-                                    <td>Identificador</td>
+                                    <td>Clasificador</td>
                                     <td>Bloque</td>
                                     <td>No de Caja</td>
                                     <td>Folio Inicial</td>
@@ -541,7 +488,7 @@ class Concentracion extends MY_Controller {
                                     </td>
                                     <td>'. $rRow->Nombre        .'</td>
                                     <td>'. $rRow->OrdenTrabajo  .'</td>
-                                    <td>'. $rRow->identificado  .'</td>
+                                    <td>'. $rRow->clasificador  .'</td>
                                     <td>'. $rRow->Bloques       .'</td>
                                     <td>'. $rRow->No_caja       .'</td>
                                     <td>'. $rRow->Folio_Inicial .'</td>

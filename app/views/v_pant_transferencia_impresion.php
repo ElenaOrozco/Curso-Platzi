@@ -75,9 +75,9 @@ header("Expires: 0");*/
 
                 <tr>
                     <th colspan="1" class="titulo" style="text-align: right;">Direccion General: </th>
-                    <th colspan="3" style="text-align: lefth;" class="upper">Obras públicas </th>
+                    <th colspan="3" style="text-align: lefth;" class="upper"> </th>
                     <th colspan="1" class="titulo" style="text-align: right;">Fecha de Registro:</th>
-                    <th colspan="1" style="text-align: lefth;"><?php  $date = date_create($rRow->fecha_registro);
+                    <th colspan="1" style="text-align: lefth;"><?php  $date = date_create($cabecera['fecha_registro']);
                                                                     $fecha=date_format($date, 'd-m-Y');
                                                                     echo  $fecha; $cabecera['fecha_registro'] ?> </th>
                     <th colspan="1" class="titulo" style="text-align: right;">Folio:</th>
@@ -88,7 +88,7 @@ header("Expires: 0");*/
                 </tr>
                 <tr>
                     <th colspan="1" class="titulo" style="text-align: right;">Direccion Área: </th>
-                    <th colspan="3" style="text-align: lefth;" class="upper"><?= $cabecera['idDireccion'] ?> </th>
+                    <th colspan="3" style="text-align: lefth;" class="upper"><?= $direccion ?> </th>
                     <th colspan="1" class="titulo" style="text-align: right;">Fecha de Transferencia: </th>
                     <th colspan="1" style="text-align: lefth;"> </th>
                     <th colspan="1" class="titulo" style="text-align: right;">Cajas: </th>

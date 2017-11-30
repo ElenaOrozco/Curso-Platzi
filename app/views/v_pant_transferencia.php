@@ -27,6 +27,7 @@
         <link href="<?php echo site_url(); ?>css/font-awesome.min.css" type="text/css" rel="stylesheet" />
         <link href="<?php echo site_url(); ?>js/select2/select2.css" rel="stylesheet">
         <link href="<?php echo site_url(); ?>js/select2/select2-bootstrap.css" rel="stylesheet">
+        <link href="<?php echo site_url(); ?>css/jquery-confirm.css" rel="stylesheet">
         <!-- Fav and touch icons -->
         <link rel="apple-touch-icon-precomposed" sizes="144x144" href="<?php echo site_url(); ?>img/apple-touch-icon-144-precomposed.png">
         <link rel="apple-touch-icon-precomposed" sizes="114x114" href="<?php echo site_url(); ?>img/apple-touch-icon-114-precomposed.png">
@@ -45,6 +46,7 @@
         <script type="text/javascript" src="<?php echo site_url(); ?>js/jquery.datatable.extraorder.js"></script> 
         <script type="text/javascript" src="<?php echo site_url(); ?>js/scripts.js"></script>        
         <script type="text/javascript" src="<?php echo site_url(); ?>js/select2/select2.min.js"></script> 
+        <script type="text/javascript" src="<?php echo site_url(); ?>js/jquery-confirm.js"></script>  
 
         <script>
             var ot_listado;
@@ -58,7 +60,7 @@
                     'sPaginationType': 'bs_normal',
                     'sDom': '<"top"iflp<"clear">>rt<"bottom"iflp<"clear">>',
                     'iDisplayLength': 10,
-                    
+                    'aaSorting': [[1, 'desc']],
                     'aLengthMenu': [[10, 50, 100, 200, -1], [10, 50, 100, 200, "Todo"]],
                     'bDeferRender': true,
                     'bAutoWidth': false,
@@ -90,8 +92,44 @@
                 });
             });
                 
+           
         
-        
+            function  marcar_revisada(id){
+                $.post( "<?php echo site_url("transferencia/ver_datos"); ?>",{ id:id }, function( data ) {
+                    mensaje = data + "<br>¿Deseas aceptar?";
+                    $.confirm({
+                    title: 'Revisar',
+                    content: mensaje,
+                    type: 'blue',
+                    icon: 'glyphicon glyphicon-question-sign',
+                    typeAnimated: true,
+                    buttons: {
+                        Aceptar: function () {
+                            $.ajax({
+
+                                type: "POST",
+                                url: "<?php echo site_url('transferencia/marcar_revisada');?>/"+id,
+                                success: function (data, textStatus, jqXHR) {
+                                    console.log(data)
+                                    if (data ==1){
+                                       document.location.reload()  
+                                    }
+
+                                 },
+                                 error: function(jqXHR, estado, error){
+
+                                 }
+                            }) ;
+                        },
+                        Cancelar: function () {
+                            //$.alert('Canceled!');
+                        }
+
+                    }});
+
+                });
+            }
+
         
         </script>
         
@@ -113,8 +151,8 @@
                 <div class="container">
                     <h3 class="text-center">Listado de Transferencias</h3>
                     <div class="text-right">
-                        <!--<a href="<?php echo base_url('transferencia/editar/0'); ?>" class="btn btn-success">Nueva Transferencia</a>-->
-                        <a href="<?php echo base_url('transferencia/nueva'); ?>" class="btn btn-success"><i class="fa fa-plus" aria-hidden="true"></i> Nueva Transferencia</a>
+                        
+                        <a href="<?php echo base_url('transferencia/editar'); ?>" class="btn btn-success"><i class="fa fa-plus" aria-hidden="true"></i> Nueva Transferencia</a>
                     </div>
 
                     <div class="row">
@@ -153,9 +191,14 @@
                                                         <?php endif; ?>
                                                     </td>
                                                     <td>
-                                                        <?php if ($rRow->idUsuario_transfiere == 0):?>
+                                                        
+                                                        <?php if ($preregistro == 1 && $rRow->idUsuario_transfiere == 0 ):?>
+                                                        
                                                             <a href="<?php echo base_url('transferencia/editar/'. $rRow->id); ?>" class="btn btn-success btn-sm"><i class="fa fa-edit" aria-hidden="true"></i></a>
                                                           
+                                                        <?php endif; ?>
+                                                        <?php if ($preregistro == 0):?>
+                                                            <a href="#" onclick="marcar_revisada(<?=  $rRow->id ?>)" class="btn btn-success btn-sm"><i class="fa fa-check-square-o" aria-hidden="true"></i></a>
                                                         <?php endif; ?>
                                                     </td>
                                                     

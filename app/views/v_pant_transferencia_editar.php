@@ -203,7 +203,7 @@
             .select2-container .select2-choice {
                 height: 24px;
                 line-height: 1;
-                font-size: 70%;
+                font-size: 9.8px;
             }
             .select2-container .select2-choice .select2-arrow b, .select2-container .select2-choice div b {
                 background-position: 0 -2px;
@@ -224,6 +224,12 @@
             .flex{
                 display:flex;
                 justify-content: space-between;
+            }
+            #tablaCUCA{
+                width: 100%;
+            }
+            #s2id_identificador{
+                width: 300px;
             }
 
             
@@ -269,7 +275,7 @@
                                     </div>
                                     <div class="col-xs-6 text-right m-b">
                                         <!--button type="button" class="btn btn-warning" onclick="imprimir_transferencia(<?= $id ?>)"><i class="fa fa-print" aria-hidden="true"></i> Imprimir</button-->
-                                        <a  href="<?php echo site_url("impresion/transferencia"). '/' . $id ?> " class="btn btn-warning" target="_blank" >Imprimir </a>
+                                        <a  href="<?php echo site_url("impresion/transferencia"). '/' . $id ?> " class="btn btn-warning" target="_blank" onclick="guardar()" >Imprimir </a>
                                     </div>
                                 </div>
                                 
@@ -289,7 +295,7 @@
                                     <div class="col col-xs-5">
                                         <div class="input-group form-group">
                                             <label for="" class="input-group-addon" >No Cajas:</label>
-                                            <input type="number" name="fecha_registro" value="1" class="form-control" readonly>
+                                            <input type="number" id="cajas_total" name="cajas_total" value="<?= $cajas->num_rows() ?>" class="form-control" readonly>
                                         </div>
                                        
                                     </div>
@@ -308,13 +314,14 @@
                                     <div class="m-b" id="mensaje">
 
                                     </div>
-                                    <div class="d-n" id="div-cajas">
-
+                                    <div class="" id="div-cajas">
+                                       
+                                        
                                     </div>
                                 </form>
                                 
                                 <textarea name="text-caja" id="text-caja" style="display:none">
-                                    <div class="panel panel-info">
+                                    <div class="panel panel-primary">
                                     
                                         <div class="panel-heading flex">
                                                <a class="panel-title"  data-toggle="collapse" data-parent="#panel" href="#div-caja-{idCaja}">Caja {numeroCaja} </a>
@@ -331,9 +338,9 @@
                                                             <thead>
                                                                 <tr>
                                                                     <th class="col-md-1"> Carpeta</th>
-                                                                    <th class="col-md-2"> OT</th>
-                                                                    <th class="col-md-2"> Descripción</th>
-                                                                    <th class="col-md-2"> Identificador</th>
+                                                                    <th class="col-md-1"> OT</th>
+                                                                    <th class="col-md-1"> Descripción</th>
+                                                                    <th class="col-md-4"> Identificador</th>
                                                                     <th class="col-md-1"> Año</th>
                                                                     <th class="col-md-1"> Fojas</th>
                                                                     <th class="col-md-1"> 
@@ -355,7 +362,7 @@
                                                                 </tr>
                                                             </thead>
                                                             <tbody id='f_body_{idCaja}'>
-
+                                                                
                                                                
 
                                                             </tbody>
@@ -363,7 +370,7 @@
                                                     </div>
 
                                                     <div class="text-right">
-                                                        <button type="button" class="btn btn-success btn-sm" onclick="nuevaFila({idCaja})"><i class="fa fa-plus" aria-hidden="true"></i></button>
+                                                        <button type="button" class="btn btn-success btn-sm" onclick="nuevaFila({idCaja}, {numeroCaja})"><i class="fa fa-plus" aria-hidden="true"></i></button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -373,28 +380,30 @@
                                 <textarea name="text-plantilla" id="text-plantilla" cols="30" rows="10" style="display:none">
                                
                                     <tr>
-                                        <td> 
+                                        <td class="col-md-1"> 
                                             <input type="hidden" id="No_Detalle" name="No_Detalle[]"   value="{idDetalle}" required /> 
                                             <input type="hidden" id="No_Caja" name="No_Caja[]"   value="{numeroCaja}" required /> 
                                             <input type="hidden" id="idCaja" name="idCaja[]"   value="{idCaja}" required /> 
                                             <input type="number" id="No_Carpeta" name="No_Carpeta[]"   value="{No_carpeta}" required /> 
                                         </td>
-                                        <td> <input type="hidden" id="ot" name="ot[]"  class="form-control" value="{ot}" required /> </td>
-                                        <td> <input type="text" id="obra" name="obra[]" value="{obra}" required  disabled/> </td>
-                                        <td> 
-                                            <div class="col-sm-8">
-                                                <input type="text" id="identificador" name="identificador[]"  class="form-control" value="{identificador}" required />
-                                            </div>
+                                        <td class="col-md-1" id="td-{idDetalle}"> <input type="hidden" id="ot" name="ot[]"  class="form-control" value="{ot}" required /> </td>
+                                        <td class="col-md-1"> <input type="text" id="obra" name="obra[]" value="{obra}" required  disabled/> </td>
+                                        <td class="col-md-4"> 
+                                            
+                                                <input type="hidden" id="identificador" name="identificador[]"  value="{identificador}" required />
+                                                <input type="hidden" id="IDidentificador" name="IDidentificador[]"  class="form-control" value="{identificador}"  required />
+                                            
+                                            <!--
                                             <div class="col-sm-3">
-                                                 <button type="button" class="btn btn-default btn-sm" ><i class="fa fa-plus" aria-hidden="true"></i></button></td>
+                                                 <a class="btn btn-default btn-sm" data-toggle="modal" data-target="#modal-agregar-identificador" title="Agregar Identificador" role="button" ><i class="fa fa-plus" aria-hidden="true"></i></a></td>
                                             </div>
-                                           
+                                           -->
                                            
                                             
                                         </td>
-                                        <td> <input type="text" id="anio" name="anio[]" value="{anio}" required disabled /> </td>
-                                        <td> <input type="number" id="fojas" name="fojas[]" value="{fojas}" required /> </td>
-                                        <td>  
+                                        <td class="col-md-1"> <input type="text" id="anio" name="anio[]" value="{anio}" required disabled /> </td>
+                                        <td class="col-md-1"> <input type="number" id="fojas" name="fojas[]" value="{fojas}" required /> </td>
+                                        <td class="col-md-1">  
                                              <table width="100%">
 
                                                 <tr>
@@ -404,8 +413,8 @@
                                                 </tr>
                                             </table>
                                         </td>
-                                        <td> <input type="text" id="observaciones" name="observaciones[]" value="{observaciones}" required /> </td>
-                                        <td> <button type="button" class="btn btn-danger btn-sm" onclick="eliminar(this,{idDetalle} )"><i class="fa fa-trash-o" aria-hidden="true"></i></button> </td>
+                                        <td class="col-md-1"> <input type="text" id="observaciones" name="observaciones[]" value="{observaciones}" required /> </td>
+                                        <td class="col-md-1"> <button type="button" class="btn btn-danger btn-sm" onclick="eliminar(this,{idDetalle} )"><i class="fa fa-trash-o" aria-hidden="true"></i></button> </td>
                                     </tr>
                                 </textarea>
 
@@ -418,181 +427,37 @@
                 </div>
             </div>
             
-            
         </div>
         
-        <!-- Fin Tabla Estimaciones --> 
-        <!-- Dialogo Nueva Estimación --> 
-        <!-- Historial del Bloque  -->
-        <div class="modal fade" id="modal-historico-archivo" role="dialog" aria-labelledby="myModalLabel-observaciones_bloque" aria-hidden="true">
+        
+        <div class="modal fade" id="modal-agregar-identificador" role="dialog" aria-labelledby="myModalLabel-cambiar-direccion" aria-hidden="true">
             <div class="modal-dialog modal-lg">
+                <!--Forma-->
+
                 <div class="modal-content">
-                    <div class="modal-header panel-default">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title" id="myModalLabel-historial">
-                            Estatus de bloques
-                        </h4>
+                    <div class="modal-header panel-title">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                        <h4 class="modal-title" id="cambiar-concepto">Listado CUCA</h4>
                     </div>
                     <div class="modal-body">
-                        
-                                <div id="idHistorial_estatus"></div>
-                                                                              
-                    </div>
-                    <div class="modal-footer">                            
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-        <!--            Fin Dialog-->
-        <!-- Modal Nuevo Archivo -->
-        <div class="modal fade" id="modal-agregar-cat" role="dialog" aria-labelledby="modal-agregar-cat_myModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                            ×
-                        </button>
-                        <h4 class="modal-titlsamplee" id="modal-nuevo_subdocumentomyModalLabel">Transferencia- Nueva</h4>
-                    </div>
-                   
-                    <form action="<?= site_url('transferencia/agregar_cat')?>" method="post" enctype="multipart/form-data" id="forma1" name="forma1" target="_self" id="forma1" role="form" class="form-horizontal" onSubmit="return valida_Datos();">
-                        <div class="modal-body">
-                                
-                                <div class="form-group">
-                                    <label for="NoCajas" class="control-label col-sm-3">No de Cajas:</label>
-                                    <div class="col-sm-7">
-                                        
-                                        <input type="number" id="NoCajas" name="NoCajas" value="" onchange="mostrar_cajas()" class="form-control input-sm" required/>          
-                                    </div>
-                                </div>
-                                <div id="detalles">
-
-                                </div>
-                                 <div class="form-group">
-                                    <label for="Contrato" class="control-label col-sm-3">Contrato:</label>
-                                    <div class="col-sm-7">
-                                        <input type="text" id="Contrato" name="Contrato" value="" class="form-control input-sm" required/>          
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="Obra" class="control-label col-sm-3">Obra:</label>
-                                    <div class="col-sm-7">
-                                        <input type="text" id="Obra" name="Obra" value="" class="form-control input-sm" required/>          
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="Descripcion" class="control-label col-sm-3">Descripción:</label>
-                                    <div class="col-sm-7">
-                                        <textarea class="form-control input-sm" rows="3" id="Descripcion" name="Descripcion"></textarea>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="FondodePrograma" class="control-label col-sm-3">Fondo de Programa:</label>
-                                    <div class="col-sm-7">
-                                        <input type="text" id="FondodePrograma" name="FondodePrograma" value="" class="form-control input-sm" required/>          
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="Normatividad" class="control-label col-sm-3">Normatividad:</label>
-                                    <div class="col-sm-7">
-                                        <select id="Normatividad" name="Normatividad" class="form-control">
-                                            <option value="FEDERAL">Federal</option>
-                                            <option value="ESTATAL">Estatal</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="Modalidad" class="control-label col-sm-3">Modalidad:</label>
-                                    <div class="col-sm-7">
-                                        <?php echo form_dropdown('idModalidad', $Modalidades, '', 'class="form-control input-sm" id="idModalidad" '); ?>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="Ejercicio" class="control-label col-sm-3">Ejercicio:</label>
-                                    <div class="col-sm-7">
-                                        <input type="number" id="idEjercicio" name="idEjercicio" value="" class="form-control input-sm" required min="1999" max="2049"/>   
-                                        <!--<?php echo form_dropdown('idEjercicio', $Ejercicios, '', 'class="form-control input-sm" id="Ejercicio" '); ?>-->
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="control-label col-sm-3"> Es Proyecto:
-                                       
-                                    </label>
-                                    <div class="col-sm-7">
-                                        <input type="checkbox" id="Proyecto" name="Proyecto" value="" class="input-sm" />     
-                                        
-                                    </div>
-                                </div>
-                                
-                 
-                             
-                                                                                        
-                        </div>
-                        <div class="modal-footer">
-                            
-                            <button type="submit" id="idGuardar" name="idGuardar" class="btn btn-success">
-                                Guardar
-                            </button>	
-                            <button type="button" class="btn btn-danger" data-dismiss="modal">
-                                Cancelar
-                            </button>                     
-                        </div>
-                    </form>                    
-                </div>
-            </div>
-        </div>
-        
-        <!-- Modal ver reporte archivos por direccion 
-        <div class="modal fade" id="modal-ver-reporte" role="dialog" aria-labelledby="modal-modificar-cat_myModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-                            ×
-                        </button>
-                        <h4 class="modal-titlsamplee" id="modal-nuevo_documentomyModalLabel">Reporte Obras por dirección</h4>
-                    </div>
-                    <form action="<?php echo site_url("impresion/reporte_obras_direccion"); ?> " method="post" name="forma1" target="_self" id="forma1" role="form" class="form-horizontal" method="post" enctype="multipart/form-data">
-                        <div class="modal-body">
-                            
-                            
-                            
-                                                                
+                        <fieldset>
                             <div class="form-group">
-                              <label class="col-sm-2 control-label" for="bloqueObra">Grupo Obra</label>
-                              <div class="col-sm-10">
-                                  <select class="form-control" id="slc_bloqueObra" name="slc_bloqueObra">
-                                        <option value="0">SELECCIONA</option>
-                                        <?php /*foreach ($qBloques->result() as $rowdata) {  ?>
-                                        <option value="<?php echo $rowdata->id; ?>"><?php echo $rowdata->Nombre; ?></option>
-                                        <?php } */?>
-                                  </select>
-                              </div>
-
+                               
+                                <div class="col-md-12">
+                                    <div id="tablaCUCA">
+                                        
+                                    </div>
+                                </div>
                             </div>
-                                            
-                        </div>
-                        <div class="modal-footer">
-                           
-                            
-                            
-                            <button type="submit" class="btn btn-success">
-                                Imprimir
-                            </button>						
-                            <button type="button" class="btn btn-danger" data-dismiss="modal">
-                                Cancelar
-                            </button>						
-                        </div>
-                    </form>                    
+                        </fieldset> 
+                    </div>
+                    <div class="modal-footer">
+                        <input type="hidden" id="idArchivo_agregar" name="idArchivo_agregar" value="">
+                    </div>
                 </div>
+                <!--fin forma-->
             </div>
-        </div> -->
-        
-        
-        
+        </div>
         
         
         
@@ -601,35 +466,22 @@
             
             var caja = 0;
             $(document).ready(function(){  
+               
                 
-                nuevaCaja($("#idTransferencia").val())
-                 
+                
+                //nuevaCaja($("#idTransferencia").val())
+                inicializar ($("#idTransferencia").val());
                  
                 $("#enviar").click(function() {
-                    console.log($("#form-detalles").serialize())
-                    $.post("<?php echo site_url("transferencia/guardar_detalles"); ?>",$("#form-detalles").serialize(),function(res){
-                        console.log("Resultado" +res)
-                        if(res ==1){
-                            msj = "Transferencia guardada con exito";
-                            $("#mensaje").css("Color", "green");
-                            $("#mensaje").html(msj)
-                            $("#mensaje").delay(500).fadeIn("slow");      // Si hemos tenido éxito, hacemos aparecer el div "exito" con un efecto fadeIn lento tras un delay de 0,5 segundos.
-                            $("#mensaje").fadeOut(5000);
-                        } else {
-                            msj = "Error al guardar cambios";
-                            $("#mensaje").css("color", "red");
-                            $("#mensaje").html(msj)
-                            $("#mensaje").delay(500).fadeIn("slow");      // Si hemos tenido éxito, hacemos aparecer el div "exito" con un efecto fadeIn lento tras un delay de 0,5 segundos.
-                            $("#mensaje").fadeOut(5000);
-                            
-                        }
-                    });
+                    guardar(1);
                     
-                    //event.preventDefault();
+                    
                 });
                 
                 
-               $("#orden_trabajo").select2({
+                
+                /*
+                 * $("#orden_trabajo").select2({
                     placeholder: "Ingresa OT",
                     ajax: {
                         url: '<?php echo site_url("transferencia/ot_json"); ?>',
@@ -691,38 +543,163 @@
                      //detalles()
                 });
                 
-               $("td> #identificador").select2({
-                    placeholder: "",
-                    ajax: {
-                        url: '<?php echo site_url("transferencia/identificador_json"); ?>',
-                        dataType: 'json',
-                        quietMillis: 100,
-                        type: 'POST',
-                        data: function (term, page) {
-                            return {
-                                term: term, //search term
-                                page_limit: 100 // page size                               
-                            };
-                        },
-                        results: function (data, page) {
-                            return { results: data.results };
-                        }
-                    },
-                    initSelection: function(element, callback) {
-                        var idInicial = $("#identificador").val();
-                        return $.post( '<?php echo site_url("transferencia/identificador_json"); ?>', { id: idInicial }, function( data ) {
-                            return callback(data.results[0]);
-                           
-                        }, "json");
-                     
-                    }
-                });
+               
                 
+                 * 
+                 */
+               
                 
 
 
                 
              });
+             
+            function validaForm(){
+                // Campos de texto
+                
+                
+                console.log("Formulario")
+                for (x = 0 ; x < No_Carpeta.length; x++){
+                    console.log(No_Carpeta[x] + " Carpeta");
+                    console.log(identificador[x] + " identificador");
+                    console.log(fojas[x] + " Fojas");
+                    if( No_Carpeta[x] == ""){
+                        alert("El número de carpeta no puede estar vacio.");
+                        //$("#nombre").focus();       // Esta función coloca el foco de escritura del usuario en el campo Nombre directamente.
+                        return false;
+                    }
+                    if( identificador[x] == ""){
+                        alert("El Identificador no puede estar vacio.");
+                        //$("#nombre").focus();       // Esta función coloca el foco de escritura del usuario en el campo Nombre directamente.
+                        return false;
+                    }
+                    if( fojas[x] == ""){
+                        alert("El número de fojas no puede estar vacio.");
+                        //$("#nombre").focus();       // Esta función coloca el foco de escritura del usuario en el campo Nombre directamente.
+                        return false;
+                    }
+                    
+                }
+                
+
+                return true; // Si todo está correcto
+            }
+            
+            function guardar(tipo = 0){
+                $.post("<?php echo site_url("transferencia/guardar_detalles"); ?>",$("#form-detalles").serialize(),function(res){
+                            console.log("Resultado" +res)
+                            if(tipo == 1 ){
+                                if(res ==1){
+                                    msj = "Transferencia guardada con exito";
+                                    $("#mensaje").css("color", "green");
+                                    $("#mensaje").html(msj)
+                                    $("#mensaje").delay(500).fadeIn("slow");      // Si hemos tenido éxito, hacemos aparecer el div "exito" con un efecto fadeIn lento tras un delay de 0,5 segundos.
+                                    $("#mensaje").fadeOut(5000);
+                                } else {
+                                    msj = "Error al guardar cambios";
+                                    $("#mensaje").css("color", "red");
+                                    $("#mensaje").html(msj)
+                                    $("#mensaje").delay(500).fadeIn("slow");      // Si hemos tenido éxito, hacemos aparecer el div "exito" con un efecto fadeIn lento tras un delay de 0,5 segundos.
+                                    $("#mensaje").fadeOut(5000);
+
+                                }
+                            }
+                        });
+            }
+
+            function inicializar(idTransferencia){
+                $.post( "<?php echo site_url("transferencia/get_cajas"); ?>",{ idTransferencia:idTransferencia }, function( data ) {
+                    console.log( data ); 
+                    
+                    for (var i=0; i < data.length; i++){
+                        
+                        //Pintar Cajas
+                        obj = {};
+                        obj.idCaja = data[i].id;
+                        obj.numeroCaja = caja +1;
+                        console.log(obj) 
+                        agregarCaja(obj)
+                        caja = caja +1
+                        console.log(caja +" Cajas Totales")
+                        //buscar Filas de la Caja
+                        
+                    
+                        $.post( "<?php echo site_url("transferencia/get_detalles"); ?>",{ idCaja:data[i].id }, function( data ) {
+                            console.log( data ); 
+
+                            for (var j=0; j < data.length; j++){
+
+                                //Pintar Filas
+                                obj = {};
+                                
+                                obj.idDetalle = data[j].id;
+                                obj.numeroCaja = data[j].No_Caja;
+                                obj.idCaja = data[j].idCaja;
+                                
+                                if (data[j].No_Carpeta) {
+                                     obj.No_carpeta = data[j].No_Carpeta;
+                                } else {
+                                     obj.No_carpeta =  "";
+                                }
+                                
+                                
+                                 
+                                if (data[j].ot) {
+                                    obj.ot = data[j].ot;
+                                } else {
+                                     obj.ot =  "";
+                                }
+                                
+                                if (data[j].Obra) {
+                                     obj.obra = data[j].Obra;
+                                } else {
+                                     obj.obra =  "";
+                                }
+                                
+                                if (data[j].identificador) {
+                                     obj.identificador = data[j].identificador;
+                                } else {
+                                     obj.identificador=  "";
+                                }
+                                
+                                if (data[j].idEjercicio) {
+                                      obj.anio = data[j].idEjercicio;
+                                } else {
+                                      obj.anio =  "";
+                                }
+                                
+                                if (data[j].fojas) {
+                                      obj.fojas = data[j].fojas;
+                                } else {
+                                      obj.fojas =  "";
+                                }
+                                
+                                obj.adm = data[j].adm;
+                                obj.leg = data[j].leg;
+                                obj.con = data[j].con;
+                                
+                                if (data[j].observaciones) {
+                                      obj.observaciones = data[j].observaciones;
+                                } else {
+                                      obj.observaciones =  "";
+                                }
+                                
+                                
+
+                                console.log(obj)
+                                agregarFila(obj, data[j].idCaja);
+
+
+                                //buscar Filas de la Caja
+
+                            }
+
+                        }, "json");
+                    }
+
+                }, "json");
+                
+            }
              
             
             function alert_confirm(type, title, content){
@@ -746,17 +723,51 @@
                 });
             }
             
-            function traer_detalles(tr, ot){
+            
+            
+           
+            function traer_detalles(elemento, ot){
                 
                 console.log(ot + " OT")
                 $.post( "<?php echo site_url("transferencia/traer_detalles"); ?>",{ ot:ot }, function( data ) {
                     console.log( data ); 
+                    console.log(elemento);
+                   
+                    obra = elemento.find("#obra")
+                    obra.val(data.Obra);
+                    anio = elemento.find("#anio")
+                    anio.val(data.idEjercicio);
                     
-                    $("tr #obra").val(data.Obra);
-                    $("tr #obra").css("background", "#fcf8e3")
-                    $("tr #anio").css("background", "#fcf8e3")
-                    $("tr #anio").val(data.idEjercicio);
+                    if (data.identificador != null && data.identificador != ""){
+                        console.log("hay identificador")
+                        ide = elemento.find("#identificador")
+                        
+                        $.post( "<?php echo site_url("transferencia/traer_identificador"); ?>",{ id:data.identificador }, function( data ) {
+                            console.log( data); 
+                            identificador = data.identificador
+                            //ide.val(identificador);
+                            ide.val(data.id);
+                            select = elemento.find("#select2-chosen-2")
+                            select.html(data.identificador+"-"+data.Nombre+"-"+data.Nombres+"-"+data.Nombresub+"-"+data.Nombresubsub)
+                            select.css("background", "#fcf8e3")
+                            
+                            ide.css("background", "#fcf8e3")
+                        }, "json");
+                        
+                        
+                       /*
+                        * idIde = elemento.find("#IDidentificador")
+                       
+                        idIde.val(data.identificador);
+                        */ 
+                        
+                       
+                    } 
                     
+                    obra.css("background", "#fcf8e3")
+                    anio.css("background", "#fcf8e3")
+                   
+                   
                 }, "json");
                 
             
@@ -793,15 +804,15 @@
                             console.log(obj)
            
                             agregarCaja(obj);
-                            nuevaFila(data);
-                            
+                            nuevaFila(data, caja);
+                            $("#cajas_total").val(caja)
                         } else {
                             alert("Error al agregar caja, intentalo nuevamente")
                         }
                     },
                     "json"
                 ); 
-        
+                guardar();
                 
             }
             
@@ -825,13 +836,13 @@
                 //Como ocpamos 4 veces la propiedad 
                 for(i=0 ; i <5 ;i++){
                     for( prop in obj){
-                        //console.log(prop);
+                        console.log(prop  + "  " +  obj[prop]);
                         div_contenido = div_contenido.replace('{'+prop+'}', obj[prop]);
 
                     }
                 }
                 
-                console.log(div_contenido)
+                //console.log(div_contenido)
                 div.innerHTML = div_contenido;
                 
                 document.getElementById('div-cajas').appendChild(div);
@@ -847,7 +858,7 @@
                         if (data > 0){
                             obj = {};
                             obj.idDetalle = data;
-                            obj.numeroCaja = caja;
+                            obj.numeroCaja = noCaja;
                             obj.idCaja = idCaja;
                             obj.No_carpeta = "";
                             obj.ot ="";
@@ -870,28 +881,36 @@
                     },
                     "json"
                 ); 
-        
+                guardar();
                
             }
             
 
             function agregarFila(obj, idCaja){
+                
                 tr = document.createElement('tr');
                 cont = $('#text-plantilla').val();
                 
-                for(i=0 ; i <4;i++){
+                for(i=0 ; i <8;i++){
                     for( prop in obj){
-                     
+                        
                         cont = cont.replace('{'+prop+'}', obj[prop]);
-
+                        
+                       
+               
                     }
                 }
-               
+                
+                
+                console.log (cont)       
                 tr.innerHTML = cont;
 
                 document.getElementById('f_body_'+idCaja).appendChild(tr);
+                idDetalle = obj.idDetalle;
                 
-                $("tr #ot").select2({
+                
+                //Select
+                $("#td-" + idDetalle + " #ot").select2({
                     placeholder: "Ingresa OT",
                     ajax: {
                         url: '<?php echo site_url("transferencia/ot_json"); ?>',
@@ -905,12 +924,14 @@
                             };
                         },
                         results: function (data, page) {
+                           
                             return { results: data.results };
                         }
                     },
                     initSelection: function(element, callback) {
-                        var idInicial = $("tr #ot").val();
+                        var idInicial = $("#td-" + idDetalle + " #ot").val();
                         return $.post( '<?php echo site_url("transferencia/ot_json"); ?>', { id: idInicial }, function( data ) {
+                           
                             return callback(data.results[0]);
                            
                         }, "json");
@@ -918,15 +939,82 @@
                     }
                 });
                 
-                
-                
-                $("tr #ot").change(function(){
-                    $("tr").css("background", "pink")
-                    ot = $("tr #ot").val();
-                
-                     console.log(ot + " Orden t")
-                    traer_detalles(tr,  $("tr #ot").val())
+                $("#td-" + idDetalle + " #ot").on("change", function(){
+                        //$(this)
+                        
+                        elemento = $(this).parent();
+                        
+                        ot = elemento.find("#ot")
+                        ot = ot.val()
+                        console.log(ot + " Orden t")
+                        
+                        padre = $(this).parents('tr');
+                        
+                        traer_detalles(padre,  ot)
+                        //obra = padre.find("#obra")
+                       // obra.val("Alguno")
                 });
+                
+                
+                //Poner Checked 
+                
+                elemento = $("#td-" + idDetalle).parent();
+                console.log(elemento)
+
+                txtIdentificador = elemento.find("#identificador")
+                txtIdentificador.select2({
+                    placeholder: "Ingresa Identificador",
+                    ajax: {
+                        url: '<?php echo site_url("transferencia/identificador_json"); ?>',
+                        dataType: 'json',
+                        quietMillis: 100,
+                        type: 'POST',
+                        data: function (term, page) {
+                            return {
+                                term: term, //search term
+                                page_limit: 100 // page size                               
+                            };
+                        },
+                        results: function (data, page) {
+                           
+                            return { results: data.results };
+                        }
+                    },
+                    initSelection: function(element, callback) {
+                        var idInicial = txtIdentificador.val();
+                        return $.post( '<?php echo site_url("transferencia/identificador_json"); ?>', { id: idInicial }, function( data ) {
+                           
+                            return callback(data.results[0]);
+                           
+                        }, "json");
+                     
+                    }
+                });
+                
+                txtIdentificador.on("change", function(){
+                        elemento = $(this).parent();
+                        e = elemento.parent();
+                        ot = e.find("#ot")
+                        ot = ot.val()
+                        id = elemento.find("#identificador")
+                        id= id.val()
+                        console.log(ot)
+                    cambiar_identificador(ot, id)
+                })
+                
+                
+                elem_adm = elemento.find("#adm")
+                if (elem_adm.val() == 1 )elem_adm.prop('checked', true )
+
+
+                elem_leg = elemento.find("#leg")
+                if (elem_leg.val() == 1 ) elem_leg.prop('checked', true )
+
+
+
+                elem_con = elemento.find("#con")
+                if (elem_con.val() == 1 ) elem_con.prop('checked', true )
+               
                 
             }
             
@@ -982,7 +1070,7 @@
                                    registro = btn.parentNode.parentNode;
                                    console.log(registro)
                                    registro.parentNode.removeChild(registro);
-
+                                   caja = caja -1
 
                                 } else {
                                     alert("Error al Eliminar caja, intentalo nuevamente")
@@ -1019,6 +1107,135 @@
                         ); 
                 
             }
+            
+            function cambiar_identificador(idArchivo, id){
+                
+                
+                $.post("<?php echo site_url('transferencia/editarIdentificador'); ?>/", 
+                            { identificador : id, ot: idArchivo },
+                            function(data) {
+                                console.log(data)
+                                
+                            }
+                        ); 
+                
+            }
+            
+            function imprimir_identificador(id, identificador, idDetalle){
+               $("#modal-agregar-identificador").modal('hide');
+                console.log(id + identificador + idDetalle)
+                elemento = $("#td-"+idDetalle).parent(); 
+                idIdentificador = elemento.find("#IDidentificador")
+                idIdentificador.val(id);
+                iden = elemento.find("#identificador")
+                iden.val(identificador);
+                ot = elemento.find("#ot")
+                idArchivo = ot.val()
+                console.log(ot)
+                cambiar_identificador(idArchivo, id)
+                
+            }
+            
+            function uf_agregar_identificador(elemento, idDetalle){
+             
+                $.ajax({
+                    url: "<?php echo site_url('transferencia/listado_identificadores') ?>/" +idDetalle,
+                    dataType: 'json',
+                    success: function (data, textStatus, jqXHR) {
+                        //console.log(elemento)
+                        /*
+                         * var t = $('#tabla_documentos').DataTable({
+                            'bProcessing': true,
+                            //'sScrollY': '400px',                    
+
+                            'sPaginationType': 'bs_normal',
+                            'sDom': '<"top"iflp<"clear">>rt<"bottom"iflp<"clear">>',
+                            'iDisplayLength': 10,
+                            
+                            'aLengthMenu': [[10, 50, 100, 200, -1], [10, 50, 100, 200, "Todo"]],
+                            'bDeferRender': true,
+                            'bAutoWidth': false,
+                            'bScrollCollapse': false,                    
+                            'oLanguage': {
+                                'sProcessing': '<img src=\"./images/ajax-loader.gif\"/> Procesando...',
+                                'sLengthMenu': 'Mostrar _MENU_ archivos',
+                                'sZeroRecords': 'Buscando Archivos...',
+                                'sInfo': 'Mostrando desde _START_ hasta _END_ de _TOTAL_ archivos',
+                                'sInfoEmpty': 'Mostrando desde 0 hasta 0 de 0 archivos',
+                                'sInfoFiltered': '(filtrado de _MAX_ archivos en total)',
+                                'sInfoPostFix': '',
+                                'sSearch': 'Buscar:',
+                                'sUrl': '',
+                                'oPaginate': {
+                                    'sFirst': '&nbsp;Primero&nbsp;',
+                                    'sPrevious': '&nbsp;Anterior&nbsp;',
+                                    'sNext': '&nbsp;Siguiente&nbsp;',
+                                    'sLast': '&nbsp;&Uacute;ltimo&nbsp;'
+                                }
+                            },
+                            'aoColumns': [
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+
+                            ],
+                        });
+                         */
+                            $("#tablaCUCA").html(data["listado"]);
+                            var t = $('#tabla_documentos').DataTable({
+                            'bProcessing': true,
+                            //'sScrollY': '400px',                    
+
+                            'sPaginationType': 'bs_normal',
+                            'sDom': '<"top"iflp<"clear">>rt<"bottom"iflp<"clear">>',
+                            'iDisplayLength': 10,
+                            
+                            'aLengthMenu': [[10, 50, 100, 200, -1], [10, 50, 100, 200, "Todo"]],
+                            'bDeferRender': true,
+                            'bAutoWidth': false,
+                            'bScrollCollapse': false,                    
+                            'oLanguage': {
+                                'sProcessing': '<img src=\"./images/ajax-loader.gif\"/> Procesando...',
+                                'sLengthMenu': 'Mostrar _MENU_ archivos',
+                                'sZeroRecords': 'Buscando Archivos...',
+                                'sInfo': 'Mostrando desde _START_ hasta _END_ de _TOTAL_ archivos',
+                                'sInfoEmpty': 'Mostrando desde 0 hasta 0 de 0 archivos',
+                                'sInfoFiltered': '(filtrado de _MAX_ archivos en total)',
+                                'sInfoPostFix': '',
+                                'sSearch': 'Buscar:',
+                                'sUrl': '',
+                                'oPaginate': {
+                                    'sFirst': '&nbsp;Primero&nbsp;',
+                                    'sPrevious': '&nbsp;Anterior&nbsp;',
+                                    'sNext': '&nbsp;Siguiente&nbsp;',
+                                    'sLast': '&nbsp;&Uacute;ltimo&nbsp;'
+                                }
+                            },
+                            'aoColumns': [
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+                                {'sClass': 'small'},
+
+                            ],
+                        });
+                       
+                        
+                        
+                        
+                       
+                    }
+                });
+                
+                
+            }
+            
+            
 
 
 
@@ -1028,16 +1245,16 @@
             
 
         </script>
-        <script>
+        <!--script>
             
-            <?php
+            <?php /*
                 $det = $CI->db->query("SELECT *FROM saaTransferencia_Detalle where idTransferencia = '{$transferencia->id}'")->result();
                 
                 $json = json_encode($det); //objeto
                 
                 echo "detalle = {$json}; ";
                 
-               
+               */
             ?>
                 for(k in detalle){
                     fila = detalle[k];
@@ -1045,7 +1262,7 @@
                     
                     agregarFila(fila);
                 }
-        </script>
+        </script-->
             
     
 </body>

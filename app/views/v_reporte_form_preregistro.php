@@ -20,6 +20,8 @@
         <link href="<?php echo site_url(); ?>css/datatables.css" rel="stylesheet">
         <link href="<?php echo site_url(); ?>css/dataTables.bootstrap.css" rel="stylesheet">
         <link href="<?php echo site_url(); ?>css/jquery-confirm.css" rel="stylesheet">
+        <link href="<?php echo site_url(); ?>js/select2/select2.css" rel="stylesheet">
+        <link href="<?php echo site_url(); ?>js/select2/select2-bootstrap.css" rel="stylesheet">
         <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
         <!--[if lt IE 9]>
           <script src="<?php echo site_url(); ?>js/html5shiv.js"></script>
@@ -43,6 +45,7 @@
         <script type="text/javascript" src="<?php echo site_url(); ?>js/jquery.datatable.extraorder.js"></script>  
         <script type="text/javascript" src="<?php echo site_url(); ?>js/jquery-confirm.js"></script>     
         <script type="text/javascript" src="<?php echo site_url(); ?>js/scripts.js"></script>
+        <script type="text/javascript" src="<?php echo site_url(); ?>js/select2/select2.min.js"></script> 
          
  <script type="text/javascript">
         
@@ -114,6 +117,54 @@
                     }
 
                 });
+                
+                $("#identificador").select2({
+                    placeholder: "Ingresa Identificador",
+                    ajax: {
+                        url: '<?php echo site_url("transferencia/identificador_json"); ?>',
+                        dataType: 'json',
+                        quietMillis: 100,
+                        type: 'POST',
+                        data: function (term, page) {
+                            return {
+                                term: term, //search term
+                                page_limit: 100 // page size                               
+                            };
+                        },
+                        results: function (data, page) {
+                           
+                            return { results: data.results };
+                        }
+                    },
+                    initSelection: function(element, callback) {
+                        var idInicial = $("#identificador").val();
+                        return $.post( '<?php echo site_url("transferencia/identificador_json"); ?>', { id: idInicial }, function( data ) {
+                           
+                            return callback(data.results[0]);
+                           
+                        }, "json");
+                     
+                    }
+                });
+                
+                $("#identificador").on("change", function(){
+                    ot = "<?php echo $idArchivo ?>"  
+                    id = $("#identificador").val()
+                    cambiar_identificador(ot, id)
+                })
+                
+                function cambiar_identificador(idArchivo, id){
+                
+                
+                    $.post("<?php echo site_url('transferencia/editarIdentificador'); ?>/", 
+                                { identificador : id, ot: idArchivo },
+                                function(data) {
+                                    console.log(data)
+                                    $("#select2-chosen-1").css("background", "#d9e4da")
+                                }
+                    ); 
+                
+                }
                 
                 $("div.btn-permisos  > a").attr("disabled", "disabled");
                 
@@ -1297,7 +1348,7 @@
                     url: "<?php echo site_url('archivo/cargar_identificador') ?>/" + id + "/" + identificador,
                      
                     success: function (data, textStatus, jqXHR) {
-                         $("#identificador").css("border-color", "green");
+                         $("#select2-chosen-1").css("border-color", "green");
                           
                     }
                 });
@@ -2605,6 +2656,9 @@
             .d-n{
               display : none;
             }
+            #s2id_identificador{
+                width: 100%;
+            }
             .input :checked .tog-con{
                 background : #1c5;
                 transition : all ease-in-out 300ms;
@@ -2841,7 +2895,10 @@
                                                                  
                                                                     <label class="col-sm-4 control-label" for="exampleInputEmail3">Identificador</label>
                                                                     <div class="col-sm-8">
+                                                                        <input type="hidden" id="identificador" name="identificador"  value="<?php if ($aArchivo['identificado']) echo $aArchivo['identificado']?>" required />
+                                                                        <!--
                                                                         <input type="text" class="form-control" id="identificador" name="identificador" placeholder="Identificador" value="<?php if ($aArchivo['identificado']) echo $aArchivo['identificado']?>" onchange="cargar_identificador(<?= $idArchivo ?>)">
+                                                                        -->
                                                                          
                                                                     </div>
                                                                     <!--
@@ -3318,7 +3375,7 @@
 
 
                                                          <div class="btn-documentos">         
-                                                                 <a href="#" id="btn-agregar-documentos"  class="btn btn-success btn-sm"  data-toggle="modal" data-target="#modal-agregar-documentos" title="Agregar Documentos" role="button" onclick="uf_agregar_documentos(<?php echo $idArchivo; ?>,<?= $rProcesos->idTipoProceso ?>)">
+                                                                <a href="#" id="btn-agregar-documentos"  class="btn btn-success btn-sm"  data-toggle="modal" data-target="#modal-agregar-documentos" title="Agregar Documentos" role="button" onclick="uf_agregar_documentos(<?php echo $idArchivo; ?>,<?= $rProcesos->idTipoProceso ?>)">
                                                                     <span class="glyphicon glyphicon-plus-sign"></span> Agregar Documentos
                                                                 </a>
 

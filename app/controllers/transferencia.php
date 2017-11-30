@@ -19,10 +19,10 @@ class Transferencia extends MY_Controller {
     }
     
     public function index() {
-        
-        /*if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Transferencias","P")==false ){
+        $this->load->library('ferfunc');
+        if ($this->ferfunc->get_permiso_edicion_lectura($this->session->userdata('id'),"Transferencias","P")==false ){
             header("Location:" . site_url('principal'));
-        }*/
+        }
         
         $data['meta'] = array(
             array('name' => 'robots', 'content' => 'no-cache'),
@@ -40,9 +40,12 @@ class Transferencia extends MY_Controller {
         
         $data['usuario'] = $this->session->userdata('nombre');   
         $data["aWidgets"]["widget_menu"] = $this->load->view('widget_menu.php', $data, TRUE);
-        
+        $data["preregistro"]=$this->session->userdata('preregistro');
         $tipo = $this->session->userdata('prerregistro');
-        if ($tipo == 1){
+        $data['tipo'] = $tipo;
+        
+        
+        if ($data["preregistro"]){
             $direccion = $this->session->userdata('idDireccion_responsable');   
             $data['listado'] = $this->transferencia_model->listado($direccion);
             $this->load->view('v_pant_transferencia', $data);
@@ -55,9 +58,34 @@ class Transferencia extends MY_Controller {
       
     }
     
+   
+    
+    
+    function marcar_revisada($id){
+       
+        
+        $data = array ( 
+            "idUsuario_transfiere" => $this->session->userdata("id"),
+            
+        );
+        $retorno = $this->transferencia_model->marcar_revisada($data, $id);
+        
+        echo $retorno;
+    }
+    
+    function ver_datos(){
+       
+        $id = $this->input->post('id');
+        
+        $retorno = $this->transferencia_model->ver_datos($id);
+        $cajas = $retorno['cajas'];
+        $carpetas = $retorno['carpetas'];
+        echo "La Transferencia cuenta con:  <br> $cajas Cajas y $carpetas Carpetas";
+    }
+    
     
    
-    function modificar( $id=0 ){
+    function editar( $id=0 ){
          $data['meta'] = array(
             array('name' => 'robots', 'content' => 'no-cache'),
             array('name' => 'description', 'content' => $this->config->item('titulo_ext') . " - " . $this->config->item('titulo') . " Versión: " . $this->config->item('version')),
@@ -69,8 +97,13 @@ class Transferencia extends MY_Controller {
             array('name' => 'EXPIRES', 'content' => 'Mon, 26 Jul 1997 05:00:00 GMT', 'type' => 'equiv')
         );
         
-         
-        if ($id == 0){
+        
+        if ($id > 0){
+            
+            $data["id"] = $id ;
+            $idTransferencia = $id;
+            
+        } else {
             //Agregar transferencia
             $idTransferencia = $this->transferencia_nueva();
             $data["id"] = $idTransferencia ;
@@ -82,11 +115,11 @@ class Transferencia extends MY_Controller {
             //Agregar Fila
             $data_fila= array ( "idCaja" => $idCaja, "No_Caja" =>1);
             $idDetalle =  $this->transferencia_model->agregar_fila($data_fila);
+           
             
-        } else {
-            $data["id"] = $id ;
-            $idTransferencia = $id;
         }
+        
+        
         $data["aTransferecia"] = $this->transferencia_model->get_transferencia($idTransferencia)->row_array();
         
         
@@ -112,7 +145,8 @@ class Transferencia extends MY_Controller {
         $data['usuario'] = $this->session->userdata('nombre'); 
         $data['urlanterior']= isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : 'transferencia'; 
         $data["aWidgets"]["widget_menu"] = $this->load->view('widget_menu.php', $data, TRUE);
-        $this->load->view('v_pant_transferencia_modificar', $data );
+        //$this->load->view('v_pant_transferencia_modificar', $data );
+        $this->load->view('v_pant_transferencia_editar', $data );
     }
     
     
@@ -123,6 +157,86 @@ class Transferencia extends MY_Controller {
         
         
     }
+    
+    
+    public function listado_identificadores($idDetalle){
+       
+        
+        $qListado = $this->transferencia_model->listado_cuca();
+        
+         
+        $tabla='
+         
+         
+          <table class="table table-striped table-hover table-condensed" id="tabla_documentos" width="100%">
+                            <thead>
+                                <tr>                                    
+                                    <th class="col-sm-1">
+                                        Accion
+                                    </th> 
+                                    <th class="col-sm-3">
+                                        Sección
+                                    </th>
+                                    <th class="col-sm-3">
+                                        Serie
+                                    </th>
+                                    <th class="col-sm-2">
+                                        Sub Serie
+                                    </th>
+                                    <th class="col-sm-2">
+                                        Sub Sub-Serie
+                                    </th>
+                                    <th class="col-sm-1">
+                                        Identificador
+                                    </th>
+                                    
+                                    
+                                </tr>
+                            </thead>
+                            <tbody>
+         ';
+         
+         
+                                if (isset($qListado)) {
+                                    if ($qListado->num_rows() > 0) {
+                                        //echo 'Hola';
+                                        foreach ($qListado->result() as $rListado) {
+                                            
+                                           
+                                           $identificador = '"' .$rListado->identificador .'"';
+                                           $id = $rListado->id;
+                                           
+                                           $tabla.= "<tr>";
+                                           $tabla.= "<td><small><a href='#' class='btn btn-default btn-xs'  onclick='imprimir_identificador(".$id . ",".$identificador.",".$idDetalle .")'>Agregar</a></small></td>";
+                                           $tabla.= "<td class='sinwarp'>" . $rListado->Nombre . "</td>";
+                                           
+                                           $tabla.="<td>" . $rListado->Nombres . "</td>"; 
+                                           $tabla.="<td>" . $rListado->Nombresub . "</td>"; 
+                                           $tabla.="<td>" . $rListado->Nombresubsub . "</td>"; 
+                                           $tabla.="<td>" . $rListado->identificador . "</td>"; 
+                                                        
+                                                
+                                           
+                                            
+                                        }
+                                    }
+                                }
+        
+                                
+        $tabla.=' </tbody>
+                        </table> ';                        
+                                
+        $data=array();
+        $data["listado"]=$tabla;
+                                
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Content-type: application/json');
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);                      
+         
+         
+    }
+    
     
     function eliminarCaja(){
         $idCaja = $this->input->post('idCaja');
@@ -166,6 +280,23 @@ class Transferencia extends MY_Controller {
             );
        $this->transferencia_model->editar_detalles($data, $idDetalle);
     }
+    
+    public function  editarIdentificador(){
+       $id =    $this->input->post("ot");
+       $identificador =    $this->input->post("identificador");
+       
+       
+        $data = array (
+            'identificado' => $identificador,
+            
+            );
+       echo $this->transferencia_model->editar_identificador($data, $id);
+    }
+    
+    function limpia_espacios($cadena){
+	$cadena = str_replace(' ', '', $cadena);
+	return $cadena;
+    }   
 
 
     public function guardar_detalles(){
@@ -175,17 +306,26 @@ class Transferencia extends MY_Controller {
         $No_Carpeta =   $this->input->post("No_Carpeta");
         $ot =           $this->input->post("ot");
        
-        $identificador =$this->input->post("identificador");
+        $identificador   = $this->input->post("identificador");
+        $idIdentificador = $this->input->post("IDidentificador");
+        $fojas           = $this->input->post("fojas");
         
-        $fojas =        $this->input->post("fojas");
+        $observaciones  = $this->input->post("observaciones");
         
-        $observaciones =$this->input->post("observaciones");
         
        
         
         $data = array();
         foreach ($No_Carpeta as $v => $carpeta) {
-           
+            
+            $ordenTrabajo = $this->traer_ot ($ot[$v]);
+            $ident = $this->identificador_text($identificador[$v]);
+            
+            
+            $cadena= 'SIOP'.'.'.$ident.'/'.$ordenTrabajo.'/';
+            $clasificador = $this->limpia_espacios($cadena);
+            
+            
             
             
             $data[] = array (
@@ -194,8 +334,8 @@ class Transferencia extends MY_Controller {
                         'No_Caja'         => $no_Caja[$v],
                         'No_Carpeta'      => $No_Carpeta[$v], 
                         'ot'              => $ot[$v],
-                       
-                        'clasificador'    => 'SIOP' .$identificador[$v],
+                        'identificador'   => $identificador[$v],
+                        'clasificador'    => $clasificador,
                         'fojas'           => $fojas[$v],
                      
                         'observaciones'   => $observaciones[$v]
@@ -207,6 +347,15 @@ class Transferencia extends MY_Controller {
          
         
         echo  $this->transferencia_model->guardar_detalles($data);
+    }
+    
+     public function traer_ot($ot){
+        $this->load->model('transferencia_model');
+        
+        
+        $aArchivo = $this->transferencia_model->traer_detalles ($ot);
+        
+        return $aArchivo['OrdenTrabajo'];
     }
 
     public function transferencia_nueva(){
@@ -312,13 +461,61 @@ class Transferencia extends MY_Controller {
 
             'Obra'=> $aArchivo['Obra'],
             'idEjercicio' =>  $aArchivo['idEjercicio'],
-            
+            'identificador' =>  $aArchivo['identificado'],
         ); 
         
         header('Cache-Control: no-cache, must-revalidate');
         header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
         header('Content-type: application/json');
         echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+    }
+    
+    public function identificador_text ($id){
+        $this->load->model('transferencia_model');
+        
+        //$id = $this->input->post("id");
+       
+        $aIdentificador = $this->transferencia_model->traer_identificador ($id);
+        return $aIdentificador['identificador'];
+        /*
+        $data=array(
+
+            
+            'identificador' =>  $aIdentificador['identificador'],
+        ); 
+        
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Content-type: application/json');
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+         * */
+        
+    }
+    
+    public function traer_identificador (){
+        $this->load->model('transferencia_model');
+        
+        $id = $this->input->post("id");
+       
+        $aIdentificador = $this->transferencia_model->traer_identificador ($id);
+        
+        
+        $data=array(
+
+            'id'=>  $aIdentificador['id'],
+            'identificador' =>  $aIdentificador['identificador'],
+            'Nombre' => $aIdentificador['Nombre'],
+            'Nombres' => $aIdentificador['Nombres'],
+            'Nombresub' => $aIdentificador['Nombresub'],
+            'Nombresubsub' => $aIdentificador['Nombresubsub'],
+        ); 
+        
+        header('Cache-Control: no-cache, must-revalidate');
+        header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        header('Content-type: application/json');
+        echo json_encode($data, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+       
+        
     }
     
     public function dibujar_cajas(){

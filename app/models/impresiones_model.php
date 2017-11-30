@@ -14,9 +14,35 @@ class Impresiones_model extends CI_Model {
         return $this->db->get('saaTransferencia');
     }
     
+    public function get_direccion($id){
+        $this->db->where('id', $id); 
+        return $this->db->get('catDirecciones');
+    }
+    
     public function get_no_cajas($id){
         $this->db->where('idTransferencia', $id);
         return $this->db->get('saaTransferencia_Caja');
+    }
+    
+    
+    public function  get_detalles_nocaja($id){
+        $this->db->where('idCaja', $id);
+        $this->db->limit(1);
+        return $this->db->get('saaTransferencia_Detalle')->row_array();
+    }
+    
+    public function  get_detalles_caja($id){
+        $this->db->select('d.*, a.OrdenTrabajo');
+        $this->db->from('saaTransferencia_Detalle as d');
+        $this->db->join('saaArchivo as a', 'a.id = d.ot');
+        $this->db->where('idCaja', $id);
+        return $this->db->get();
+    }
+    
+    public function  get_detalles_anio($id){
+       
+        $this->db->where('idCaja', $id);
+        return $this->db->get('saaTransferencia_Detalle');
     }
     
     public function get_detalles($id){
@@ -1388,11 +1414,22 @@ WHERE (`memMemorias`.`id` =?);';
     }
     
     public function traer_datos($id){
-        $this -> db -> select ( 'r.*, u.Nombre, a.OrdenTrabajo, a.identificado, rel.fojas_utiles, rel.`legajos`, a.Obra, a.FechaInicio, a.FechaTermino' ); 
-        $this -> db -> from ( 'saaConcentracion_Registros as r' ); 
-        $this -> db -> join ( 'saaRel_ArchivoConcentracion_Ubicacion as rel' ,  'rel.id = r.idRACU' ); 
-        $this -> db -> join ( 'saaUbicaciones_Concentracion as u' ,  'r.idUbicacion = u.id' ); 
-        $this -> db -> join ( 'saaArchivo as a' ,  'rel.idArchivo = a.id' ); 
+        
+       
+        $this -> db -> select ( 'ut.*, 
+                r.id,
+                r.idIngreso,
+                r.Bloques,
+                r.Folio_Inicial,
+                r.Folio_Final,
+                i.idArchivo,
+                i.clasificador,
+                i.legajos,
+                a.*' ); 
+        $this -> db -> from ( 'saaConcentracion_UbicacionesTipos AS ut' ); 
+        $this -> db -> join ( 'saaConcentracion_Registros AS r' ,  'r.idUbicacion = ut.id' ); 
+        $this -> db -> join ( 'saaConcentracion_Ingreso AS i' ,  'i.id = r.idIngreso' ); 
+        $this -> db -> join ( 'saaArchivo as a' ,  'a.id = i.idArchivo' ); 
         $this -> db -> where ('r.id', $id);
         $query = $this -> db -> get( ); 
         
