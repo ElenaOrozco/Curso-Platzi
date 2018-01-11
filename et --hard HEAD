@@ -1,0 +1,108 @@
+[33mcommit 89ce2bb7ebdba2f629e0636a07c8fd658c001def[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;32mprueba[m[33m, [m[1;32md2e057b[m[33m)[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Thu Nov 30 16:56:59 2017 -0600
+
+    Siadar VERSION 1.1 sistema funcionando
+
+[33mcommit 94c1176c995720dfe40e04df78618373d6fa078f[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Tue Nov 21 09:44:04 2017 -0600
+
+    Transferencias modificar y modificar/idTransferencia funciona bbien excepto change ot
+
+[33mcommit c7770b1ea6b2773183c0c54974d0a347c7be6381[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Fri Nov 3 12:48:35 2017 -0600
+
+    Modificacndo Concentracion -Sin terminar -
+
+[33mcommit 6fd3257e4e2db7a30717f1339a9ba8dc4e781f3f[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Tue Oct 24 11:48:29 2017 -0500
+
+    transferencias incompleta
+
+[33mcommit 9f82a1460cc837ee10d4a66ffd348beac6a2f410[m
+Merge: f592ddc b350e96
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Tue Oct 10 13:58:49 2017 -0500
+
+    Merge branch 'master' of bitbucket.org:siop2/siadar
+
+[33mcommit f592ddce7ea9574ca4c7a7796e2443de4aef0da9[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Tue Oct 10 13:50:30 2017 -0500
+
+    actualizacion 10-10 preregistro y recibir preregistro
+
+[33mcommit 99e12faa3187e4d6d8cbe4a65b1c0c738b285b1a[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Thu Sep 7 14:44:03 2017 -0500
+
+    Antes de cambios
+
+[33mcommit ccd3a1495f3620fbdd4426edab9445488537b79b[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Fri Sep 1 09:38:12 2017 -0500
+
+    Empezando con cencentracion
+
+[33mcommit b350e96ad2272d84bf4a0d63b3a09710ddf4f55c[m
+Author: luis montero <monterocovarrubias@hotmail.com>
+Date:   Thu Aug 31 13:49:43 2017 -0500
+
+    subir contratistas y fecha extincion de derechos
+
+[33mcommit cd5b5cca41f9faea4681059b007512731c36ae51[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Thu Aug 24 14:14:03 2017 -0500
+
+    Subida a Siadar Bueno
+
+[33mcommit 57c4565eb9f66c134910eba685b7bd27f424974b[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Thu Aug 24 12:07:24 2017 -0500
+
+    archivo-preregistro
+
+[33mcommit 37195e3963438152ad1b08e84098bdbb625e14fc[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Thu Aug 24 12:00:48 2017 -0500
+
+    Relacion archivo documento model UPDATE sis Archivo
+
+[33mcommit 3c8e029712ff86f00b7b2c381341abae5e713528[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Thu Aug 24 11:56:31 2017 -0500
+
+    models parte 2
+
+[33mcommit 154693abe6828bbdc5ac2c3dd8f36ac9b6ee7ae4[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Thu Aug 24 11:22:25 2017 -0500
+
+    Control modalidad hasta observaciones model
+
+[33mcommit 982d7a58ed87b511f976280ddb3ba44c66c79eaa[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Thu Aug 24 10:43:47 2017 -0500
+
+    Psrte de Proyectos
+
+[33mcommit fe4fc69e59208b2f3f662b2f294c6bf5d7f4909e[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Fri Aug 18 19:14:32 2017 -0500
+
+    Catalogo ubicaciones proyectos
+
+[33mcommit c4e7a90a42d0c98b2f394c47e83473fec0967bba[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Thu Aug 17 13:45:57 2017 -0500
+
+    Segundo prueba
+
+[33mcommit da5c2e847192ff158afa5d2eef73b19258660684[m
+Author: Elena Orozco <elena.orozcoch@gmail.com>
+Date:   Thu Aug 17 13:42:56 2017 -0500
+
+    Primer commit
